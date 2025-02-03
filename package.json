@@ -1,0 +1,43 @@
+{
+  "name": "asr_project",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^6.6.0",
+    "@fortawesome/vue-fontawesome": "^3.0.8",
+    "@stripe/stripe-js": "^5.6.0",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
+    "axios": "^1.7.7",
+    "chart.js": "^4.4.7",
+    "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
+    "font-awesome": "^4.7.0",
+    "laravel-echo": "^1.17.1",
+    "pusher-js": "^8.4.0-rc2",
+    "qrcode": "^1.5.4",
+    "vue": "^3.5.12",
+    "vue-chartjs": "^5.3.2",
+    "vue-icons-plus": "^0.1.7",
+    "vue-qrcode": "^2.2.2",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@types/qrcode": "^1.5.5",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "sass": "^1.83.4",
+    "sass-loader": "^16.0.4",
+    "tailwindcss": "^3.4.15",
+    "vite": "^5.4.11"
+  }
+}
