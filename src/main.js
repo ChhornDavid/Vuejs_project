@@ -12,13 +12,15 @@ import Home from './components/admin/pages/master/Home.vue'
 import User from './components/admin/pages/master/user/User.vue'
 import Menu from './components/admin/pages/master/Menu.vue'
 import Food from './components/admin/pages/master/Food.vue'
-import Item from './components/dashboard/Item.vue'
 import SpecialMenu from './components/admin/pages/master/SpecialMenu.vue'
 import Unauthorized from './components/Authorized/Unauthorized.vue'
 import NotFound from './components/Authorized/NotFound.vue'
+import OrderHistory from './components/admin/pages/master/order/OrderHistory.vue'
+import Order from './components/admin/pages/master/order/Order.vue'
 
 // Font Awesome CSS
 import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 // Define Routes
 const routes = [
@@ -26,12 +28,6 @@ const routes = [
         path: '/',
         component: Login,
         name: 'Login',
-    },
-    {
-        path: '/item',
-        component: Item,
-        name: 'Item',
-        meta: { requiresAuth: true, roles: ['user'] }
     },
     {
         path: '/dashboard',
@@ -73,6 +69,18 @@ const routes = [
                 path: 'food',
                 component: Food,
                 name: 'Food',
+                meta: { requiresAuth: true, roles: ['admin'] },
+            },
+            {
+                path: 'order',
+                component: Order,
+                name: 'Order',
+                meta: { requiresAuth: true, roles: ['admin'] },
+            },
+            {
+                path: 'orderHistory',
+                component: OrderHistory,
+                name: 'OrderHistory',
                 meta: { requiresAuth: true, roles: ['admin'] },
             }
         ]

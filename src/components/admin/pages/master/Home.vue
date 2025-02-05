@@ -1,4 +1,5 @@
 <template>
+  <h1 class="font-bold text-3xl mb-5">Admin / Dashboard</h1>
   <div class="h-[calc(100vh-50px)] bg-gray-50">
     <!-- Border container -->
     <div class="h-full overflow-y-auto">  

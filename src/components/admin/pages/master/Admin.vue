@@ -14,23 +14,42 @@
                     <li class="hover:bg-gray-100 rounded-md">
                         <router-link to="/admin/home"
                             class="text-xl font-bold flex items-center py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <font-awesome-icon icon="fa-solid fa-tv" class="w-6 h-6 mr-4" />
+                            <i class="fas fa-tv text-xl w-6 h-4 mr-4"></i>
                             Dashboard
                         </router-link>
+                    </li>
+                    <li class="hover:bg-gray-100 rounded-md" :class="{ 'expanded': orderDropdownOpen }">
+                        <button @click="toggleOrderDropdown"
+                            class=" text-xl font-bold flex items-center w-full py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
+                            <i class="fas fa-list text-xl w-6 h-4 mr-4"></i>
+                            Order
+                            <span :class="{
+                                'rotate-90 transition-transform duration-200': orderDropdownOpen,
+                                '-rotate-90': !orderDropdownOpen
+                            }" class="ml-1 inline-block">></span>
+                        </button>
+                        <ul v-if="orderDropdownOpen"
+                            class="w-full mt-1 rounded-md bg-white shadow-md border border-gray-200">
+                            <li class="hover:bg-gray-100">
+                                <router-link to="/admin/order"
+                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order</router-link>
+                            </li>
+                            <li class="hover:bg-gray-100">
+                                <router-link to="/admin/orderHistory"
+                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order History</router-link>
+                            </li>
+                        </ul>
                     </li>
                     <!-- Payments (with dropdown) -->
                     <li class="hover:bg-gray-100 rounded-md" :class="{ 'expanded': productsDropdownOpen }">
                         <button @click="toggleProductsDropdown"
                             class=" text-xl font-bold flex items-center w-full py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <font-awesome-icon icon="fa-solid fa-credit-card" class="w-6 h-6 mr-4" />
+                            <i class="fas fa-box text-xl w-6 h-4 mr-4"></i>
                             Product
                             <span :class="{
                                 'rotate-90 transition-transform duration-200': productsDropdownOpen,
                                 '-rotate-90': !productsDropdownOpen
                             }" class="ml-1 inline-block">></span>
-                            <font-awesome-icon icon="fa-solid"
-                                :icon="productsDropdownOpen ? 'fa-chevron-up' : 'fa-chevron-down'"
-                                class="ml-auto w-3 h-3" />
                         </button>
                         <ul v-if="productsDropdownOpen"
                             class="w-full mt-1 rounded-md bg-white shadow-md border border-gray-200">
@@ -52,7 +71,7 @@
                     <li class="hover:bg-gray-100 rounded-md">
                         <router-link to="/admin/user"
                             class="flex text-xl font-bold items-center py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <font-awesome-icon icon="fa-solid fa-users" class="w-6 h-6 mr-4" />
+                            <i class="fas fa-solid fa-users w-6 h-4 mr-4"></i>
                             Users
                         </router-link>
                     </li>
@@ -170,6 +189,7 @@ export default {
             showMessage: false,
             userData: null,
             productsDropdownOpen: false,
+            orderDropdownOpen: false,
             pendingOrders: [],
             loading: false,
             error: null
@@ -193,6 +213,9 @@ export default {
         },
         toggleProductsDropdown() {
             this.productsDropdownOpen = !this.productsDropdownOpen;
+        },
+        toggleOrderDropdown() {
+            this.orderDropdownOpen = !this.orderDropdownOpen;
         },
         toggleSideBar() {
             this.showSide = !this.showSide;

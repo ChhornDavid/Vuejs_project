@@ -342,7 +342,7 @@ export default {
       try {
         const response = await api.post("/addusers", this.newUser, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
           },
         });
         alert("User added successfully!");
@@ -360,7 +360,7 @@ export default {
         console.log("Request data:", this.editUser);
         await api.put(`/updateusers/${this.editUser.id}`, { ...this.editUser }, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
           },
         });
         alert("User updated successfully!");
@@ -379,7 +379,7 @@ export default {
       try {
         await api.delete(`/deleteusers/${userId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
           },
         });
         alert("User deleted successfully!");
@@ -429,5 +429,5 @@ export default {
 </script>
 <style scoped>
 /* Import Font Awesome for Icons */
-@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css");
+@import "font-awesome/css/font-awesome.min.css";
 </style>

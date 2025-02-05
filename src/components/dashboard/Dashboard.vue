@@ -450,3 +450,7 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+@import "font-awesome/css/font-awesome.min.css";
+</style>
