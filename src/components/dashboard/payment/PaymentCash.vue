@@ -110,6 +110,7 @@ export default {
                     payment_type: "cash",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
+                        product_name: item.name,
                         quantity: item.quantity,
                         amount: item.price,
                         size: item.size

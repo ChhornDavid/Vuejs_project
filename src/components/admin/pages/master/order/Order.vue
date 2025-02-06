@@ -1,42 +1,198 @@
 <template>
-    <h1 class="font-bold text-3xl mb-6">Order / OrderList</h1>
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-gray-100 rounded-2xl p-4 shadow-md">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
-                <div class="mt-4 sm:mt-0 sm:w-full">
-                    <!-- Title and Rating -->
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-xl font-bold">Hello</h2>
-                        <span class=" text-lg flex items-center">
-                            <svg class="w-4 h-4 inline-block mr-1 font-bold text-yellow-500" fill="currentColor"
-                                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                    d="M12 2c.417 0 .786.267.928.662l2.264 6.976 7.04.001a.93.93 0 01.548 1.685l-5.73 4.166 2.28 6.898a.928.928 0 01-1.426 1.04L12 18.525l-5.902 4.004a.93.93 0 01-1.426-1.04l2.28-6.898-5.73-4.166a.93.93 0 01.548-1.685h7.04l2.264-6.976A.93.93 0 0112 2z" />
-                            </svg>
-                            3.5
-                        </span>
-                    </div>
-                    <!-- Description -->
-                    <p class="text-gray-600 text-sm mt-2">This is</p>
-                    <!-- Size Options -->
-                    <div class="justify-start items-start mt-4">
-                        <span class="flex justify-start text-gray-600 text-sm font-bold">SIZE</span>
-                        <div class="flex space-x-2 mt-2">
-                            <button
-                                class="'border text-sm font-bold rounded-md px-2 py-1 transition-colors', item.selectedSizeIndex === index ? 'bg-blue-600 text-white' : 'bg-blue-50 border-blue-600 text-blue-500']">
-                                Normal
-                            </button>
+    <div class="container mx-auto p-4">
+        <h1 class="font-bold text-3xl mb-6 text-gray-900">Order / OrderList</h1>
+
+        <div v-if="loading">
+            <p class="text-center text-gray-500">Loading orders...</p>
+        </div>
+        <div v-else-if="error">
+            <p class="text-center text-red-500">{{ error }}</p>
+        </div>
+        <div v-else-if="pendingOrders.length === 0">
+            <p class="text-center text-gray-500">No pending orders to display.</p>
+        </div>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div v-for="order in pendingOrders" :key="order.id"
+                class="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-shadow duration-200">
+                <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
+                    <div class="mt-4 sm:mt-0 sm:w-full">
+                        <div class="flex items-center mb-3">
+                            <h2 class="text-lg font-semibold text-gray-800">Table:</h2>
+                            <h2 class="text-lg pl-2 font-semibold text-gray-800">T{{ order.id }}</h2>
                         </div>
-                    </div>
-                    <!-- Price -->
-                    <div class="flex items-center justify-between mt-4">
-                        <!-- Price -->
-                        <div>
-                            <span class="text-lg font-bold text-gray-800">$100</span>
+                        <div class="mb-4">
+                            <div class="grid grid-cols-4 gap-2 text-sm">
+                                <p class="text-gray-500 font-medium">Item</p>
+                                <p class="text-gray-500 font-medium">Qty</p>
+                                <p class="text-gray-500 font-medium">Price</p>
+                                <p class="text-gray-500 font-medium">Total</p>
+                            </div>
+
+                            <div v-for="item in JSON.parse(order.items)" :key="item.product_id"
+                                class="grid grid-cols-4 gap-2 py-2 border-b border-gray-200 last:border-b-0">
+                                <p class="text-gray-700 text-sm">{{ item.product_name }}</p>
+                                <p class="text-gray-700 text-sm">{{ item.quantity }}</p>
+                                <p class="text-gray-700 text-sm">{{ formatCurrency(item.amount) }}</p>
+                                <p class="text-gray-700 text-sm">{{ formatCurrency(item.quantity * item.amount) }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between mt-2 text-gray-700">
+                            <span class="text-sm">Sub Total:</span>
+                            <span class="text-sm font-medium">{{ formatCurrency(order.amount) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2 text-gray-700">
+                            <span class="text-sm">Discount:</span>
+                            <span class="text-sm font-medium">$0.00</span>
+                        </div>
+                        <div class="flex items-center justify-between mt-2 text-gray-700">
+                            <span class="text-sm">Total:</span>
+                            <span class="text-sm font-semibold">{{ formatCurrency(order.amount) }}</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-4 mt-6">
+                            <button @click="confirmApprove(order.id)"
+                                class="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors duration-200">
+                                Accept
+                            </button>
+                            <button @click="confirmDecline(order.id)"
+                                class="w-full py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors duration-200">
+                                Decline
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <div v-if="showConfirmation"
+            class="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 flex items-center justify-center">
+            <div class="bg-white p-6 rounded-md shadow-lg">
+                <p class="mb-4">{{ confirmationMessage }}</p>
+                <div class="flex justify-end gap-4">
+                    <button @click="cancelConfirmation"
+                        class="py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
+                    <button @click="confirmAction"
+                        class="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">Confirm</button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
+
+<script>
+import api from '../../../../../axios/Axios';
+
+export default {
+    data() {
+        return {
+            pendingOrders: [],
+            loading: false,
+            error: null,
+            showConfirmation: false,
+            confirmationMessage: '',
+            orderIdToProcess: null,
+            actionType: null,
+        }
+    },
+    mounted() {
+        this.fetchPendingOrders();
+    },
+    methods: {
+        formatCurrency(amount) {
+            const formatter = new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+            });
+            return formatter.format(amount);
+        },
+
+        async fetchPendingOrders() {
+            this.loading = true;
+            this.error = null;
+            try {
+                const token = sessionStorage.getItem("auth_token");
+                const response = await api.get("/admin/pending-orders", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                this.pendingOrders = response.data;
+            } catch (error) {
+                this.error = "Failed to get pending orders: " + error.message;
+                console.error("Failed to get pending orders", error);
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        async approveOrder(id) {
+            try {
+                const token = sessionStorage.getItem("auth_token");
+                const response = await api.post(`/admin/approve/${id}`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+                }
+            } catch (error) {
+                console.error("Error approving order:", error);
+                this.error = 'Failed to approve order.'
+            }
+        },
+        async declineOrder(id) {
+            try {
+                const token = sessionStorage.getItem("auth_token");
+                const response = await api.post(`admin/decline/${id}`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                if (response.status === 200) {
+                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+                }
+            } catch (error) {
+                console.error("Error declining order:", error);
+                this.error = 'Failed to decline order.'
+            }
+        },
+
+        confirmApprove(id) {
+            this.orderIdToProcess = id;
+            this.actionType = 'approve';
+            this.confirmationMessage = 'Are you sure you want to approve this order?';
+            this.showConfirmation = true;
+        },
+
+        confirmDecline(id) {
+            this.orderIdToProcess = id;
+            this.actionType = 'decline';
+            this.confirmationMessage = 'Are you sure you want to decline this order?';
+            this.showConfirmation = true;
+        },
+
+        cancelConfirmation() {
+            this.showConfirmation = false;
+            this.orderIdToProcess = null;
+            this.actionType = null;
+        },
+
+        async confirmAction() {
+            this.showConfirmation = false;
+            if (this.actionType === 'approve') {
+                await this.approveOrder(this.orderIdToProcess);
+            } else if (this.actionType === 'decline') {
+                await this.declineOrder(this.orderIdToProcess);
+            }
+            this.orderIdToProcess = null;
+            this.actionType = null;
+        },
+    },
+}
+</script>
+
+<style scoped>
+.bg-gray-100:hover {
+    background-color: #f0f0f0;
+}
+</style>

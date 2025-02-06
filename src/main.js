@@ -20,6 +20,7 @@ import Order from './components/admin/pages/master/order/Order.vue'
 
 // Font Awesome CSS
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import Invoice from './components/admin/pages/master/order/Invoice.vue'
 
 
 // Define Routes
@@ -82,10 +83,16 @@ const routes = [
                 component: OrderHistory,
                 name: 'OrderHistory',
                 meta: { requiresAuth: true, roles: ['admin'] },
+            },
+            {
+                path: 'invoice',
+                component: Invoice,
+                name: 'Invoice',
+                meta: { requiresAuth: true, role: ['admin'] },
             }
         ]
     },
-     {
+    {
         path: '/unauthorized',
         component: Unauthorized,
         name: 'Unauthorized'
@@ -114,32 +121,32 @@ export const allowRouteNavigation = () => {
 
 // Function to deny navigation
 export const preventRouteNavigation = () => {
-  allowNavigation = false;
+    allowNavigation = false;
 };
 
 router.beforeEach((to, _from, next) => {
 
-   const role = sessionStorage.getItem('role');
+    const role = sessionStorage.getItem('role');
 
-  if (!allowNavigation) {
-     console.log("Navigation cancelled by route guard");
-     allowNavigation = true;
-         next(false);
-         return;
-   }
-if (to.meta.requiresAuth) {
-     if (!role) {
-         console.log('User not authenticated. Redirecting to login.');
-         next('/');
-     } else if (to.meta.roles && !to.meta.roles.includes(role)) {
-         console.log(`Role '${role}' is not authorized for this route.`);
-         next('/unauthorized');
-     } else {
-         next();
-     }
- } else {
-         next();
-  }
+    if (!allowNavigation) {
+        console.log("Navigation cancelled by route guard");
+        allowNavigation = true;
+        next(false);
+        return;
+    }
+    if (to.meta.requiresAuth) {
+        if (!role) {
+            console.log('User not authenticated. Redirecting to login.');
+            next('/');
+        } else if (to.meta.roles && !to.meta.roles.includes(role)) {
+            console.log(`Role '${role}' is not authorized for this route.`);
+            next('/unauthorized');
+        } else {
+            next();
+        }
+    } else {
+        next();
+    }
 });
 
 

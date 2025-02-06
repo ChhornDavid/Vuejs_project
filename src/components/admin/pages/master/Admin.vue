@@ -36,7 +36,14 @@
                             </li>
                             <li class="hover:bg-gray-100">
                                 <router-link to="/admin/orderHistory"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order History</router-link>
+                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order
+                                    History</router-link>
+                            </li>
+                            <li class="hover:bg-gray-100">
+                                <router-link to="/admin/invoice"
+                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
+                                    Invoice
+                                </router-link>
                             </li>
                         </ul>
                     </li>
@@ -107,30 +114,7 @@
                         <!-- Notification Message (Only visible when showMessage is true) -->
                         <div v-if="showMessage"
                             class="absolute top-12 right-0 w-72 p-2 mt-2 bg-gray-800 text-white rounded-md shadow-lg z-50">
-                            <div v-if="loading">Loading Pending Orders...</div>
-                            <div v-else-if="error">
-                                <p class="text-sm">Error fetching pending orders: {{ error }}</p>
-                            </div>
-                            <div v-else-if="pendingOrders && pendingOrders.length === 0">
-                                <p class="text-sm">No pending orders</p>
-                            </div>
-                             <div v-else-if="pendingOrders">
-                                <div v-for="order in pendingOrders" :key="order.id"
-                                    class="mb-4 p-2 bg-gray-700 rounded-md">
-                                    <p class="text-sm font-medium">Order ID: {{ order.id }}</p>
-                                    <p class="text-sm">
-                                        Amount: ${{ typeof order.amount === 'number' ? order.amount.toFixed(2) : 'N/A'
-                                        }}
-                                    </p>
-                                    <p class="text-sm">Payment Type: {{ order.payment_type }}</p>
-                                    <div class="flex mt-2 space-x-2">
-                                        <button @click="approveOrder(order.id)"
-                                            class="px-3 py-1 bg-green-600 hover:bg-green-700 rounded-md text-sm">Approve</button>
-                                        <button @click="declineOrder(order.id)"
-                                            class="px-3 py-1 bg-red-600 hover:bg-red-700 rounded-md text-sm">Decline</button>
-                                    </div>
-                                </div>
-                            </div>
+                            <div>Welcome back to message</div>
                         </div>
                     </div>
 
@@ -176,9 +160,7 @@
 
 <script>
 import { useRouter } from "vue-router";
-import { ref, onMounted } from 'vue';
 import api from "../../../../axios/Axios";
-import { echo } from "../../../../services/echo";
 
 
 export default {
@@ -190,7 +172,6 @@ export default {
             userData: null,
             productsDropdownOpen: false,
             orderDropdownOpen: false,
-            pendingOrders: [],
             loading: false,
             error: null
         };
@@ -201,8 +182,6 @@ export default {
     },
     mounted() {
         this.loadUserData();
-        this.fetchPendingOrders();
-        this.listenForOrderCash();
     },
     methods: {
         toggleMessage() {
@@ -223,65 +202,14 @@ export default {
         toggleDrop() {
             this.showDropDown = !this.showDropDown;
         },
-        async fetchPendingOrders() {
-            this.loading = true;
-            this.error = null;
-            try {
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.get("/admin/pending-orders", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                this.pendingOrders = response.data;
-                this.listenForOrderCash();
-            } catch (error) {
-                this.error = "Failed to get pending orders.";
-                console.error("Failed to get pending orders", error);
-            } finally {
-                this.loading = false;
-            }
-        },
-       listenForOrderCash() {
-            echo.channel("order-status")
-                .listen("OrderApprovedCash", (event) => {
-                    console.log(event);
-                   this.pendingOrders = event.pendingOrders || event;
-                });
-        },
-        async approveOrder(id) {
-            try {
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.post(`/admin/approve/${id}`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                console.log(response.data);
-                if (response.status === 200) {
-                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
-                }
-            } catch (error) {
-                console.error("Error approving order:", error);
-                this.error = 'Failed to approve order.'
-            }
-        },
-        async declineOrder(id) {
-            try {
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.post(`admin/decline/${id}`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (response.status === 200) {
-                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
-                }
-            } catch (error) {
-                console.error("Error declining order:", error);
-                this.error = 'Failed to decline order.'
-            }
-        },
+        //    listenForOrderCash() {
+        //         echo.channel("order-status")
+        //             .listen("OrderApprovedCash", (event) => {
+        //                 console.log(event);
+        //                this.pendingOrders = event.pendingOrders || event;
+        //             });
+        //     },
+
         async logout() {
             try {
                 const token = sessionStorage.getItem("auth_token");
