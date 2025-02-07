@@ -251,9 +251,7 @@ export default {
       userData: null,
       dataUrl: null,
       qrCodeSrc: '',
-      //Return category
       categories: [],
-      //return special menu
       specialMenus: [],
       currentIndex: 0,
       visibleItems: 3,
@@ -416,9 +414,20 @@ export default {
       this.selectedCategory = category;
     },
     filterMenuItems() {
-      return this.selectedCategory === "all"
-        ? this.menuItems
-        : this.menuItems.filter(item => item.category === this.selectedCategory);
+      if (!this.selectedCategory) {
+        return this.menuItems;
+      }
+
+      if (this.selectedCategory === "all") {
+        return this.menuItems;
+      }
+      if (!isNaN(Number(this.selectedCategory))) {
+        // Filter by item ID
+        const selectedId = Number(this.selectedCategory); 
+        return this.menuItems.filter(item => item.id === selectedId);
+      } else {
+        return this.menuItems.filter(item => item.category === this.selectedCategory);
+      }
     },
     removeFromOrder(index) {
       this.selectedItems.splice(index, 1);

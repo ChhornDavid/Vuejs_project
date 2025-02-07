@@ -1,29 +1,64 @@
 <template>
-  <div  class="h-screen w-screen overflow-hidden relative grid grid-cols-2 bg-[url('/src/images/6158983.png')] bg-center bg-cover">
-      <div></div>
-      <div class=" flex items-center">
-        <div class="bg-white bg-opacity-80 w-96 h-96 rounded-3xl ">
-            <h1 class="text-orange-500 text-4xl font-semibold text-center mt-7">Login</h1>
-            <div class="flex flex-col gap-3 ">
-            <span class="text-orange-500 text-xl font-semibold mt-5 ml-10">Username</span>
-            <input type="text" v-model="email" class="rounded-3xl p-3 text-center text-cyan-700 border-2 border-orange-600 ml-8 mr-8 placeholder:text-red-600 " placeholder="Input your username!">
-          </div>
-          <div class="flex flex-col gap-3 ">
-            <span class="text-orange-500 text-xl font-semibold mt-5 ml-10">Password</span>
-            <input type="password" v-model="password" class="rounded-3xl p-3 text-center text-cyan-700 border-2 border-orange-600 ml-8 mr-8 placeholder:text-red-600 " placeholder="Input your password!">
-          </div>
-          <button
-          @click="login"
-          class="rounded-3xl p-3 text-center text-white border-2 border-orange-600 bg-orange-600 mt-5 ml-32 px-12">
-          Login
-          </button>
+  <div class="min-h-screen bg-gray-300 flex justify-center items-center">
+    <div class="w-full max-w-md mx-auto">
+      <div class="bg-white rounded-3xl shadow-lg px-12 py-12 w-[550px]">
+        <div class="flex items-center justify-center mb-8">
+          <img
+            class="w-32 h-32 object-cover"
+            src="/src/assets/image/Picture1.png"
+            alt="Restaurant Logo"
+          />
         </div>
+        <h2 class="text-3xl font-extrabold text-gray-800 text-center mb-4">
+          Welcome Back
+        </h2>
+        <p class="text-gray-600 text-center mb-6">Please enter your details to login</p>
+
+        <div class="mb-6">
+          <label
+            class="block text-gray-700 font-medium mb-2"
+            for="email"
+          >
+            Email
+          </label>
+          <input
+            v-model="email"
+            id="email"
+            type="email"
+            placeholder="Enter your email"
+            class="w-full px-4 py-3 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+            required
+          />
+        </div>
+
+        <div class="mb-6">
+          <label
+            class="block text-gray-700 font-medium mb-2"
+            for="password"
+          >
+            Password
+          </label>
+          <input
+            v-model="password"
+            id="password"
+            type="password"
+            placeholder="Enter your password"
+            class="w-full px-4 py-3 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+            required
+          />
+        </div>
+
+        <button
+          @click="login"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
+        >
+          Login
+        </button>
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
-
-
 <script>
 
 import { ref } from 'vue';

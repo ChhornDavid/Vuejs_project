@@ -21,6 +21,7 @@ import Order from './components/admin/pages/master/order/Order.vue'
 // Font Awesome CSS
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Invoice from './components/admin/pages/master/order/Invoice.vue'
+import Kithchen from './components/kitchen/Kithchen.vue'
 
 
 // Define Routes
@@ -35,6 +36,12 @@ const routes = [
         component: Dashboard,
         name: 'Dashboard',
         meta: { requiresAuth: true, roles: ['user', 'admin'] }
+    },
+    {
+        path: '/kitchen',
+        component: Kithchen,
+        name: 'Kitchen',
+        meta: { requiresAuth: true, roles: ['cooker', 'admin'] }
     },
     {
         path: '/admin',
