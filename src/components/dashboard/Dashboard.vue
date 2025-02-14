@@ -3,8 +3,17 @@
     <!-- Left Side -->
     <div class="w-3/4 p-6 bg-slate-400">
       <!-- Header with Logo and Search Bar -->
-      <header class="bg-green-100 space-x-10 mb-6 p-5">
-        <h1 class="text-2xl text-center font-bold text-green-600">AS Restaurant</h1>
+      <header class="flex bg-green-100 mb-4 p-5 items-center">
+        <h1 class="text-2xl font-bold text-green-600 flex-grow text-center">AS Restaurant</h1>
+        <div class="relative w-12 h-12">
+          <div id="status-text" class="absolute -top-4 -left-8 bg-blue-500 text-white text-xs py-1 px-2 rounded-full">
+            {{ currentStatus }}
+          </div>
+          <div
+            class="rounded-full border border-blue-500 flex items-center justify-center bg-white text-blue-500 w-12 h-12">
+            <i class="fas fa-bell text-xl"></i>
+          </div>
+        </div>
       </header>
 
       <section class="mb-8">
@@ -98,7 +107,8 @@
                 <div class="justify-start items-start mt-4">
                   <span class="flex justify-start text-gray-600 text-sm font-bold">SIZE</span>
                   <div class="flex space-x-2 mt-2">
-                    <button class="'border text-sm font-bold rounded-md px-2 py-1 transition-colors', item.selectedSizeIndex === index ? 'bg-blue-600 text-white' : 'bg-blue-50 border-blue-600 text-blue-500']">
+                    <button
+                      class="'border text-sm font-bold rounded-md px-2 py-1 transition-colors', item.selectedSizeIndex === index ? 'bg-blue-600 text-white' : 'bg-blue-50 border-blue-600 text-blue-500']">
                       {{ item.size }}
                     </button>
                   </div>
@@ -213,16 +223,16 @@
           </button>
         </div>
         <div>
-          <PaymentCash :selectedItems="selectedItems" :showPaymentCash="showPaymentCash"
-            @close-modal="toggleModal" @payment-success="handlePaymentSuccess" />
+          <PaymentCash :selectedItems="selectedItems" :showPaymentCash="showPaymentCash" @close-modal="toggleModal"
+            @payment-success="handlePaymentSuccess" />
         </div>
         <div>
           <PaymentCreditCard :selectedItems="selectedItems" :showPaymentCard="showPaymentCard"
             @close-modal="toggleModal" @payment-success="handlePaymentSuccess" />
         </div>
         <div>
-          <PaymentScan :selectedItems="selectedItems" :showPaymentScan="showPaymentScan"
-            @close-modal="toggleModal" @payment-success="handlePaymentSuccess" />
+          <PaymentScan :selectedItems="selectedItems" :showPaymentScan="showPaymentScan" @close-modal="toggleModal"
+            @payment-success="handlePaymentSuccess" />
         </div>
       </div>
     </aside>
@@ -267,6 +277,9 @@ export default {
       showPaymentCard: false,
       showPaymentScan: false,
       cardName: '',
+      statuses: ["Free", "Cashier Accept", "On Cooking", "Ready"],
+      currentIndex: 0,
+      currentStatus: 'Free',
     };
   },
   setup() {
@@ -278,6 +291,10 @@ export default {
     this.fetchMenus();
     this.fetchFood();
     this.loadUserData();
+    this.startStatusUpdates();
+  },
+  beforeUnmount() {
+    this.stopStatusUpdates();
   },
   components: {
     VueQrcode,
@@ -293,6 +310,16 @@ export default {
     },
     handlePaymentSuccess(data) {
       console.log("Payment Successful:", data);
+    },
+    updateStatus() {
+      this.currentStatus = this.statuses[this.currentIndex];
+      this.currentIndex = (this.currentIndex + 1) % this.statuses.length;
+    },
+    startStatusUpdates() {
+      this.intervalId = setInterval(this.updateStatus, 10000);
+    },
+    stopStatusUpdates() {
+      clearInterval(this.intervalId);
     },
     //special Menu
     async fetchSpecialMenus() {
@@ -423,7 +450,7 @@ export default {
       }
       if (!isNaN(Number(this.selectedCategory))) {
         // Filter by item ID
-        const selectedId = Number(this.selectedCategory); 
+        const selectedId = Number(this.selectedCategory);
         return this.menuItems.filter(item => item.id === selectedId);
       } else {
         return this.menuItems.filter(item => item.category === this.selectedCategory);

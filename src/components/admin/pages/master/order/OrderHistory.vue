@@ -202,7 +202,6 @@ export default {
                     },
                 });
                 this.orders = response.data;
-                console.log("Orders:", this.orders);
             } catch (err) {
                 this.error = "Error fetching orders: " + err.message;
                 console.error("Error fetching orders", err);

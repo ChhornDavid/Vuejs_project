@@ -63,6 +63,9 @@
   <script>
   import OrderList from "./OrderList.vue";
   import History from "./History.vue";
+  import { echo } from "../../services/echo";
+
+  
   export default {
     components: {
       OrderList,

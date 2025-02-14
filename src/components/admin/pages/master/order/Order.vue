@@ -18,7 +18,7 @@
                     <div class="mt-4 sm:mt-0 sm:w-full">
                         <div class="flex items-center mb-3">
                             <h2 class="text-lg font-semibold text-gray-800">Table:</h2>
-                            <h2 class="text-lg pl-2 font-semibold text-gray-800">T{{ order.id }}</h2>
+                            <h2 class="text-lg pl-2 font-semibold text-gray-800">{{ order.user_id }}</h2>
                         </div>
                         <div class="mb-4">
                             <div class="grid grid-cols-4 gap-2 text-sm">
@@ -80,6 +80,7 @@
 
 <script>
 import api from '../../../../../axios/Axios';
+import { echo } from '../../../../../services/echo';
 
 export default {
     data() {
@@ -91,10 +92,11 @@ export default {
             confirmationMessage: '',
             orderIdToProcess: null,
             actionType: null,
-        }
+        };
     },
     mounted() {
         this.fetchPendingOrders();
+        this.listenForOrders();
     },
     methods: {
         formatCurrency(amount) {
@@ -124,7 +126,41 @@ export default {
             }
         },
 
+        listenForOrders() {
+            echo.channel("order-status")
+                .listen("OrderApprovedCash", (event) => {
+                    if (event.orders && Array.isArray(event.orders)) {
+                        // Handle the full list of orders
+
+                        this.pendingOrders = [...event.orders]; // Replace the existing list
+                        console.log("Full list of pending orders received:", event.orders);
+                    } else if (event.order) {
+                        const updatedOrder = event.order;
+                        const index = this.pendingOrders.findIndex(order => order.id === updatedOrder.id);
+                        if (index !== -1) {
+                            // Update existing order
+                            this.pendingOrders.splice(index, 1, updatedOrder);
+                            console.log("Updated order:", updatedOrder);
+                        } else {
+                            // Add new order (if it wasn't already in the list)
+                            this.pendingOrders.push(updatedOrder);
+                            console.log("Added new order:", updatedOrder);
+                        }
+                    } else if (event.orderId) { // Listen for a declined order (only ID sent)
+                        // Remove the declined order
+                        this.pendingOrders = this.pendingOrders.filter(order => order.id !== event.orderId);
+                        console.log("Removed order with ID:", event.orderId);
+                    } else {
+                        console.error("Unexpected event format:", event);
+                    }
+                });
+        },
+
         async approveOrder(id) {
+            // Optimistically remove the order
+            const originalOrders = [...this.pendingOrders]; // Save a copy for potential rollback
+            this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post(`/admin/approve/${id}`, {}, {
@@ -132,15 +168,20 @@ export default {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                if (response.status === 200) {
-                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+
+                if (response.status !== 200) {
+                    throw new Error(`Failed to approve order: ${response.status} ${response.statusText}`);
                 }
             } catch (error) {
                 console.error("Error approving order:", error);
-                this.error = 'Failed to approve order.'
+                this.error = 'Failed to approve order.';
+                this.pendingOrders = originalOrders; // Rollback on error
             }
         },
         async declineOrder(id) {
+            // Optimistically remove the order
+            const originalOrders = [...this.pendingOrders]; // Save a copy for potential rollback
+            this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post(`admin/decline/${id}`, {}, {
@@ -148,12 +189,14 @@ export default {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                if (response.status === 200) {
-                    this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+
+                if (response.status !== 200) {
+                    throw new Error(`Failed to decline order: ${response.status} ${response.statusText}`);
                 }
             } catch (error) {
                 console.error("Error declining order:", error);
-                this.error = 'Failed to decline order.'
+                this.error = 'Failed to decline order.';
+                this.pendingOrders = originalOrders; // Rollback on error
             }
         },
 
