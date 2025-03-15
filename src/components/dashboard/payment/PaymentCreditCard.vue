@@ -9,222 +9,197 @@
                 </svg>
             </button>
 
-            <div class="grid grid-cols-2 items-center pb-2 mb-4">
-                <h2 class="text-2xl font-bold text-white">Order Summary</h2>
-                <h2 class="text-2xl font-bold text-white">Payment Amount</h2>
-            </div>
-
-            <div class="flex flex-col md:flex-row gap-6">
-                <div class="flex flex-col md:flex-row gap-6 w-full">
-                    <!-- Order items and total amount -->
-                    <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto w-full md:w-1/2">
-                        <div v-for="(item, index) in selectedItems" :key="index"
-                            class="flex justify-between items-center mb-2">
-                            <span class="text-xl text-white font-medium"> {{ item.name }} ({{ item.quantity }})</span>
-                            <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2)
-                                }}</span>
-                        </div>
-                        <div class="flex justify-between items-center font-bold text-xl text-white border-t pt-2 mt-4">
-                            <span>Total</span>
-                            <span>${{ total.toFixed(2) }}</span>
-                        </div>
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Left: Order Summary -->
+                <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto">
+                    <h2 class="text-2xl font-bold text-white mb-4">Order Summary</h2>
+                    <div v-for="(item, index) in selectedItems" :key="index"
+                        class="flex justify-between items-center mb-2">
+                        <span class="text-xl text-white font-medium"> {{ item.name }} ({{ item.quantity }})</span>
+                        <span class="text-xl text-white font-medium">{{ formatPrice(item.price * item.quantity)
+                            }}</span>
                     </div>
-
-                    <!-- Credit Card Form -->
-                    <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto w-full md:w-1/2">
-                        <form @submit.prevent="handleSubmit" id="payment-form" class="space-y-4">
-                            <div class="space-y-1">
-                                <label class="block text-sm font-medium text-gray-700">Name on Card</label>
-                                <input v-model="cardHolderName"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                    type="text" required />
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="block text-sm font-medium text-gray-700">Card Number</label>
-                                <input v-model="cardNumber" autocomplete="off"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm card-number"
-                                    type="text" required />
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div class="space-y-1">
-                                    <label class="block text-sm font-medium text-gray-700">CVC</label>
-                                    <input v-model="cardCVC" autocomplete="off"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm card-cvc"
-                                        placeholder="ex. 311" type="text" required />
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="block text-sm font-medium text-gray-700">Exp Month</label>
-                                    <input v-model="cardExpMonth"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm card-expiry-month"
-                                        placeholder="MM" type="text" required />
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="block text-sm font-medium text-gray-700">Expiration Year</label>
-                                    <input v-model="cardExpYear"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm card-expiry-year"
-                                        placeholder="YYYY" type="text" required />
-                                </div>
-                            </div>
-
-                            <!-- Error message -->
-                            <div v-if="formError">
-                                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative"
-                                    role="alert">
-                                    <span class="block sm:inline">{{ formError }}</span>
-                                </div>
-                            </div>
-
-                            <!-- Submit button -->
-                            <input type="hidden" :value="totalAmount" name="total" />
-                            <button
-                                class="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                type="submit" :disabled="loading">
-                                Pay Now (${{ total.toFixed(2) }})
-                            </button>
-                        </form>
+                    <div class="flex justify-between items-center font-bold text-xl text-white border-t pt-2 mt-4">
+                        <span>Total</span>
+                        <span>{{ formatPrice(total) }}</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- Result message -->
-            <div id="result-message" class="mt-5 text-white text-center">
-                {{ resultMessage }}
+                <!-- Right: Stripe Payment Form -->
+                <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto">
+                    <h2 class="text-2xl font-bold text-white mb-4">Payment Details</h2>
+                    <form @submit.prevent="handleSubmit" id="payment-form" class="space-y-4">
+                        <div class="space-y-1">
+                            <label class="block text-sm font-medium text-white">Name on Card:</label>
+                            <input v-model="cardholderName"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" type="text" required
+                                :disabled="loading" />
+                        </div>
+                        <div id="card-element" class="p-3 bg-white rounded-md"></div>
+                        <div v-if="formError" class="mt-2 text-red-500 text-sm">{{ formError }}</div>
+                        <button
+                            class="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            type="submit" :disabled="loading">
+                            <span v-if="!loading">Pay Now ({{ formatPrice(total) }})</span>
+                            <span v-else>Processing...</span>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <script>
+import { loadStripe } from '@stripe/stripe-js';
 import api from "../../../axios/Axios";
 
 export default {
-    name: "PaymentCreditCard",
+    name: "StripePayment",
     props: {
-        selectedItems: {
-            type: Array,
-            required: true,
-        },
-        showPaymentCard: {
-            type: Boolean,
-            required: true,
-        },
+        selectedItems: { type: Array, required: true },
+        showPaymentCard: { type: Boolean, required: true },
     },
     emits: ["close-modal", "payment-success"],
     data() {
         return {
-            cardHolderName: '',
-            cardNumber: '',
-            cardCVC: '',
-            cardExpMonth: '',
-            cardExpYear: '',
-            formError: null,
+            stripe: null,
+            card: null,
+            cardholderName: '',
             total: 0,
             loading: false,
-            resultMessage: "",
-            paymentSuccess: false,
-            paymentFailure: false,
+            formError: null,
         };
     },
     watch: {
         selectedItems: {
-            handler() {
-                this.calculateTotal();
-            },
+            handler() { this.calculateTotal(); },
             deep: true,
         },
+        showPaymentCard(newValue) {
+            if (newValue) {
+                this.initializeStripe();
+            }
+        },
     },
-    mounted() {
+    async mounted() {
         this.calculateTotal();
+        await this.$nextTick(); // Ensure the DOM is fully rendered before interacting with it
+        if (this.showPaymentCard) {
+            this.initializeStripe();
+        }
     },
     methods: {
+        async initializeStripe() {
+            // Ensure Stripe is loaded
+            if (!this.stripe) {
+                this.stripe = await loadStripe("pk_test_51Pi4i22N83kttsNCYZG4bxJ3NQlMxCNDtBBaAJsDO81Uzo23s7doQ9NzSUlTObFx9doP0C6N52VmcfqwXSK6tBQ000xRKbD3Iu");
+            }
+            const elements = this.stripe.elements();
+            this.card = elements.create("card");
+
+            // Wait for the DOM to be updated before mounting
+            await this.$nextTick();
+
+            const cardElement = document.getElementById("card-element");
+            if (cardElement) {
+                this.card.mount(cardElement);
+            } else {
+                console.error("Card element not found in the DOM");
+            }
+        },
         calculateTotal() {
             this.total = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
         },
         async handleSubmit() {
+            if (this.loading) return;
             this.loading = true;
             this.formError = null;
+
+            // Create Stripe Payment Method
+            const { paymentMethod, error } = await this.stripe.createPaymentMethod({
+                type: "card",
+                card: this.card,
+                billing_details: { name: this.cardholderName },
+            });
+
+            if (error) {
+                this.formError = error.message;
+                this.loading = false;
+                return;
+            }
+
             try {
-                const payload = {
+                // Send to Laravel API
+                const response = await api.post('/stripe', {
+                    paymentMethodId: paymentMethod.id,
                     amount: this.total,
-                    cardHolderName: this.cardHolderName,
-                    cardNumber: this.cardNumber,
-                    cardCVC: this.cardCVC,
-                    cardExpMonth: this.cardExpMonth,
-                    cardExpYear: this.cardExpYear,
-                    description: "Payment through credit card",
-                };
-                console.log("payload", payload);
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.post('stripe', payload, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    description: "Order Payment",
                 });
 
-                if (response.status === 201) {
-                    this.paymentSuccess = true;
-                    this.resultMessage = "Payment successful!";
-                    await this.handleOrder('credit_card')
+                if (response.data.requires_action) {
+                    const { paymentIntent, error: confirmError } = await this.stripe.confirmCardPayment(
+                        response.data.payment_intent_client_secret
+                    );
 
-                }
-            } catch (error) {
-                this.resultMessage = "Payment Failed! Please try again";
-                if (error.response && error.response.data && error.response.data.error) {
-                    this.formError = error.response.data.error;
-                    this.paymentFailure = true;
+                    if (confirmError) {
+                        this.formError = confirmError.message;
+                        this.loading = false;
+                        return;
+                    }
+
+                    if (paymentIntent.status === "succeeded") {
+                        this.$emit("payment-success");
+                        this.closeModal();
+                    } else {
+                        this.formError = "Payment not completed.";
+                    }
+                } else if (response.data.status === "succeeded") {
+                    this.$emit("payment-success");
+                    this.closeModal();
                 } else {
-                    this.formError = "An unexpected error occurred, please try again.";
-                    this.paymentFailure = true;
+                    this.formError = "Payment failed. Try again.";
                 }
-                console.error("Payment error:", error);
-            } finally {
-                this.loading = false;
+            } catch (err) {
+                this.formError = "Server error. Try again.";
+                console.error(err);
             }
+
+            this.loading = false;
         },
-        async handleOrder(paymentType) {
-            try {
+        async handelOrder() {
+            const userId = sessionStorage.getItem("id");
                 const orderPayload = {
+                    user_id: userId,
                     amount: this.total,
-                    payment_type: paymentType,
+                    payment_type: "cash",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
+                        product_name: item.name,
                         quantity: item.quantity,
                         amount: item.price,
                         size: item.size
                     }))
                 };
-                console.log('Order Payload:', orderPayload);
+                console.log("payload", orderPayload);
                 const token = sessionStorage.getItem("auth_token");
-                const orderResponse = await api.post("/orders", orderPayload, {
+                const response = await api.post("/orders", orderPayload, {
                     headers: {
                         Authorization: `Bearer ${token}`,
-                    }
+                    },
                 });
-                if (orderResponse.status === 201) {
-                    this.resultMessage = "Payment successful! Order placed successfully";
-                    this.$emit("payment-success");
-                } else {
-                    this.resultMessage = "Payment successful, but there was an issue creating your order. Please check your order history for more information.";
-                    console.error('Error placing the order:', orderResponse);
-                }
-
-            } catch (error) {
-                console.error("Error placing order", error);
-                this.resultMessage = "Payment successful, but there was an issue creating your order. Please try again later";
-            }
         },
         closeModal() {
             this.$emit("close-modal");
+        },
+        formatPrice(value) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
         },
     },
 };
 </script>
 
 <style scoped>
-/* Custom styles */
-
 button:disabled {
     background-color: #ccc;
     cursor: not-allowed;

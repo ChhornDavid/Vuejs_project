@@ -22,6 +22,7 @@ import Order from './components/admin/pages/master/order/Order.vue'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Invoice from './components/admin/pages/master/order/Invoice.vue'
 import Kithchen from './components/kitchen/Kithchen.vue'
+import Test from './components/Test.vue'
 
 
 // Define Routes
@@ -30,6 +31,11 @@ const routes = [
         path: '/',
         component: Login,
         name: 'Login',
+    },
+    {
+        path: '/test',
+        component: Test,
+        name: 'Test',
     },
     {
         path: '/dashboard',

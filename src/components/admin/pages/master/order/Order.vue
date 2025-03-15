@@ -28,7 +28,7 @@
                                 <p class="text-gray-500 font-medium">Total</p>
                             </div>
 
-                            <div v-for="item in JSON.parse(order.items)" :key="item.product_id"
+                            <div v-for="item in safeParseJSON(order.items)" :key="item.product_id"
                                 class="grid grid-cols-4 gap-2 py-2 border-b border-gray-200 last:border-b-0">
                                 <p class="text-gray-700 text-sm">{{ item.product_name }}</p>
                                 <p class="text-gray-700 text-sm">{{ item.quantity }}</p>
@@ -50,11 +50,11 @@
                         </div>
                         <div class="flex items-center justify-center gap-4 mt-6">
                             <button @click="confirmApprove(order.id)"
-                                class="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors duration-200">
+                                class="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600">
                                 Accept
                             </button>
                             <button @click="confirmDecline(order.id)"
-                                class="w-full py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition-colors duration-200">
+                                class="w-full py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600">
                                 Decline
                             </button>
                         </div>
@@ -94,17 +94,25 @@ export default {
             actionType: null,
         };
     },
-    mounted() {
+    created() {
         this.fetchPendingOrders();
-        this.listenForOrders();
+        this.listenForUserOrderUpdates();
     },
     methods: {
         formatCurrency(amount) {
-            const formatter = new Intl.NumberFormat('en-US', {
+            return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
-            });
-            return formatter.format(amount);
+            }).format(amount);
+        },
+
+        safeParseJSON(data) {
+            try {
+                return JSON.parse(data) || [];
+            } catch (error) {
+                console.error("Invalid JSON:", data);
+                return [];
+            }
         },
 
         async fetchPendingOrders() {
@@ -113,9 +121,7 @@ export default {
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.get("/admin/pending-orders", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 this.pendingOrders = response.data;
             } catch (error) {
@@ -126,77 +132,54 @@ export default {
             }
         },
 
-        listenForOrders() {
-            echo.channel("order-status")
-                .listen("OrderApprovedCash", (event) => {
-                    if (event.orders && Array.isArray(event.orders)) {
-                        // Handle the full list of orders
+        listenForUserOrderUpdates() {
+            echo.channel("order-status").listen("OrderApprovedCash", (event) => {
 
-                        this.pendingOrders = [...event.orders]; // Replace the existing list
-                        console.log("Full list of pending orders received:", event.orders);
-                    } else if (event.order) {
-                        const updatedOrder = event.order;
-                        const index = this.pendingOrders.findIndex(order => order.id === updatedOrder.id);
-                        if (index !== -1) {
-                            // Update existing order
-                            this.pendingOrders.splice(index, 1, updatedOrder);
-                            console.log("Updated order:", updatedOrder);
-                        } else {
-                            // Add new order (if it wasn't already in the list)
-                            this.pendingOrders.push(updatedOrder);
-                            console.log("Added new order:", updatedOrder);
-                        }
-                    } else if (event.orderId) { // Listen for a declined order (only ID sent)
-                        // Remove the declined order
-                        this.pendingOrders = this.pendingOrders.filter(order => order.id !== event.orderId);
-                        console.log("Removed order with ID:", event.orderId);
-                    } else {
-                        console.error("Unexpected event format:", event);
-                    }
-                });
+                if (!event.order) return;
+
+                const index = this.pendingOrders.findIndex(order => order.id === event.order.id);
+                
+                if (index !== -1) {
+                    this.pendingOrders.splice(index, 1, event.order);
+                } else {
+                    this.pendingOrders.push(event.order);
+                }
+            });
         },
 
         async approveOrder(id) {
-            // Optimistically remove the order
-            const originalOrders = [...this.pendingOrders]; // Save a copy for potential rollback
-            this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+            const originalOrders = [...this.pendingOrders];
+            this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
 
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post(`/admin/approve/${id}`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
 
-                if (response.status !== 200) {
-                    throw new Error(`Failed to approve order: ${response.status} ${response.statusText}`);
-                }
+                if (response.status !== 200) throw new Error(`Failed to approve order.`);
             } catch (error) {
                 console.error("Error approving order:", error);
                 this.error = 'Failed to approve order.';
-                this.pendingOrders = originalOrders; // Rollback on error
+                this.pendingOrders = originalOrders;
             }
         },
+
         async declineOrder(id) {
-            // Optimistically remove the order
-            const originalOrders = [...this.pendingOrders]; // Save a copy for potential rollback
-            this.pendingOrders = this.pendingOrders.filter((order) => order.id !== id);
+            const originalOrders = [...this.pendingOrders];
+            this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
+
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post(`admin/decline/${id}`, {}, {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                 });
 
-                if (response.status !== 200) {
-                    throw new Error(`Failed to decline order: ${response.status} ${response.statusText}`);
-                }
+                if (response.status !== 200) throw new Error(`Failed to decline order.`);
             } catch (error) {
                 console.error("Error declining order:", error);
                 this.error = 'Failed to decline order.';
-                this.pendingOrders = originalOrders; // Rollback on error
+                this.pendingOrders = originalOrders;
             }
         },
 
@@ -216,26 +199,13 @@ export default {
 
         cancelConfirmation() {
             this.showConfirmation = false;
-            this.orderIdToProcess = null;
-            this.actionType = null;
         },
 
         async confirmAction() {
             this.showConfirmation = false;
-            if (this.actionType === 'approve') {
-                await this.approveOrder(this.orderIdToProcess);
-            } else if (this.actionType === 'decline') {
-                await this.declineOrder(this.orderIdToProcess);
-            }
-            this.orderIdToProcess = null;
-            this.actionType = null;
+            if (this.actionType === 'approve') this.approveOrder(this.orderIdToProcess);
+            else if (this.actionType === 'decline') this.declineOrder(this.orderIdToProcess);
         },
     },
 }
 </script>
-
-<style scoped>
-.bg-gray-100:hover {
-    background-color: #f0f0f0;
-}
-</style>

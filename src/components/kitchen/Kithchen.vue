@@ -17,31 +17,6 @@
                 <span class="mr-2"></span> Order List
               </button>
             </li>
-            <li class="mb-4 flex items-center">
-              <img
-                src="/src/assets/image/history.png"
-                alt="History Icon"
-                class="w-6 h-6 mr-2"
-              />
-              <button
-                class="flex items-center text-gray-700 hover:text-blue-500 w-full text-left"
-                @click="activeSection = 'History'"
-              >
-                <span class="mr-2"></span> History
-              </button>
-            </li>
-            <li class="flex items-center">
-              <img
-                src="/src/assets/image/setting.png"
-                alt="Settings Icon"
-                class="w-6 h-6 mr-2"
-              />
-              <button
-                class="flex items-center text-gray-700 hover:text-blue-500 w-full text-left"
-              >
-                <span class="mr-2"></span> Setting
-              </button>
-            </li>
           </ul>
         </nav>
       </aside>
@@ -55,7 +30,6 @@
           <p class="text-sm text-gray-500">{{ currentDate }}</p>
         </header>
         <OrderList v-if="activeSection === 'OrderList'" />
-        <History v-if="activeSection === 'History'" />
       </main>
     </div>
   </template>
