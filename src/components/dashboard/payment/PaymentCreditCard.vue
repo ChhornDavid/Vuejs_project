@@ -150,12 +150,14 @@ export default {
 
                     if (paymentIntent.status === "succeeded") {
                         this.$emit("payment-success");
+                        await this.handleOrder();
                         this.closeModal();
                     } else {
                         this.formError = "Payment not completed.";
                     }
                 } else if (response.data.status === "succeeded") {
                     this.$emit("payment-success");
+                    await this.handleOrder();
                     this.closeModal();
                 } else {
                     this.formError = "Payment failed. Try again.";
@@ -167,27 +169,48 @@ export default {
 
             this.loading = false;
         },
-        async handelOrder() {
-            const userId = sessionStorage.getItem("id");
+        async handleOrder() {
+            try {
+                const userId = sessionStorage.getItem("id");
+                if (!userId) {
+                    console.error("User ID not found in session storage.");
+                    return;
+                }
+
+                const token = sessionStorage.getItem("auth_token");
+                if (!token) {
+                    console.error("Authentication token not found.");
+                    return;
+                }
+
                 const orderPayload = {
-                    user_id: userId,
-                    amount: this.total,
-                    payment_type: "cash",
+                    user_id: parseInt(userId, 10), // Ensure user_id is an integer
+                    amount: this.total, // Fixed missing comma
+                    payment_type: "credit_card",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,
                         quantity: item.quantity,
-                        amount: item.price,
-                        size: item.size
+                        amount: item.price * item.quantity, // Ensure amount is total price per item
+                        size: item.size || null, // Ensure null safety for size
                     }))
                 };
-                console.log("payload", orderPayload);
-                const token = sessionStorage.getItem("auth_token");
+
+                console.log("Payload:", orderPayload);
+
                 const response = await api.post("/orders", orderPayload, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
+                console.log("Order Response:", response.data);
+                this.$emit("payment-success", response.data.order);
+                this.closeModal();
+            } catch (error) {
+                console.error("Order creation failed:", error.response?.data || error);
+                this.formError = "Failed to create order. Please try again.";
+            }
         },
         closeModal() {
             this.$emit("close-modal");

@@ -81,6 +81,7 @@ export default {
     mounted() {
         this.fetchKitchenOrders();
         this.listenOrderToKitchen();
+        this.listenCardToKitchen();
     },
     methods: {
         async fetchKitchenOrders() {
@@ -126,6 +127,15 @@ export default {
                         this.orders.unshift(event.order);
                     }
                 });
+        },
+        listenCardToKitchen() {
+            echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
+                console.log("Card received:", event);
+                const cardorder = this.orders.find(order => order.id === event.order.id);
+                if (!cardorder) {
+                    this.orders.unshift(event.order);
+                }
+            })
         }
     },
     computed: {
