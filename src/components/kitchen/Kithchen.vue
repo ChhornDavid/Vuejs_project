@@ -6,7 +6,7 @@
           <ul>
             <li class="mb-4 flex items-center">
               <img
-                src="/src/assets/image/order.png"
+                src="/public/images/order.png"
                 alt="Order List Icon"
                 class="w-6 h-6 mr-2"
               />

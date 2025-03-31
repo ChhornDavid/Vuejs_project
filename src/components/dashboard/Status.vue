@@ -68,7 +68,6 @@ export default {
             ],
             currentStep: 1,
             intervalId: null,
-            autoProcess: false, // Flag to control automatic progression
         };
     },
     watch: {
@@ -104,30 +103,25 @@ export default {
             });
         },
         nextStep() {
-            if (this.currentStep < this.steps.length - 1) {
+            if (this.currentStep < this.steps.length) {
                 this.currentStep++;
                 this.updateActiveSteps();
             } else {
-                this.stopAutoProcess(); // Stop when the last step is reached
+                this.stopAutoProcess();
+                this.currentStep = this.steps.length;
             }
         },
         startAutoProcess() {
-            this.autoProcess = true;
             if (this.intervalId) {
                 clearInterval(this.intervalId);
             }
-            const intervalPerStep = 5000;
+            const intervalPerStep = 5000; // 5 seconds per step
 
             this.intervalId = setInterval(() => {
-                if (!this.autoProcess) {
-                    this.stopAutoProcess();
-                    return;
-                }
                 this.nextStep();
             }, intervalPerStep);
         },
         stopAutoProcess() {
-            this.autoProcess = false;
             if (this.intervalId) {
                 clearInterval(this.intervalId);
                 this.intervalId = null;
@@ -141,5 +135,8 @@ export default {
 </script>
 
 <style scoped>
-/* No unused styles remaining */
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
 </style>

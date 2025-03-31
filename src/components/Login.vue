@@ -5,7 +5,7 @@
         <div class="flex items-center justify-center mb-8">
           <img
             class="w-32 h-32 object-cover"
-            src="/src/assets/image/Picture1.png"
+            src="/public/images/Picture1.png"
             alt="Restaurant Logo"
           />
         </div>
