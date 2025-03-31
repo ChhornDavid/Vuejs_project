@@ -82,6 +82,7 @@ export default {
         this.fetchKitchenOrders();
         this.listenOrderToKitchen();
         this.listenCardToKitchen();
+        this.listenForCallRobot();
     },
     methods: {
         async fetchKitchenOrders() {
@@ -99,11 +100,16 @@ export default {
         async updateStatus(id, newStatus) {
             try {
                 const token = sessionStorage.getItem("auth_token");
-                //console.log(`Updating order ${id} to status: ${newStatus}`);
+                // console.log(`Updating order ${id} to status: ${newStatus}`);
 
-                await api.put(`/kitchen/orders/${id}/status`, { status: newStatus }, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const response = await api.put(`/kitchen/orders/${id}/status`, { status: newStatus }, {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
                 });
+
+                //console.log("Order updated:", response.data);
 
                 if (newStatus === "completed") {
                     this.orders = this.orders.filter(order => order.id !== id);
@@ -114,13 +120,13 @@ export default {
                     }
                 }
             } catch (error) {
-                console.error("Error updating order status:", error);
+                console.error("Error updating order status:", error.response ? error.response.data : error);
             }
         },
         listenOrderToKitchen() {
             echo.channel("kitchen-orders")
                 .listen("OrderSentToKitchen", (event) => {
-                    console.log("Order received:", event);
+                    //console.log("Order received:", event);
 
                     const existingOrder = this.orders.find(order => order.id === event.order.id);
                     if (!existingOrder) {
@@ -130,11 +136,16 @@ export default {
         },
         listenCardToKitchen() {
             echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
-                console.log("Card received:", event);
+                //console.log("Card received:", event);
                 const cardorder = this.orders.find(order => order.id === event.order.id);
                 if (!cardorder) {
                     this.orders.unshift(event.order);
                 }
+            })
+        },
+        listenForCallRobot() {
+            echo.channel("robot-channel").listen("EventForRobot", (event) => {
+                console.log("Event received:", event.robot);
             })
         }
     },

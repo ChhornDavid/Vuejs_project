@@ -6,26 +6,27 @@
       <header class="flex bg-green-100 mb-4 p-5 items-center">
         <h1 class="text-2xl font-bold text-green-600 flex-grow text-center">AS Restaurant</h1>
         <div class="relative w-12 h-12">
-          <div id="status-text" class="absolute -top-4 -left-8 bg-blue-500 text-white text-xs py-1 px-2 rounded-full">
-            {{ currentStatus }}
-          </div>
-          <div
+          <!-- Status Display -->
+          <button @click="showStatus = true"
             class="rounded-full border border-blue-500 flex items-center justify-center bg-white text-blue-500 w-12 h-12">
             <i class="fas fa-bell text-xl"></i>
-          </div>
+          </button>
+
+          <!-- Payment Modal -->
+          <Status :showStatus="showStatus" :resultMessage="resultMessage" :paymentStatus="paymentStatus"
+            @close-modal="toggleModal" />
         </div>
+
       </header>
 
-      <section class="mb-8">
+      <!-- <section class="mb-8">
         <h2 class="text-3xl text-left text-blue-600 font-bold mb-4">Special Menu</h2>
         <div class="flex justify-end items-center space-x-2">
-          <!-- Menu items -->
           <div class="flex space-x-4 overflow-x-hidden w-full">
             <ul class="flex space-x-4">
               <li v-for="(menu, index) in specialMenus" :key="menu.id"
                 class="p-4 bg-white rounded-xl border-2 border-blue-700 hover:bg-blue-600 shadow cursor-pointer group"
                 @click="changeCategory(menu.name)">
-                <!-- Menu Item Name -->
                 <span class="text-blue-700 group-hover:text-white transition-colors">
                   {{ menu.name }}
                 </span>
@@ -33,7 +34,7 @@
             </ul>
           </div>
         </div>
-      </section>
+      </section> -->
 
 
       <!-- Menu -->
@@ -41,24 +42,12 @@
         <h2 class="text-3xl text-left text-blue-600 font-bold mb-4">Menu</h2>
         <div class="flex items-center space-x-2">
 
-          <!-- Left Arrow -->
-          <button @click="scrollLeft"
-            class="group relative rounded bg-blue-600 w-14 h-14 hover:bg-blue-500 disabled:opacity-100 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-            :disabled="currentIndex === 0" aria-label="Scroll left">
-            <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-           w-0 h-0 border-t-[10px] border-b-[10px] border-r-[15px]
-           border-transparent border-r-white
-           disabled:border-r-gray-400 transform transition-transform"></span>
-          </button>
-
-          <!-- Menu items -->
-          <div class="flex space-x-4 overflow-x-hidden">
-            <ul class="flex space-x-4" :style="{ transform: `translateX(-${currentIndex * 100}px)` }">
+          <div ref="scrollContainer" class="flex space-x-4 overflow-x-auto scrollbar-hide">
+            <ul class="flex space-x-4">
               <li v-for="(category, index) in categories" :key="index"
-                class="p-2 pb-2  bg-white rounded-xl border-2 border-blue-700 hover:bg-blue-600 shadow cursor-pointer group flex flex-col items-center space-y-2 space-x-2"
-                @click="changeCategory(category.value)">
+                class="p-2 pb-2 bg-white rounded-xl border-2 border-blue-700 hover:bg-blue-600 shadow cursor-pointer group flex flex-col items-center space-y-2">
                 <!-- Image -->
-                <img :src="category.image" class="w-10 border-blue-700 group-hover:border-white transition-all group" />
+                <img :src="category.image" class="w-10 border-blue-700 group-hover:border-white transition-all" />
                 <!-- Name -->
                 <span class="text-blue-700 font-bold group-hover:text-white transition-colors">
                   {{ category.name }}
@@ -66,16 +55,6 @@
               </li>
             </ul>
           </div>
-
-          <!-- Right Arrow -->
-          <button @click="scrollRight"
-            class="group relative rounded items-center jus bg-blue-600 w-14 h-14 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            :disabled="currentIndex === 0" aria-label="Scroll right">
-            <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
-             w-0 h-0 border-t-[10px] border-b-[10px] border-l-[15px]
-             border-transparent border-l-white
-             disabled:border-l-gray-400 transition-transform"></span>
-          </button>
         </div>
 
       </section>
@@ -247,6 +226,7 @@ import api from '../../axios/Axios';
 import PaymentCreditCard from './payment/PaymentCreditCard.vue';
 import PaymentCash from './payment/PaymentCash.vue';
 import PaymentScan from './payment/PaymentScan.vue';
+import Status from './Status.vue';
 
 export default {
   mounted() {
@@ -276,15 +256,27 @@ export default {
       showPaymentCash: false,
       showPaymentCard: false,
       showPaymentScan: false,
+      showStatus: false,
       cardName: '',
-      statuses: ["Free", "Cashier Accept", "On Cooking", "Ready"],
+      statuses: [],
+      currentStatus: "Free",
       currentIndex: 0,
-      currentStatus: 'Free',
+      resultMessage: '',
+      paymentStatus: ''
     };
   },
   setup() {
     const router = useRouter();
     return { router };
+    const scrollContainer = ref(null);
+
+    onMounted(() => {
+      if (scrollContainer.value) {
+        scrollContainer.value.style.setProperty('scroll-behavior', 'smooth');
+        scrollContainer.value.style.setProperty('overflow-x', 'auto');
+        scrollContainer.value.style.setProperty('white-space', 'nowrap');
+      };
+    });
   },
   mounted() {
     this.fetchSpecialMenus();
@@ -301,12 +293,18 @@ export default {
     PaymentCreditCard,
     PaymentCash,
     PaymentScan,
+    Status,
   },
   methods: {
+    switchStatus() {
+      const currentIndex = this.statuses.indexOf(this.currentStatus);
+      this.currentStatus = this.statuses[(currentIndex + 1) % this.statuses.length];
+    },
     toggleModal() {
       this.showPaymentCard = false;
       this.showPaymentCash = false;
       this.showPaymentScan = false;
+      this.showStatus = false;
     },
     handlePaymentSuccess(data) {
       console.log("Payment Successful:", data);
@@ -420,22 +418,14 @@ export default {
       this.showPaymentCash = false;
       this.showPaymentCard = false;
       this.showPaymentScan = false;
+      this.showStatus = false;
     },
     chooseMethod(method) {
       alert(`You selected: ${method}`);
       this.showPaymentCash = false;
       this.showPaymentCard = false;
       this.showPaymentScan = false;
-    },
-    scrollLeft() {
-      if (this.currentIndex > 0) {
-        this.currentIndex--;
-      }
-    },
-    scrollRight() {
-      if ((this.currentIndex + this.visibleItems) < this.categories.length) {
-        this.currentIndex++;
-      }
+      this.showStatus = false;
     },
     changeCategory(category) {
       this.selectedCategory = category;

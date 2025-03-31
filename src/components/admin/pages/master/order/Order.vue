@@ -134,7 +134,7 @@ export default {
 
         listenForUserOrderUpdates() {
             echo.channel("order-status").listen("OrderApprovedCash", (event) => {
-
+                console.log("cash order: ", event)
                 if (!event.order) return;
 
                 const index = this.pendingOrders.findIndex(order => order.id === event.order.id);

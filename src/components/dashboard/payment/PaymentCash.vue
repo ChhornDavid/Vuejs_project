@@ -16,16 +16,14 @@
                 <h2 class="text-2xl font-bold text-white">Payment Amount</h2>
             </div>
 
-            <!-- Order items and payment info -->
+            <!-- Order details -->
             <div class="flex flex-col md:flex-row gap-6">
                 <div class="flex flex-col md:flex-row gap-6 w-full">
-                    <!-- Order details -->
                     <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto w-full md:w-1/2">
                         <div v-for="(item, index) in selectedItems" :key="index"
                             class="flex justify-between items-center mb-2">
                             <span class="text-xl text-white font-medium"> {{ item.name }} ({{ item.quantity }})</span>
-                            <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2)
-                                }}</span>
+                            <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2) }}</span>
                         </div>
                         <div class="flex justify-between items-center font-bold text-xl text-white border-t pt-2 mt-4">
                             <span>Total</span>
@@ -36,8 +34,7 @@
                     <!-- Cash Payment Info -->
                     <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto w-full md:w-1/2">
                         <p class="text-white text-lg">You have selected Cash as your payment method.</p>
-                        <p class="text-white text-lg mt-4">Please have the exact amount ready for payment.
-                        </p>
+                        <p class="text-white text-lg mt-4">Please have the exact amount ready for payment.</p>
                         <button @click="handlePayment"
                             class="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4">
                             Confirm Payment
@@ -47,15 +44,18 @@
             </div>
 
             <!-- Result message -->
-            <div id="result-message" class="mt-5 text-white text-center">
+            <div v-if="resultMessage" class="mt-5 text-white text-center">
                 {{ resultMessage }}
             </div>
         </div>
     </div>
+
+    <Status v-if="showStatus" :showStatus="showStatus" :resultMessage="resultMessage" @close-modal="showStatus = false" />
 </template>
 
 <script>
-import api from "../../../axios/Axios";
+import api from '../../../axios/Axios';
+import Status from '../Status.vue';
 
 export default {
     name: "PaymentCash",
@@ -70,14 +70,14 @@ export default {
         },
     },
     emits: ["close-modal", "payment-success"],
+    components: {
+        Status
+    },
     data() {
         return {
-            formError: null,
             total: 0,
-            loading: false,
             resultMessage: "",
-            paymentSuccess: false,
-            paymentFailure: false,
+            showStatus: false,
         };
     },
     watch: {
@@ -96,12 +96,10 @@ export default {
             this.total = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
         },
         closeModal() {
+            this.resultMessage = "";
             this.$emit("close-modal");
         },
         async handlePayment() {
-            this.loading = true;
-            this.formError = null;
-
             try {
                 const userId = sessionStorage.getItem("id");
                 const orderPayload = {
@@ -116,40 +114,30 @@ export default {
                         size: item.size
                     }))
                 };
-                console.log("payload", orderPayload);
+
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post("/pending-orders", orderPayload, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
+
                 if (response.status === 201) {
                     this.resultMessage = "Order placed successfully with Cash! It is awaiting cashier approval.";
-                    this.paymentSuccess = true;
                     this.$emit("payment-success");
-                }
-                else {
+                    this.paymentStatus = "success";
+                    setTimeout(() => {
+                        this.closeModal();
+                        this.showStatus = true;
+                    }, 2000);
+                } else {
                     this.resultMessage = "Something went wrong, please try again.";
-                    this.paymentFailure = true;
-                    console.error("Error with Cash payment:", response);
                 }
-
             } catch (error) {
                 console.error("Error with Cash payment:", error);
                 this.resultMessage = "Something went wrong, please try again.";
-                this.paymentFailure = true;
-            } finally {
-                this.loading = false;
             }
-        },
+        }
     },
 };
 </script>
-
-<style scoped>
-/* Custom styles for Cash on Delivery payment method */
-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-}
-</style>

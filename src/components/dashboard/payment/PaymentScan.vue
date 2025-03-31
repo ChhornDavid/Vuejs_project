@@ -189,7 +189,7 @@ export default {
                 const orderPayload = {
                     user_id: parseInt(userId, 10),
                     amount: this.total,
-                    payment_type: "credit_card",
+                    payment_type: "scan",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,
