@@ -47,8 +47,7 @@
                     <button class="text-gray-600" :disabled="current_page === 1" @click="prevPage">
                         < Previous</button>
                             <button v-for="link in links" :key="link.label" class="text-gray-600"
-                                :class="{ 'bg-blue-500 text-white p-2 rounded': link.active }"
-                                @click="goToPage(link)">
+                                :class="{ 'bg-blue-500 text-white p-2 rounded': link.active }" @click="goToPage(link)">
                                 <span v-html="link.label"></span>
                             </button>
                             <button class="text-gray-600" :disabled="current_page === last_page" @click="nextPage">Next

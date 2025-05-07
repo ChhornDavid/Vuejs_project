@@ -1,6 +1,5 @@
 <template>
     <section>
-        <!-- Tabs for filtering orders -->
         <div class="flex space-x-4 mb-6">
             <button v-for="tab in tabs" :key="tab" @click="activeTab = tab" :class="{
                 'bg-blue-500 text-white': activeTab === tab,
@@ -15,17 +14,17 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div v-for="order in filteredOrders" :key="order.id"
                 class="border rounded-lg p-4 bg-white shadow-md hover:shadow-lg transition-shadow duration-200 ease-in-out">
-
                 <!-- Order Header -->
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-gray-800">Order ID: {{ order.id }}</h3>
                     <h3 class="text-xl font-bold text-gray-800">Table: T{{ order.user_id }}</h3>
                     <span :class="{
-                        'bg-blue-100 text-blue-500': order.status === 'pending',
-                        'bg-yellow-100 text-yellow-500': order.status === 'preparing',
-                        'bg-green-100 text-green-500': order.status === 'completed',
+                        'bg-blue-100 text-blue-500': normalizeStatus(order.status) === 'pending',
+                        'bg-purple-100 text-purple-500': normalizeStatus(order.status) === 'accepted',
+                        'bg-yellow-100 text-yellow-500': normalizeStatus(order.status) === 'preparing',
+                        'bg-green-100 text-green-500': normalizeStatus(order.status) === 'completed',
                     }" class="px-3 py-1 rounded-full text-sm font-semibold">
-                        {{ order.status }}
+                        {{ normalizeStatus(order.status) }}
                     </span>
                 </div>
 
@@ -49,16 +48,14 @@
                 </div>
 
                 <!-- Action Buttons -->
+                <!-- Action Button (Changes Label Based on Status) -->
                 <div class="flex flex-col space-y-2">
-                    <button v-if="order.status === 'pending'"
-                        class="w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ease-in-out focus:outline-none"
-                        @click="updateStatus(order.id, 'preparing')">
-                        Accept
-                    </button>
-                    <button v-if="order.status === 'preparing'"
-                        class="w-full py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 ease-in-out focus:outline-none"
-                        @click="updateStatus(order.id, 'completed')">
-                        Complete
+                    <button v-if="order.status === 'pending' || order.status === 'preparing'" :class="{
+                        'bg-blue-500 hover:bg-blue-600': order.status === 'pending',
+                        'bg-yellow-500 hover:bg-yellow-600': order.status === 'preparing',
+                    }" class="w-full py-2 text-white rounded transition-colors duration-200"
+                        @click="nextStatus(order)">
+                        {{ order.status === 'pending' ? 'Accept' : 'Complete' }}
                     </button>
                 </div>
             </div>
@@ -100,63 +97,73 @@ export default {
         async updateStatus(id, newStatus) {
             try {
                 const token = sessionStorage.getItem("auth_token");
-                // console.log(`Updating order ${id} to status: ${newStatus}`);
-
-                const response = await api.put(`/kitchen/orders/${id}/status`, { status: newStatus }, {
+                const response = await api.put(`/kitchen/orders/${id}/status`, {
+                    status: newStatus,
+                }, {
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`
                     },
                 });
 
-                //console.log("Order updated:", response.data);
-
                 if (newStatus === "completed") {
                     this.orders = this.orders.filter(order => order.id !== id);
                 } else {
-                    const orderIndex = this.orders.findIndex(order => order.id === id);
-                    if (orderIndex !== -1) {
-                        this.orders[orderIndex].status = newStatus;
-                    }
+                    const index = this.orders.findIndex(order => order.id === id);
+                    if (index !== -1) this.orders[index].status = newStatus;
                 }
             } catch (error) {
-                console.error("Error updating order status:", error.response ? error.response.data : error);
+                console.error("Error updating order status:", error.response?.data || error);
             }
         },
+        nextStatus(order) {
+            if (order.status === 'pending') {
+                this.updateStatus(order.id, 'preparing');
+            } else if (order.status === 'preparing') {
+                this.updateStatus(order.id, 'completed');
+            }
+        },
+        
         listenOrderToKitchen() {
             echo.channel("kitchen-orders")
                 .listen("OrderSentToKitchen", (event) => {
-                    //console.log("Order received:", event);
-
                     const existingOrder = this.orders.find(order => order.id === event.order.id);
                     if (!existingOrder) {
                         this.orders.unshift(event.order);
                     }
                 });
         },
+
         listenCardToKitchen() {
             echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
-                //console.log("Card received:", event);
-                const cardorder = this.orders.find(order => order.id === event.order.id);
-                if (!cardorder) {
+                const cardOrder = this.orders.find(order => order.id === event.order.id);
+                if (!cardOrder) {
                     this.orders.unshift(event.order);
                 }
-            })
+            });
         },
+
         listenForCallRobot() {
             echo.channel("robot-channel").listen("EventForRobot", (event) => {
                 console.log("Event received:", event.robot);
-            })
-        }
+            });
+        },
+
+        normalizeStatus(status) {
+            // Ensures consistent comparison (e.g., in case of nulls or casing)
+            return status ? status.toLowerCase() : '';
+        },
     },
+
     computed: {
         filteredOrders() {
             if (this.activeTab === "All") {
-                // Show pending and preparing orders in the "All" tab, but not completed or cancelled.
-                return this.orders.filter(order => order.status === "pending" || order.status === "preparing");
+                return this.orders.filter(order => {
+                    const status = this.normalizeStatus(order.status);
+                    return status !== "completed";
+                });
             }
-            // Filter by the active tab's status
-            return this.orders.filter(order => order.status === this.activeTab);
+            return this.orders.filter(order => this.normalizeStatus(order.status) === this.activeTab);
         },
     },
 };

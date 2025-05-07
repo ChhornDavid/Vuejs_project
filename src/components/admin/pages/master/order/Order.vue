@@ -83,6 +83,8 @@ import api from '../../../../../axios/Axios';
 import { echo } from '../../../../../services/echo';
 
 export default {
+    emits: ["close-modal", "approve-success"],
+    name: "Order",
     data() {
         return {
             pendingOrders: [],
@@ -92,6 +94,7 @@ export default {
             confirmationMessage: '',
             orderIdToProcess: null,
             actionType: null,
+            approveStatus: '',
         };
     },
     created() {
@@ -138,7 +141,7 @@ export default {
                 if (!event.order) return;
 
                 const index = this.pendingOrders.findIndex(order => order.id === event.order.id);
-                
+
                 if (index !== -1) {
                     this.pendingOrders.splice(index, 1, event.order);
                 } else {

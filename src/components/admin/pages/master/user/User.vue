@@ -286,6 +286,7 @@ export default {
       try {
         const response = await api.get("/users");
         this.users = response.data.data;
+        console.log("user" , response.data)
         this.listenForUserStatusUpdates();
       } catch (err) {
         this.error = "Error fetching users!";

@@ -11,10 +11,11 @@
             class="rounded-full border border-blue-500 flex items-center justify-center bg-white text-blue-500 w-12 h-12">
             <i class="fas fa-bell text-xl"></i>
           </button>
-
           <!-- Payment Modal -->
-          <Status :showStatus="showStatus" :resultMessage="resultMessage" :paymentStatus="paymentStatus"
-            @close-modal="toggleModal" />
+
+          <!-- In Dashboard.vue's template -->
+          <Status :show-status="showStatus" :result-message="resultMessage" :payment-status="paymentStatus"
+            :approve-status="approveStatus" @close-modal="toggleModal" />
         </div>
 
       </header>
@@ -119,7 +120,7 @@
           <p v-if="userData && userData.name">{{ userData.name }}</p>
         </div>
         <div class="text-blue-500 text-center text-lg">
-          Order #0892
+          Order No #{{ OrderId }}
         </div>
         <button @click="logout" class="p-4 rounded-2xl ml-16 hover:bg-blue-700 transition-colors duration-300">
           <i class="fas fa-sign-out-alt text-xl"></i>
@@ -165,7 +166,7 @@
             </div>
             <div class="w-16 text-right">
               <button @click="removeFromOrder(index)" class="ml-4 text-red-500 hover:text-red-600">
-                <img src="../../images/delete.png" alt="Cash Icon" class="w-8 h-8" />
+                <img src="/public/images/delete.png" alt="Cash Icon" class="w-8 h-8" />
               </button>
             </div>
           </div>
@@ -187,17 +188,17 @@
         <div class="grid grid-cols-3 space-x-5 mt-4">
           <button @click="showPaymentCash = true"
             class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl  space-y-2">
-            <img src="../../images/money.png" alt="Cash Icon" class="w-8 h-8" />
+            <img src="/public/images/money.png" alt="Cash Icon" class="w-8 h-8" />
             <span>Cash</span>
           </button>
           <button @click="showPaymentCard = true"
             class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl space-y-2">
-            <img src="../../images/credit-card.png" alt="Cash Icon" class="w-8 h-8" />
+            <img src="/public/images/credit-card.png" alt="Cash Icon" class="w-8 h-8" />
             Credit Card
           </button>
           <button @click="showPaymentScan = true"
             class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl space-y-2">
-            <img src="../../images/technology.png" alt="Cash Icon" class="w-8 h-8" />
+            <img src="/public/images/technology.png" alt="Cash Icon" class="w-8 h-8" />
             E-Pays
           </button>
         </div>
@@ -226,16 +227,10 @@ import api from '../../axios/Axios';
 import PaymentCreditCard from './payment/PaymentCreditCard.vue';
 import PaymentCash from './payment/PaymentCash.vue';
 import PaymentScan from './payment/PaymentScan.vue';
+import Order from '../admin/pages/master/order/Order.vue';
 import Status from './Status.vue';
-
+import { echo } from '../../services/echo';
 export default {
-  mounted() {
-    const token = sessionStorage.getItem('auth_token');
-    if (!token) {
-      this.$router.push('/');
-    };
-    this.fetchSpecialMenus();
-  },
   data() {
     return {
       userData: null,
@@ -262,7 +257,9 @@ export default {
       currentStatus: "Free",
       currentIndex: 0,
       resultMessage: '',
-      paymentStatus: ''
+      paymentStatus: '',
+      approveStatus: '',
+      OrderId: [],
     };
   },
   setup() {
@@ -279,11 +276,23 @@ export default {
     });
   },
   mounted() {
+    const savedItems = sessionStorage.getItem('selectedItems');
+    if (savedItems) {
+      this.selectedItems = JSON.parse(savedItems);
+    };
+    const token = sessionStorage.getItem('auth_token');
+    if (!token) {
+      this.$router.push('/');
+    };
+    this.fetchSpecialMenus();
     this.fetchSpecialMenus();
     this.fetchMenus();
     this.fetchFood();
     this.loadUserData();
     this.startStatusUpdates();
+    this.fetchIdOrder();
+    this.listenForCallRobot();
+    //this.listenForStoreOrder();
   },
   beforeUnmount() {
     this.stopStatusUpdates();
@@ -294,6 +303,15 @@ export default {
     PaymentCash,
     PaymentScan,
     Status,
+    Order,
+  },
+  watch: {
+    selectedItems: {
+      handler(newItems) {
+        sessionStorage.setItem('selectedItems', JSON.stringify(newItems));
+      },
+      deep: true
+    }
   },
   methods: {
     switchStatus() {
@@ -308,6 +326,13 @@ export default {
     },
     handlePaymentSuccess(data) {
       console.log("Payment Successful:", data);
+      this.paymentStatus = 'success';
+      this.resultMessage = 'Payment was successful!';
+      setTimeout(() => {
+        this.toggleModal();
+        this.showStatus = true;
+        this.updateStatus();
+      }, 5000);
     },
     updateStatus() {
       this.currentStatus = this.statuses[this.currentIndex];
@@ -319,6 +344,33 @@ export default {
     stopStatusUpdates() {
       clearInterval(this.intervalId);
     },
+
+    listenForCallRobot() {
+      echo.channel("robot-channel").listen("EventForRobot", (event) => {
+        console.log("Event received:", event.robot);
+
+        if (event.robot?.status === 'completed') {
+          console.log("Received status:", event.robot?.status); // Should show "completed"
+          console.log("Status is completed — reloading page...");
+          if (this.selectedItems && typeof this.selectedItems.removeItem === 'function') {
+            this.selectedItems.removeItem();
+          }
+          sessionStorage.removeItem('selectedItems');
+          sessionStorage.removeItem('order_paid');
+          window.location.reload();
+        };
+      });
+    },
+    // listenForStoreOrder() {
+    //   echo.channel("store-order").listen("StoreOrder", (event) => {
+    //     if (sessionStorage.getItem('order_paid') === 'true') {
+    //       console.log("Order already paid. Skipping...");
+    //       return;
+    //     }
+    //     sessionStorage.setItem('order_paid', 'true');
+    //     this.handleSuccessfulPayment(event.sent);
+    //   });
+    // },
     //special Menu
     async fetchSpecialMenus() {
       try {
@@ -342,6 +394,20 @@ export default {
         this.categories = response.data.data;
       } catch (error) {
         console.error("Error fetching special menus:", error);
+      }
+    },
+    async fetchIdOrder() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        const response = await api.get("/getitem", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
+        this.OrderId = response.data.id;
+        console.log(this.OrderId);
+      } catch (error) {
+        console.log("Error fetch OrderID: ", error);
       }
     },
     async fetchFood() {
@@ -403,13 +469,24 @@ export default {
       console.log("Selected category:", category);
     },
     addToOrder(item) {
-      const existingItem = this.selectedItems.find(i => i.name === item.name && i.selectedSize === item.selectedSize);
+      const existingItem = this.selectedItems.find(i => i.id === item.id);
+
       if (existingItem) {
         existingItem.quantity += 1;
       } else {
-        this.selectedItems.push({ ...item, quantity: 1 });
+        const newItem = {
+          ...item,
+          quantity: 1,
+          selectedSize: item.size || 'default' // optional size handling
+        };
+        this.selectedItems.push(newItem);
       }
-      this.calculateTotals();
+
+      this.updateTotals();
+    },
+    updateTotals() {
+      this.subtotal = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      this.total = this.subtotal; // Add taxes or discounts if needed
     },
     onDataUrlChange(dataUrl) {
       this.dataUrl = dataUrl

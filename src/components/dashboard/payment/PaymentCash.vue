@@ -23,7 +23,8 @@
                         <div v-for="(item, index) in selectedItems" :key="index"
                             class="flex justify-between items-center mb-2">
                             <span class="text-xl text-white font-medium"> {{ item.name }} ({{ item.quantity }})</span>
-                            <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                            <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2)
+                            }}</span>
                         </div>
                         <div class="flex justify-between items-center font-bold text-xl text-white border-t pt-2 mt-4">
                             <span>Total</span>
@@ -35,8 +36,8 @@
                     <div class="bg-blue-400 shadow-xl rounded-lg p-6 md:p-12 h-auto w-full md:w-1/2">
                         <p class="text-white text-lg">You have selected Cash as your payment method.</p>
                         <p class="text-white text-lg mt-4">Please have the exact amount ready for payment.</p>
-                        <button @click="handlePayment"
-                            class="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4">
+                        <button @click="handlePayment" :disabled="isPaidAlready"
+                            class="w-full py-2 px-4 text-white bg-indigo-600 hover:bg-indigo-700 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-4 disabled:opacity-50 disabled:cursor-not-allowed">
                             Confirm Payment
                         </button>
                     </div>
@@ -50,7 +51,7 @@
         </div>
     </div>
 
-    <Status v-if="showStatus" :showStatus="showStatus" :resultMessage="resultMessage" @close-modal="showStatus = false" />
+    <!-- <Status v-if="showStatus" :showStatus="showStatus" :resultMessage="resultMessage" @close-modal="showStatus = false" /> -->
 </template>
 
 <script>
@@ -91,6 +92,11 @@ export default {
     mounted() {
         this.calculateTotal();
     },
+    computed: {
+        isPaidAlready() {
+            return sessionStorage.getItem('order_paid') === 'true';
+        }
+    },
     methods: {
         calculateTotal() {
             this.total = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -126,9 +132,9 @@ export default {
                     this.resultMessage = "Order placed successfully with Cash! It is awaiting cashier approval.";
                     this.$emit("payment-success");
                     this.paymentStatus = "success";
+                    sessionStorage.setItem('order_paid', 'true');
                     setTimeout(() => {
                         this.closeModal();
-                        this.showStatus = true;
                     }, 2000);
                 } else {
                     this.resultMessage = "Something went wrong, please try again.";
