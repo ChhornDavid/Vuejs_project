@@ -24,7 +24,7 @@
                             class="flex justify-between items-center mb-2">
                             <span class="text-xl text-white font-medium"> {{ item.name }} ({{ item.quantity }})</span>
                             <span class="text-xl text-white font-medium">${{ (item.price * item.quantity).toFixed(2)
-                            }}</span>
+                                }}</span>
                         </div>
                         <div class="flex justify-between items-center font-bold text-xl text-white border-t pt-2 mt-4">
                             <span>Total</span>
@@ -56,6 +56,7 @@
 
 <script>
 import api from '../../../axios/Axios';
+import { echo } from '../../../services/echo';
 import Status from '../Status.vue';
 
 export default {
@@ -70,7 +71,7 @@ export default {
             required: true,
         },
     },
-    emits: ["close-modal", "payment-success"],
+    emits: ["close-modal"],
     components: {
         Status
     },
@@ -90,6 +91,8 @@ export default {
         },
     },
     mounted() {
+        this.generateGroupKey();
+        this.generateOrderSessionKey();
         this.calculateTotal();
     },
     computed: {
@@ -103,7 +106,20 @@ export default {
         },
         closeModal() {
             this.resultMessage = "";
-            this.$emit("close-modal");
+            this.$emit("close-modal");  
+        },
+        generateOrderSessionKey() {
+            if (!sessionStorage.getItem('order_session_key')) {
+                const uniqueKey = `sess_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+                sessionStorage.setItem('session_key', uniqueKey);
+            }
+        },
+        generateGroupKey() {
+            const userId = sessionStorage.getItem('id');
+            if (!sessionStorage.getItem('group_key') && userId) {
+                const groupKey = `group_${userId}`;
+                sessionStorage.setItem('group_key', groupKey);
+            }
         },
         async handlePayment() {
             try {
@@ -112,6 +128,8 @@ export default {
                     user_id: userId,
                     amount: this.total,
                     payment_type: "cash",
+                    session_key: sessionStorage.getItem("session_key"),
+                    group_key: sessionStorage.getItem("group_key"),
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,
@@ -120,7 +138,6 @@ export default {
                         size: item.size
                     }))
                 };
-
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post("/pending-orders", orderPayload, {
                     headers: {
@@ -130,8 +147,6 @@ export default {
 
                 if (response.status === 201) {
                     this.resultMessage = "Order placed successfully with Cash! It is awaiting cashier approval.";
-                    this.$emit("payment-success");
-                    this.paymentStatus = "success";
                     sessionStorage.setItem('order_paid', 'true');
                     setTimeout(() => {
                         this.closeModal();

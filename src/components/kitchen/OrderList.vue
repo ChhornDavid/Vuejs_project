@@ -47,15 +47,14 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <!-- Action Button (Changes Label Based on Status) -->
+                <!-- 3-Step Button -->
                 <div class="flex flex-col space-y-2">
-                    <button v-if="order.status === 'pending' || order.status === 'preparing'" :class="{
+                    <button v-if="order.status !== 'completed'" :class="{
                         'bg-blue-500 hover:bg-blue-600': order.status === 'pending',
                         'bg-yellow-500 hover:bg-yellow-600': order.status === 'preparing',
-                    }" class="w-full py-2 text-white rounded transition-colors duration-200"
-                        @click="nextStatus(order)">
-                        {{ order.status === 'pending' ? 'Accept' : 'Complete' }}
+                        'bg-green-500 hover:bg-green-600': order.status === 'completed',
+                    }" class="w-full py-2 text-white rounded transition-colors duration-200" @click="nextStatus(order)">
+                        {{ getButtonLabel(order.status) }}
                     </button>
                 </div>
             </div>
@@ -116,6 +115,22 @@ export default {
                 console.error("Error updating order status:", error.response?.data || error);
             }
         },
+
+        getButtonLabel(status) {
+            switch (status) {
+                case 'pending':
+                    return 'Accept';
+                case 'preparing':
+                    return 'Preparing';
+                case 'accepted':
+                    return 'Preparing';
+                case 'completed':
+                    return 'Complete';
+                default:
+                    return '';
+            }
+        },
+
         nextStatus(order) {
             if (order.status === 'pending') {
                 this.updateStatus(order.id, 'preparing');
@@ -123,7 +138,7 @@ export default {
                 this.updateStatus(order.id, 'completed');
             }
         },
-        
+
         listenOrderToKitchen() {
             echo.channel("kitchen-orders")
                 .listen("OrderSentToKitchen", (event) => {
@@ -150,7 +165,6 @@ export default {
         },
 
         normalizeStatus(status) {
-            // Ensures consistent comparison (e.g., in case of nulls or casing)
             return status ? status.toLowerCase() : '';
         },
     },

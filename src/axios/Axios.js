@@ -19,26 +19,61 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) prom.reject(error);
+    else prom.resolve(token);
+  });
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({
+            resolve: (token) => {
+              originalRequest.headers.Authorization = 'Bearer ' + token;
+              resolve(api(originalRequest));
+            },
+            reject: (err) => reject(err),
+          });
+        });
+      }
+
+      isRefreshing = true;
+
       try {
-        const refreshResponse = await api.post("/refresh", {},
-          { withCredentials: true }
-        );
+        const refreshResponse = await api.post("/refresh", {}, {
+          withCredentials: true,
+        });
 
         const newToken = refreshResponse.data.token;
         sessionStorage.setItem("auth_token", newToken);
+        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
 
-        error.config.headers.Authorization = `Bearer ${newToken}`;
-        return api.request(error.config);
+        processQueue(null, newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
       } catch (refreshError) {
-        console.error("Token refresh failed", refreshError);
+        processQueue(refreshError, null);
         sessionStorage.removeItem("auth_token");
         window.location.href = "/";
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
+
     return Promise.reject(error);
   }
 );

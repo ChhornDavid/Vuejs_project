@@ -3,11 +3,7 @@
     <div class="w-full max-w-md mx-auto">
       <div class="bg-white rounded-3xl shadow-lg px-12 py-12 w-[550px]">
         <div class="flex items-center justify-center mb-8">
-          <img
-            class="w-32 h-32 object-cover"
-            src="/public/images/Picture1.png"
-            alt="Restaurant Logo"
-          />
+          <img class="w-32 h-32 object-cover" src="/public/images/Picture1.png" alt="Restaurant Logo" />
         </div>
         <h2 class="text-3xl font-extrabold text-gray-800 text-center mb-4">
           Welcome Back
@@ -15,50 +11,32 @@
         <p class="text-gray-600 text-center mb-6">Please enter your details to login</p>
 
         <div class="mb-6">
-          <label
-            class="block text-gray-700 font-medium mb-2"
-            for="email"
-          >
+          <label class="block text-gray-700 font-medium mb-2" for="email">
             Email
           </label>
-          <input
-            v-model="email"
-            id="email"
-            type="email"
-            placeholder="Enter your email"
+          <input v-model="email" id="email" type="email" placeholder="Enter your email"
             class="w-full px-4 py-3 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            required
-          />
+            required />
         </div>
 
         <div class="mb-6">
-          <label
-            class="block text-gray-700 font-medium mb-2"
-            for="password"
-          >
+          <label class="block text-gray-700 font-medium mb-2" for="password">
             Password
           </label>
-          <input
-            v-model="password"
-            id="password"
-            type="password"
-            placeholder="Enter your password"
+          <input v-model="password" id="password" type="password" placeholder="Enter your password"
             class="w-full px-4 py-3 rounded-full shadow-sm border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            required
-          />
+            required />
         </div>
 
-        <button
-          @click="login"
-          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300"
-        >
+        <button @click="login"
+          class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 rounded-full transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-blue-300">
           Login
         </button>
       </div>
     </div>
   </div>
 </template>
-  
+
 <script>
 
 import { ref } from 'vue';
@@ -77,8 +55,9 @@ export default {
         const response = await api.post('/login', {
           email: email.value,
           password: password.value,
+        }, {
+          withCredentials: true
         });
-
         const { token, role, name, id } = response.data;
 
         if (token) {

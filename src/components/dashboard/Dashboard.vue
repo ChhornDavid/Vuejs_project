@@ -14,10 +14,8 @@
           <!-- Payment Modal -->
 
           <!-- In Dashboard.vue's template -->
-          <Status :show-status="showStatus" :result-message="resultMessage" :payment-status="paymentStatus"
-            :approve-status="approveStatus" @close-modal="toggleModal" />
+          <Status ref="Status" :show-status="showStatus" :result-message="resultMessage" @close-modal="toggleModal" />
         </div>
-
       </header>
 
       <!-- <section class="mb-8">
@@ -228,8 +226,9 @@ import PaymentCreditCard from './payment/PaymentCreditCard.vue';
 import PaymentCash from './payment/PaymentCash.vue';
 import PaymentScan from './payment/PaymentScan.vue';
 import Order from '../admin/pages/master/order/Order.vue';
-import Status from './Status.vue';
 import { echo } from '../../services/echo';
+import Status from './Status.vue';
+
 export default {
   data() {
     return {
@@ -260,6 +259,7 @@ export default {
       paymentStatus: '',
       approveStatus: '',
       OrderId: [],
+      sharedOrders: null,
     };
   },
   setup() {
@@ -292,7 +292,12 @@ export default {
     this.startStatusUpdates();
     this.fetchIdOrder();
     this.listenForCallRobot();
-    //this.listenForStoreOrder();
+    this.listenAddItem();
+    this.updateOrderOnServer();
+    this.calculateTotals();
+    this.updateTotals();
+    this.listenForOrderApprove();
+    this.listenForKitchenStatus();
   },
   beforeUnmount() {
     this.stopStatusUpdates();
@@ -324,16 +329,6 @@ export default {
       this.showPaymentScan = false;
       this.showStatus = false;
     },
-    handlePaymentSuccess(data) {
-      console.log("Payment Successful:", data);
-      this.paymentStatus = 'success';
-      this.resultMessage = 'Payment was successful!';
-      setTimeout(() => {
-        this.toggleModal();
-        this.showStatus = true;
-        this.updateStatus();
-      }, 5000);
-    },
     updateStatus() {
       this.currentStatus = this.statuses[this.currentIndex];
       this.currentIndex = (this.currentIndex + 1) % this.statuses.length;
@@ -344,33 +339,70 @@ export default {
     stopStatusUpdates() {
       clearInterval(this.intervalId);
     },
+    listenAddItem() {
+      echo.channel("ordersItem").listen("OrderCreated", (event) => {
+        this.selectedItems = event.items;
+        this.updateTotals();
+        this.calculateTotals();
+      });
+    },
+    listenForOrderApprove() {
+      echo.channel("order-status").listen("OrderApprovedCash", (event) => {
+        this.showStatus = true;
+        this.resultMessage = 'Order approved by cashier.';
 
+        this.$nextTick(() => {
+          const modal = this.$refs.Status;
+          if (modal && typeof modal.moveToStep === 'function') {
+            modal.moveToStep('Cashier Approve');
+          } else {
+            console.error('Status component not ready or method missing');
+          }
+        });
+      });
+    },
+    listenForKitchenStatus() {
+      echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
+          this.showStatus = true;
+          this.resultMessage = "Order sent to kitchen.";
+
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('At Kitchen');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        });
+    },
     listenForCallRobot() {
       echo.channel("robot-channel").listen("EventForRobot", (event) => {
         console.log("Event received:", event.robot);
 
-        if (event.robot?.status === 'completed') {
-          console.log("Received status:", event.robot?.status); // Should show "completed"
-          console.log("Status is completed — reloading page...");
+        const eventUserId = event.robot?.user_id;
+        const currentUserId = sessionStorage.getItem("id");
+
+        if (
+          event.robot?.status === 'completed' &&
+          eventUserId &&
+          currentUserId &&
+          String(eventUserId) === String(currentUserId)
+        ) {
+          console.log("Status is completed and user matches — reloading page...");
           if (this.selectedItems && typeof this.selectedItems.removeItem === 'function') {
             this.selectedItems.removeItem();
           }
+
           sessionStorage.removeItem('selectedItems');
           sessionStorage.removeItem('order_paid');
+
           window.location.reload();
-        };
+        } else {
+          console.log("Status is completed, but user does not match. Not reloading.");
+        }
       });
     },
-    // listenForStoreOrder() {
-    //   echo.channel("store-order").listen("StoreOrder", (event) => {
-    //     if (sessionStorage.getItem('order_paid') === 'true') {
-    //       console.log("Order already paid. Skipping...");
-    //       return;
-    //     }
-    //     sessionStorage.setItem('order_paid', 'true');
-    //     this.handleSuccessfulPayment(event.sent);
-    //   });
-    // },
     //special Menu
     async fetchSpecialMenus() {
       try {
@@ -468,6 +500,27 @@ export default {
     changeCategory(category) {
       console.log("Selected category:", category);
     },
+    updateOrderOnServer() {
+      const userId = sessionStorage.getItem('user_id');
+
+      api.post('/order/add-items', {
+        user_id: userId,
+        items: this.selectedItems.map(i => ({
+          id: i.id,
+          image: i.image,
+          name: i.name,
+          quantity: i.quantity,
+          selectedSize: i.selectedSize,
+          price: i.price
+        }))
+      })
+        .then(res => {
+          console.log("Synced with backend:", res.data);
+        })
+        .catch(err => {
+          console.error("Failed to sync order:", err);
+        });
+    },
     addToOrder(item) {
       const existingItem = this.selectedItems.find(i => i.id === item.id);
 
@@ -477,16 +530,17 @@ export default {
         const newItem = {
           ...item,
           quantity: 1,
-          selectedSize: item.size || 'default' // optional size handling
+          selectedSize: item.size || 'default'
         };
         this.selectedItems.push(newItem);
       }
-
+      this.updateOrderOnServer();
       this.updateTotals();
+      this.calculateTotals();
     },
     updateTotals() {
       this.subtotal = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      this.total = this.subtotal; // Add taxes or discounts if needed
+      this.total = this.subtotal;
     },
     onDataUrlChange(dataUrl) {
       this.dataUrl = dataUrl
@@ -526,9 +580,11 @@ export default {
     removeFromOrder(index) {
       this.selectedItems.splice(index, 1);
       this.calculateTotals();
+      this.updateOrderOnServer();
     },
     increaseQuantity(index) {
       this.selectedItems[index].quantity += 1;
+      this.updateOrderOnServer();
       this.calculateTotals();
     },
     decreaseQuantity(index) {
@@ -537,6 +593,7 @@ export default {
       } else {
         this.removeFromOrder(index);
       }
+      this.updateOrderOnServer();
       this.calculateTotals();
     },
     selectSize(item, size, index) {

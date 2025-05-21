@@ -48,14 +48,11 @@
 
 <script>
 export default {
-    name: "StatusModal",
+    name: "Status",
     props: {
-        showStatus: { type: Boolean, required: true },
-        resultMessage: { type: String, default: '' },
-        paymentStatus: { type: String, default: '' },
-        ApproveStatus: { type: String, default: '' }
+        showStatus: Boolean,
+        resultMessage: String
     },
-    emits: ["close-modal", "step-changed"],
     data() {
         return {
             steps: [
@@ -64,56 +61,27 @@ export default {
                 { label: "At Kitchen", active: false },
                 { label: "Cooking", active: false },
                 { label: "Preparing", active: false },
-                { label: "Ready", active: false },
+                { label: "Ready", active: false }
             ],
-            currentStep: 0,
-            autoProcessInterval: null,
+            currentStep: 0
         };
     },
-    watch: {
-        paymentStatus(newVal) {
-            if (newVal === "success") {
-                console.log("🚀 Payment status changed: success");
-                this.moveToStep("Cashier Approve");
-            }
-        },
-        ApproveStatus(newVal){
-            if(newVal === "approve-success"){
-                console.log("🚀 Approve status changed: success");
-                this.moveToStep("At Kitchen");
-            }
-        },
-        showStatus(newVal) {
-            if (!newVal) {
-                this.stopAutoProcess();
-            }
+    computed: {
+        isReady() {
+            return this.currentStep === this.steps.length - 1;
         }
     },
     methods: {
+        moveToStep(label) {
+            const index = this.steps.findIndex(s => s.label === label);
+            if (index !== -1) {
+                this.currentStep = index;
+                this.steps.forEach((s, i) => s.active = i <= index);
+            }
+        },
         closeModal() {
-            this.stopAutoProcess();
-            this.$emit("close-modal");
-        },
-        moveToStep(stepLabel) {
-            const stepIndex = this.steps.findIndex(step => step.label === stepLabel);
-            if (stepIndex !== -1) {
-                this.currentStep = stepIndex;
-                this.steps.forEach((step, index) => {
-                    step.active = index <= stepIndex;
-                });
-                console.log(`✅ Moved to: ${stepLabel}`);
-            }
-        },
-        stopAutoProcess() {
-            if (this.autoProcessInterval) {
-                clearInterval(this.autoProcessInterval);
-                this.autoProcessInterval = null;
-                console.log("🛑 Auto process stopped.");
-            }
+            this.$emit('close-modal');
         }
-    },
-    beforeUnmount() {
-        this.stopAutoProcess();
     }
 };
 </script>
