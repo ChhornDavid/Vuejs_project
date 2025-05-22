@@ -1,147 +1,160 @@
 <template>
-    <div class="container mx-auto p-4">
-        <h1 class="font-bold text-3xl mb-10">Order / OrderHistory</h1>
-
-        <!-- Header -->
-        <div class="bg-blue-900 text-white p-4 rounded-t-md flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-semibold">Order History</h1>
+    <div class="container mx-auto p-4 lg:p-6">
+        <!-- Page Header -->
+        <div class="mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 lg:text-3xl">Order History</h1>
+            <p class="mt-2 text-gray-600">View and manage customer orders</p>
         </div>
 
-        <!-- Loading and Error Messages -->
-        <div v-if="loading" class="text-center text-blue-600 text-lg">Loading...</div>
-        <div v-if="error" class="text-center text-red-600 text-lg">{{ error }}</div>
+        <!-- Status Indicators -->
+        <div class="mb-6 space-y-4">
+            <div v-if="loading" class="flex items-center justify-center p-4 bg-blue-50 rounded-lg">
+                <svg class="animate-spin h-6 w-6 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span class="text-blue-700 font-medium">Loading orders...</span>
+            </div>
 
-        <!-- Order Table -->
-        <div v-if="orders.data && orders.data.length > 0" class="bg-white shadow-md rounded-b-md overflow-x-auto">
-            <table class="w-full table-auto">
-                <thead class="bg-gray-200 text-gray-700">
-                    <tr>
-                        <th class="p-3 text-left">ID</th>
-                        <th class="p-3 text-left">User ID</th>
-                        <th class="p-3 text-left">Amount</th>
-                        <th class="p-3 text-left">Payment Type</th>
-                        <th class="p-3 text-left">Created At</th>
-                        <th class="p-3 text-left">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="order in paginatedOrders" :key="order.id" class="border-b hover:bg-gray-50">
-                        <td class="p-3 text-left">{{ order.id }}</td>
-                        <td class="p-3 text-left">{{ order.user_id }}</td>
-                        <td class="p-3 text-left">{{ order.amount }}</td>
-                        <td class="p-3 text-left">{{ order.payment_type }}</td>
-                        <td class="p-3 text-left">{{ formatDate(order.created_at) }}</td>
-                        <td class="p-3 text-left">
-                            <button @click="showViewModal(order)" class="text-blue-500 hover:text-blue-700 mr-2">
-                                <i class="fas fa-eye" aria-label="View"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <div v-if="error" class="p-4 bg-red-50 rounded-lg flex items-center">
+                <svg class="h-5 w-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-red-700 font-medium">{{ error }}</span>
+            </div>
+        </div>
+
+        <!-- Orders Table -->
+        <div v-if="orders.data?.length" class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Order ID</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Amount</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Payment</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
+                            <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr v-for="order in paginatedOrders" :key="order.id" class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 text-sm text-gray-900 font-medium">#{{ order.id }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">User {{ order.user_id }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-900 font-medium">
+                                ${{ Number(order.amount).toFixed(2) }}
+                            </td>
+                            <td class="px-6 py-4">
+                                <span class="px-3 py-1 rounded-full text-sm" 
+                                      :class="paymentTypeClasses(order.payment_type)">
+                                    {{ order.payment_type }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600">{{ formatDate(order.created_at) }}</td>
+                            <td class="px-6 py-4 text-right">
+                                <button @click="showViewModal(order)" 
+                                        class="p-2 text-gray-400 hover:text-blue-600 rounded-lg transition-colors"
+                                        aria-label="View order details">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center p-4">
-                <p class="text-gray-600">Showing {{ from }} to {{ to }} out of {{ total }} entries</p>
-                <div class="flex gap-2">
-                    <button class="text-gray-600" :disabled="current_page === 1" @click="prevPage">
-                        < Previous</button>
-                            <button v-for="link in links" :key="link.label" class="text-gray-600"
-                                :class="{ 'bg-blue-500 text-white p-2 rounded': link.active }" @click="goToPage(link)">
-                                <span v-html="link.label"></span>
+            <div class="px-6 py-4 border-t border-gray-100">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p class="text-sm text-gray-600">
+                        Showing <span class="font-medium">{{ from }}</span> to 
+                        <span class="font-medium">{{ to }}</span> of 
+                        <span class="font-medium">{{ total }}</span> results
+                    </p>
+                    
+                    <div class="flex items-center gap-2"> 
+                        <template v-for="link in links" :key="link.label">
+                            <button v-if="link.url" 
+                                    @click="goToPage(link)"
+                                    :class="link.active ? 
+                                        'bg-blue-600 text-white' : 
+                                        'text-gray-600 hover:bg-gray-50'"
+                                    class="px-3 py-1.5 text-sm rounded-md transition-colors"
+                                    v-html="link.label"
+                                    aria-label="Go to page">
                             </button>
-                            <button class="text-gray-600" :disabled="current_page === last_page" @click="nextPage">Next
-                                ></button>
+                        </template>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Modal -->
-        <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal">
-            <template v-if="modalType === 'view'">
-                <div class="p-6 w-full bg-white rounded-md">
-                    <h2 class="text-lg font-semibold text-gray-800 mb-4">Order Details</h2>
+        <!-- Empty State -->
+        <div v-else class="text-center p-12 bg-white rounded-xl border border-dashed border-gray-200">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
+            <p class="mt-1 text-sm text-gray-500">All orders will appear here once placed</p>
+        </div>
 
-                    <!-- Order Information -->
-                    <div class="space-y-4">
-                        <div class="flex items-center">
-                            <label class="w-1/3 text-gray-600 font-medium">Order ID:</label>
-                            <p class="text-gray-700">{{ currentOrder?.id }}</p>
+        <!-- Order Details Modal -->
+        <Modal :isVisible="modalVisible" @close="closeModal">
+            <div class="p-6 max-w-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-xl font-semibold text-gray-900">Order #{{ currentOrder?.id }}</h2>
+                    <button @click="closeModal" class="text-gray-400 hover:text-gray-500">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Order Summary -->
+                    <div class="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Order Date</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ formatDate(currentOrder?.created_at) }}</dd>
                         </div>
-                        <div class="flex items-center">
-                            <label class="w-1/3 text-gray-600 font-medium">User ID:</label>
-                            <p class="text-gray-700">{{ currentOrder?.user_id }}</p>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
+                            <dd class="mt-1 text-sm text-gray-900">{{ currentOrder?.payment_type }}</dd>
                         </div>
-                        <div class="flex items-center">
-                            <label class="w-1/3 text-gray-600 font-medium">Amount:</label>
-                            <p class="text-gray-700">{{ currentOrder?.amount }}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <label class="w-1/3 text-gray-600 font-medium">Payment Type:</label>
-                            <p class="text-gray-700">{{ currentOrder?.payment_type }}</p>
-                        </div>
-                        <div class="flex items-center">
-                            <label class="w-1/3 text-gray-600 font-medium">Created At:</label>
-                            <p class="text-gray-700">{{ formatDate(currentOrder?.created_at) }}</p>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Amount</dt>
+                            <dd class="mt-1 text-lg font-semibold text-gray-900">
+                                ${{ Number(currentOrder?.amount).toFixed(2) }}
+                            </dd>
                         </div>
                     </div>
 
                     <!-- Order Items -->
-                    <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Order Items</h3>
-                    <div v-if="currentOrder?.items && currentOrder.items.length > 0">
-                        <table class="w-full table-auto">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="p-2 text-left">Product ID</th>
-                                    <th class="p-2 text-left">Quantity</th>
-                                    <th class="p-2 text-left">Size</th>
-                                    <th class="p-2 text-left">Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="item in currentOrder.items" :key="item.id">
-                                    <td class="p-2">{{ item.product_id }}</td>
-                                    <td class="p-2">{{ item.quantity }}</td>
-                                    <td class="p-2">{{ item.size }}</td>
-                                    <td class="p-2">{{ item.amount }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div v-else>
-                        <p class="text-gray-700">No items found for this order.</p>
-                    </div>
-
-                    <!-- Close Button -->
-                    <div class="mt-6 text-right">
-                        <button @click="closeModal"
-                            class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                            Close
-                        </button>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Items</h3>
+                        <div v-if="currentOrder?.items?.length" class="border rounded-lg divide-y divide-gray-200">
+                            <div v-for="item in currentOrder.items" :key="item.id" class="p-4 flex items-center justify-between">
+                                <div>
+                                    <p class="font-medium text-gray-900">Product #{{ item.product_id }}</p>
+                                    <p class="text-sm text-gray-500">{{ item.size }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm text-gray-900">x{{ item.quantity }}</p>
+                                    <p class="text-sm text-gray-500">${{ Number(item.amount).toFixed(2) }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-else class="p-4 text-center text-gray-500">
+                            No items found in this order
+                        </div>
                     </div>
                 </div>
-            </template>
-
-            <template v-else-if="modalType === 'delete'">
-                <p class="text-gray-700">
-                    Are you sure you want to delete order with ID:
-                    <strong>{{ currentOrder?.id }}</strong>?
-                </p>
-                <div class="flex justify-end space-x-4 mt-4">
-                    <button @click="closeModal"
-                        class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                        Cancel
-                    </button>
-                    <button @click="handleDeleteOrder(currentOrder?.id)"
-                        class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                        Confirm
-                    </button>
-                </div>
-            </template>
-
-            <template v-else>
-                <p>Unexpected modal type.</p>
-            </template>
+            </div>
         </Modal>
     </div>
 </template>
@@ -154,42 +167,34 @@ export default {
     components: { Modal },
     data() {
         return {
-            orders: {}, // Changed to an object to store the entire API response
+            orders: {},
             loading: false,
             error: null,
             modalVisible: false,
-            modalType: null,
-            modalTitle: "",
             currentOrder: null,
         };
     },
     computed: {
-        paginatedOrders() {
-            return this.orders.data || []; // Use orders.data for the data
-        },
-        current_page() {
-            return this.orders.current_page;
-        },
-        last_page() {
-            return this.orders.last_page;
-        },
-        links() {
-            return this.orders.links;
-        },
-        from() {
-            return this.orders.from;
-        },
-        to() {
-            return this.orders.to;
-        },
-        total() {
-            return this.orders.total;
-        }
+        paginatedOrders() { return this.orders.data || [] },
+        current_page() { return this.orders.current_page },
+        last_page() { return this.orders.last_page },
+        links() { return this.orders.links || [] },
+        from() { return this.orders.from },
+        to() { return this.orders.to },
+        total() { return this.orders.total }
     },
     mounted() {
         this.fetchOrders();
     },
     methods: {
+        paymentTypeClasses(type) {
+            const styles = {
+                'credit_card': 'bg-green-100 text-green-800',
+                'paypal': 'bg-blue-100 text-blue-800',
+                'cash': 'bg-yellow-100 text-yellow-800'
+            };
+            return styles[type.toLowerCase()] || 'bg-gray-100 text-gray-800';
+        },
         async fetchOrders() {
             this.loading = true;
             this.error = null;
@@ -211,43 +216,16 @@ export default {
         showViewModal(order) {
             this.modalType = "view";
             this.modalVisible = true;
-            this.modalTitle = "View Order";
-            this.currentOrder = { ...order }; // Store the whole order object
-        },
-        showDeleteModal(order) {
-            this.modalType = "delete";
-            this.modalVisible = true;
-            this.modalTitle = "Delete Order";
             this.currentOrder = { ...order };
-        },
-        async handleDeleteOrder(orderId) {
-            try {
-                await api.delete(`/deleteorders/${orderId}`, {
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
-                    },
-                });
-                alert("Order deleted successfully!");
-                this.closeModal();
-                this.fetchOrders(); // Refresh orders after deletion
-            } catch (error) {
-                console.error("Error deleting order:", error);
-                if (error.response && error.response.status === 401) {
-                    alert("Unauthorized: Please check your token or login again.");
-                } else {
-                    alert("Failed to delete order. Please try again later.");
-                }
-            }
         },
         closeModal() {
             this.modalVisible = false;
-            this.modalType = null;
             this.currentOrder = null;
         },
-        goToPage(link) {
-            if (link.url) {
-                this.fetchOrdersFromUrl(link.url);
-            }
+        formatDate(date) {
+            if (!date) return "N/A";
+            const options = { year: "numeric", month: "short", day: "numeric" };
+            return new Date(date).toLocaleDateString(undefined, options);
         },
         prevPage() {
             if (this.orders.prev_page_url) {
@@ -259,10 +237,10 @@ export default {
                 this.fetchOrdersFromUrl(this.orders.next_page_url);
             }
         },
-        formatDate(date) {
-            if (!date) return "N/A";
-            const options = { year: "numeric", month: "short", day: "numeric" };
-            return new Date(date).toLocaleDateString(undefined, options);
+        goToPage(link) {
+            if (link.url) {
+                this.fetchOrdersFromUrl(link.url);
+            }
         },
         async fetchOrdersFromUrl(url) {
             this.loading = true;
@@ -275,7 +253,6 @@ export default {
                     },
                 });
                 this.orders = response.data;
-                console.log("Orders:", this.orders);
             } catch (err) {
                 this.error = "Error fetching orders: " + err.message;
                 console.error("Error fetching orders", err);
@@ -283,10 +260,9 @@ export default {
                 this.loading = false;
             }
         }
-    },
+    }
 };
 </script>
-
 <style scoped>
 /* Import Font Awesome for Icons */
 @import "font-awesome/css/font-awesome.min.css";

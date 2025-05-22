@@ -1,109 +1,92 @@
 <template>
-  <div class="min-h-screen bg-gray-100 flex">
-    <!-- Left Side -->
-    <div class="w-3/4 p-6 bg-slate-400">
-      <!-- Header with Logo and Search Bar -->
-      <header class="flex bg-green-100 mb-4 p-5 items-center">
-        <h1 class="text-2xl font-bold text-green-600 flex-grow text-center">AS Restaurant</h1>
-        <div class="relative w-12 h-12">
-          <!-- Status Display -->
-          <button @click="showStatus = true"
-            class="rounded-full border border-blue-500 flex items-center justify-center bg-white text-blue-500 w-12 h-12">
-            <i class="fas fa-bell text-xl"></i>
-          </button>
-          <!-- Payment Modal -->
+  <div class="min-h-screen bg-gray-50 flex">
+    <!-- Main Content Area -->
+    <div class="w-3/4 p-6">
+      <!-- Header -->
+      <header class="flex items-center justify-between mb-8">
+        <div class="flex items-center space-x-4">
+          <div class="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center">
+            <span class="text-white text-xl font-bold">AS</span>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-800">AS Restaurant</h1>
+        </div>
 
-          <!-- In Dashboard.vue's template -->
-          <Status ref="Status" :show-status="showStatus" :result-message="resultMessage" @close-modal="toggleModal" />
+        <div class="flex items-center space-x-4">
+          <div class="relative">
+            <button @click="showStatus = true"
+              class="relative p-2 rounded-full bg-white shadow-sm hover:bg-gray-100 transition-colors">
+              <i class="fas fa-bell text-gray-600"></i>
+              <span v-if="hasNotifications" class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+            </button>
+            <Status ref="Status" :show-status="showStatus" :result-message="resultMessage" @close-modal="toggleModal" />
+          </div>
+          <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+            <img v-if="userData?.avatar" :src="userData.avatar" class="w-full h-full object-cover">
+            <div v-else class="w-full h-full flex items-center justify-center bg-emerald-500 text-white">
+              {{ userData?.name?.charAt(0) || 'U' }}
+            </div>
+          </div>
         </div>
       </header>
 
-      <!-- <section class="mb-8">
-        <h2 class="text-3xl text-left text-blue-600 font-bold mb-4">Special Menu</h2>
-        <div class="flex justify-end items-center space-x-2">
-          <div class="flex space-x-4 overflow-x-hidden w-full">
-            <ul class="flex space-x-4">
-              <li v-for="(menu, index) in specialMenus" :key="menu.id"
-                class="p-4 bg-white rounded-xl border-2 border-blue-700 hover:bg-blue-600 shadow cursor-pointer group"
-                @click="changeCategory(menu.name)">
-                <span class="text-blue-700 group-hover:text-white transition-colors">
-                  {{ menu.name }}
-                </span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section> -->
-
-
-      <!-- Menu -->
+      <!-- Category Navigation -->
       <section class="mb-8">
-        <h2 class="text-3xl text-left text-blue-600 font-bold mb-4">Menu</h2>
-        <div class="flex items-center space-x-2">
-
-          <div ref="scrollContainer" class="flex space-x-4 overflow-x-auto scrollbar-hide">
-            <ul class="flex space-x-4">
-              <li v-for="(category, index) in categories" :key="index"
-                class="p-2 pb-2 bg-white rounded-xl border-2 border-blue-700 hover:bg-blue-600 shadow cursor-pointer group flex flex-col items-center space-y-2">
-                <!-- Image -->
-                <img :src="category.image" class="w-10 border-blue-700 group-hover:border-white transition-all" />
-                <!-- Name -->
-                <span class="text-blue-700 font-bold group-hover:text-white transition-colors">
-                  {{ category.name }}
-                </span>
-              </li>
-            </ul>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Menu Categories</h2>
+        <div class="relative">
+          <div ref="scrollContainer" class="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+            <button v-for="(category, index) in categories" :key="index" @click="changeCategory(category.name)"
+              class="flex flex-col items-center px-4 py-2 rounded-xl bg-white shadow-sm hover:bg-emerald-50 transition-colors border border-gray-100 min-w-[100px]">
+              <img :src="category.image" class="w-8 h-8 mb-2 object-contain" />
+              <span class="text-sm font-medium text-gray-700">{{ category.name }}</span>
+            </button>
           </div>
         </div>
-
       </section>
 
-      <!--Menu Section -->
+      <!-- Menu Items -->
       <section>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div v-for="(item, index) in filterMenuItems()" :key="index" class="bg-gray-100 rounded-2xl p-4 shadow-md">
-            <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
-              <!-- Image -->
-              <img :src="item.image" :alt="item.name"
-                class="bg-gray-300 h-[250px] w-[240px] rounded-md self-center sm:self-start">
-              <div class="mt-4 sm:mt-0 sm:w-full">
-                <!-- Title and Rating -->
-                <div class="flex items-center justify-between">
-                  <h2 class="text-xl font-bold">{{ item.name }}</h2>
-                  <span class=" text-lg flex items-center">
-                    <svg class="w-4 h-4 inline-block mr-1 font-bold text-yellow-500" fill="currentColor"
-                      viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M12 2c.417 0 .786.267.928.662l2.264 6.976 7.04.001a.93.93 0 01.548 1.685l-5.73 4.166 2.28 6.898a.928.928 0 01-1.426 1.04L12 18.525l-5.902 4.004a.93.93 0 01-1.426-1.04l2.28-6.898-5.73-4.166a.93.93 0 01.548-1.685h7.04l2.264-6.976A.93.93 0 0112 2z" />
-                    </svg>
-                    {{ item.rating }}
-                  </span>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory || 'All Items' }}</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div v-for="(item, index) in filterMenuItems()" :key="index"
+            class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex flex-col md:flex-row">
+              <!-- Item Image -->
+              <div class="md:w-1/3 h-48 bg-gray-100 overflow-hidden">
+                <img :src="item.image" :alt="item.name"
+                  class="w-full h-full object-cover transition-transform hover:scale-105">
+              </div>
+
+              <!-- Item Details -->
+              <div class="p-4 flex-1 flex flex-col">
+                <div class="flex justify-between items-start">
+                  <h3 class="text-lg font-semibold text-gray-800">{{ item.name }}</h3>
+                  <div class="flex items-center bg-emerald-100 px-2 py-1 rounded-full">
+                    <i class="fas fa-star text-emerald-500 text-xs mr-1"></i>
+                    <span class="text-xs font-medium text-emerald-800">{{ item.rating }}</span>
+                  </div>
                 </div>
-                <!-- Description -->
-                <p class="text-gray-600 text-sm mt-2">{{ item.description }}</p>
-                <!-- Size Options -->
-                <div class="justify-start items-start mt-4">
-                  <span class="flex justify-start text-gray-600 text-sm font-bold">SIZE</span>
-                  <div class="flex space-x-2 mt-2">
+
+                <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ item.description }}</p>
+
+                <div class="mt-4">
+                  <p class="text-xs font-medium text-gray-500 mb-1">SIZE</p>
+                  <div class="flex space-x-2">
                     <button
-                      class="'border text-sm font-bold rounded-md px-2 py-1 transition-colors', item.selectedSizeIndex === index ? 'bg-blue-600 text-white' : 'bg-blue-50 border-blue-600 text-blue-500']">
+                      class="text-xs font-medium px-3 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-500 hover:text-white transition-colors">
                       {{ item.size }}
                     </button>
                   </div>
                 </div>
-                <!-- Price -->
-                <div class="flex items-center justify-between mt-4">
-                  <!-- Price -->
-                  <div>
-                    <span class="text-lg font-bold text-gray-800">${{ item.price }}</span>
-                  </div>
-                  <!-- Order Button -->
+
+                <div class="mt-auto pt-4 flex justify-between items-center">
+                  <span class="text-lg font-bold text-gray-800">${{ item.price }}</span>
                   <button @click="addToOrder(item)"
-                    class="rounded-full bg-blue-500 text-white text-sm font-bold px-4 py-2">
-                    ORDER
+                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center">
+                    <i class="fas fa-plus mr-2 text-xs"></i>
+                    Add to Order
                   </button>
                 </div>
-                <!-- Order Button -->
               </div>
             </div>
           </div>
@@ -111,108 +94,120 @@
       </section>
     </div>
 
-    <!-- Order Details  -->
-    <aside class="w-1/3 bg-gray-300 p-6">
-      <div class="mb-10 grid grid-cols-3 rounded-2xl bg-white items-center">
-        <div class="bg-blue-500 p-10 text-3xl font-bold text-white px-3 py-5 rounded-2xl mr-20">
-          <p v-if="userData && userData.name">{{ userData.name }}</p>
+    <!-- Order Sidebar -->
+    <aside class="w-1/3 bg-white border-l border-gray-200 p-6 flex flex-col">
+      <!-- Order Header -->
+      <div class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Order #{{ OrderId }}</h2>
+          <button @click="logout" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
         </div>
-        <div class="text-blue-500 text-center text-lg">
-          Order No #{{ OrderId }}
-        </div>
-        <button @click="logout" class="p-4 rounded-2xl ml-16 hover:bg-blue-700 transition-colors duration-300">
-          <i class="fas fa-sign-out-alt text-xl"></i>
-        </button>
-      </div>
-      <h2 class="text-xl text-white font-bold">Order Details</h2>
-      <div class="flex flex-col h-[700px] border rounded-3xl p-4 bg-white">
-        <!-- Order List -->
-        <div class="flex-1 overflow-auto">
-          <!-- Subtitles for columns -->
-          <div class="flex border-b font-semibold text-sm pb-2">
-            <div class="w-12 text-blue-600">Image</div>
-            <div class="flex-1 ml-4 text-blue-600">Name</div>
-            <div class="w-28 text-center text-blue-600">Quantity</div>
-            <div class="w-24 text-right text-blue-600">Total</div>
-            <div class="w-16 text-right text-blue-600">Action</div>
-          </div>
 
-          <!-- Items loop -->
-          <div v-for="(item, index) in selectedItems" :key="index" class="flex border-b items-center mb-4 pb-2">
-            <div class="w-12 flex items-center">
-              <img :src="item.image" alt="Food" class="w-10 h-10 rounded-full" />
-            </div>
-            <div class="flex-1 ml-4">
-              <h3 class="text-sm font-semibold">{{ item.name }}</h3>
-              <p v-if="item.selectedSize" class="text-xs text-gray-500">Size: {{ item.selectedSize }}</p>
-            </div>
-            <div class="w-28 flex items-center space-x-2 justify-center">
-              <button @click="decreaseQuantity(index)"
-                class="text-white font-bold text-xl rounded-full w-8 m-2 bg-blue-600">
-                -
-              </button>
-              <div class=" text-center text-sm font-semibold px-2 py-1">
-                {{ item.quantity }}
+        <div class="flex items-center space-x-3 bg-emerald-50 p-3 rounded-lg">
+          <div
+            class="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">
+            {{ userData?.name?.charAt(0) || 'U' }}
+          </div>
+          <div>
+            <p class="font-medium text-gray-800">{{ userData?.name || 'Guest' }}</p>
+            <p class="text-xs text-gray-500">Table #{{ userData?.tableNumber || '--' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="flex-1 overflow-hidden flex flex-col">
+        <h3 class="text-sm font-medium text-gray-500 mb-3">ORDER ITEMS ({{ selectedItems.length }})</h3>
+
+        <div class="flex-1 overflow-y-auto">
+          <div class="space-y-4">
+            <div v-for="(item, index) in selectedItems" :key="index" class="flex items-start p-3 bg-gray-50 rounded-lg">
+              <img :src="item.image" class="w-12 h-12 rounded-lg object-cover mr-3" />
+
+              <div class="flex-1">
+                <div class="flex justify-between">
+                  <h4 class="font-medium text-gray-800">{{ item.name }}</h4>
+                  <button @click="removeFromOrder(index)" class="text-gray-400 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+
+                <p v-if="item.selectedSize" class="text-xs text-gray-500 mt-1">Size: {{ item.selectedSize }}</p>
+
+                <div class="flex justify-between items-center mt-2">
+                  <div class="flex items-center border border-gray-200 rounded-lg">
+                    <button @click="decreaseQuantity(index)"
+                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">
+                      -
+                    </button>
+                    <span class="px-3 text-sm font-medium">{{ item.quantity }}</span>
+                    <button @click="increaseQuantity(index)"
+                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">
+                      +
+                    </button>
+                  </div>
+
+                  <span class="font-medium text-gray-800">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                </div>
               </div>
-              <button @click="increaseQuantity(index)"
-                class="text-white font-bold text-xl rounded-full w-8 m-2 bg-blue-600">
-                +
-              </button>
             </div>
-            <div class="w-24 text-right">
-              <span class="text-sm font-semibold">{{ formatCurrency(item.price * item.quantity) }}</span>
-            </div>
-            <div class="w-16 text-right">
-              <button @click="removeFromOrder(index)" class="ml-4 text-red-500 hover:text-red-600">
-                <img src="/public/images/delete.png" alt="Cash Icon" class="w-8 h-8" />
-              </button>
-            </div>
-          </div>
-        </div>
-        <!-- Payment Section -->
-        <div class="border-t pt-4">
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span>Subtotal</span>
-              <span>{{ formatCurrency(subtotal) }}</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg">
-              <span>Total</span>
-              <span>{{ formatCurrency(total) }}</span>
+
+            <div v-if="selectedItems.length === 0" class="text-center py-8 text-gray-400">
+              <i class="fas fa-shopping-basket text-3xl mb-2"></i>
+              <p>Your order is empty</p>
+              <p class="text-sm mt-1">Add items from the menu</p>
             </div>
           </div>
         </div>
 
-        <div class="grid grid-cols-3 space-x-5 mt-4">
-          <button @click="showPaymentCash = true"
-            class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl  space-y-2">
-            <img src="/public/images/money.png" alt="Cash Icon" class="w-8 h-8" />
-            <span>Cash</span>
-          </button>
-          <button @click="showPaymentCard = true"
-            class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl space-y-2">
-            <img src="/public/images/credit-card.png" alt="Cash Icon" class="w-8 h-8" />
-            Credit Card
-          </button>
-          <button @click="showPaymentScan = true"
-            class="flex flex-col items-center justify-center p-5 bg-blue-200 hover:bg-blue-600 text-blue-400 hover:text-white font-bold py-2 rounded-2xl space-y-2">
-            <img src="/public/images/technology.png" alt="Cash Icon" class="w-8 h-8" />
-            E-Pays
-          </button>
-        </div>
-        <div>
-          <PaymentCash :selectedItems="selectedItems" :showPaymentCash="showPaymentCash" @close-modal="toggleModal"
-            @payment-success="handlePaymentSuccess" />
-        </div>
-        <div>
-          <PaymentCreditCard :selectedItems="selectedItems" :showPaymentCard="showPaymentCard"
-            @close-modal="toggleModal" @payment-success="handlePaymentSuccess" />
-        </div>
-        <div>
-          <PaymentScan :selectedItems="selectedItems" :showPaymentScan="showPaymentScan" @close-modal="toggleModal"
-            @payment-success="handlePaymentSuccess" />
+        <!-- Order Summary -->
+        <div class="border-t border-gray-200 pt-4 mt-4">
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Subtotal</span>
+              <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-500">Tax (10%)</span>
+              <span class="font-medium">${{ (subtotal * 0.1).toFixed(2) }}</span>
+            </div>
+            <div class="flex justify-between text-lg font-bold pt-2">
+              <span>Total</span>
+              <span>${{ total.toFixed(2) }}</span>
+            </div>
+          </div>
+
+          <!-- Payment Options -->
+          <div class="grid grid-cols-3 gap-3">
+            <button @click="showPaymentCash = true"
+              class="flex flex-col items-center justify-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+              <i class="fas fa-money-bill-wave text-blue-500 mb-1"></i>
+              <span class="text-xs font-medium">Cash</span>
+            </button>
+            <button @click="showPaymentCard = true"
+              class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+              <i class="fas fa-credit-card text-purple-500 mb-1"></i>
+              <span class="text-xs font-medium">Card</span>
+            </button>
+            <button @click="showPaymentScan = true"
+              class="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+              <i class="fas fa-qrcode text-green-500 mb-1"></i>
+              <span class="text-xs font-medium">E-Pay</span>
+            </button>
+          </div>
         </div>
       </div>
+
+      <!-- Payment Modals -->
+      <PaymentCash :selectedItems="selectedItems" :showPaymentCash="showPaymentCash" @close-modal="toggleModal"
+        @payment-success="handlePaymentSuccess" />
+      <PaymentCreditCard :selectedItems="selectedItems" :showPaymentCard="showPaymentCard" @close-modal="toggleModal"
+        @payment-success="handlePaymentSuccess" />
+      <PaymentScan :selectedItems="selectedItems" :showPaymentScan="showPaymentScan" @close-modal="toggleModal"
+        @payment-success="handlePaymentSuccess" />
     </aside>
   </div>
 </template>
@@ -284,6 +279,20 @@ export default {
     if (!token) {
       this.$router.push('/');
     };
+    const savedStep = localStorage.getItem("order_status_step");
+    const savedMessage = localStorage.getItem("order_status_message");
+
+    if (savedStep && savedMessage) {
+      this.showStatus = true;
+      this.resultMessage = savedMessage;
+
+      this.$nextTick(() => {
+        const modal = this.$refs.Status;
+        if (modal && typeof modal.moveToStep === 'function') {
+          modal.moveToStep(savedStep);
+        }
+      });
+    };
     this.fetchSpecialMenus();
     this.fetchSpecialMenus();
     this.fetchMenus();
@@ -350,6 +359,8 @@ export default {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
         this.showStatus = true;
         this.resultMessage = 'Order approved by cashier.';
+        localStorage.setItem("order_status_step", "Cashier Approve");
+        localStorage.setItem("order_status_message", this.resultMessage);
 
         this.$nextTick(() => {
           const modal = this.$refs.Status;
@@ -363,18 +374,20 @@ export default {
     },
     listenForKitchenStatus() {
       echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
-          this.showStatus = true;
-          this.resultMessage = "Order sent to kitchen.";
+        this.showStatus = true;
+        this.resultMessage = "Order sent to kitchen.";
+        localStorage.setItem("order_status_step", "At Kitchen");
+        localStorage.setItem("order_status_message", this.resultMessage);
 
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('At Kitchen');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
+        this.$nextTick(() => {
+          const modal = this.$refs.Status;
+          if (modal && typeof modal.moveToStep === 'function') {
+            modal.moveToStep('At Kitchen');
+          } else {
+            console.error('Status component not ready or method missing');
+          }
         });
+      });
     },
     listenForCallRobot() {
       echo.channel("robot-channel").listen("EventForRobot", (event) => {
@@ -383,6 +396,52 @@ export default {
         const eventUserId = event.robot?.user_id;
         const currentUserId = sessionStorage.getItem("id");
 
+        // Handle robot status steps
+        if (event.robot?.status === 'accepted') {
+          console.log("Robot status is 'accept' — move to Cooking step");
+          this.showStatus = true;
+          this.resultMessage = "Robot accepted the order.";
+          localStorage.setItem("order_status_step", "Cooking");
+          localStorage.setItem("order_status_message", this.resultMessage);
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('Cooking');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        } else if (event.robot?.status === 'preparing') {
+          console.log("Robot status is 'preparing' — move to Preparing step");
+          this.showStatus = true;
+          this.resultMessage = "Order is being prepared.";
+          localStorage.setItem("order_status_step", "Preparing");
+          localStorage.setItem("order_status_message", this.resultMessage);
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('Preparing');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        } else if (event.robot?.status === 'completed') {
+          console.log("Robot status is 'complete' — move to Ready step");
+          this.showStatus = true;
+          this.resultMessage = "Order is ready.";
+          localStorage.setItem("order_status_step", "Ready");
+          localStorage.setItem("order_status_message", this.resultMessage);
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('Ready');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        }
+
+        // Handle final completion and reload
         if (
           event.robot?.status === 'completed' &&
           eventUserId &&
@@ -393,16 +452,20 @@ export default {
           if (this.selectedItems && typeof this.selectedItems.removeItem === 'function') {
             this.selectedItems.removeItem();
           }
-
+          localStorage.removeItem("order_status_step");
+          localStorage.removeItem("order_status_message");
           sessionStorage.removeItem('selectedItems');
           sessionStorage.removeItem('order_paid');
 
-          window.location.reload();
-        } else {
+          setTimeout(() => {
+            window.location.reload();
+          }, 20000);
+        } else if (event.robot?.status === 'completed') {
           console.log("Status is completed, but user does not match. Not reloading.");
         }
       });
     },
+
     //special Menu
     async fetchSpecialMenus() {
       try {

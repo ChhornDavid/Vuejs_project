@@ -1,146 +1,216 @@
 <template>
-  <div class="bg-gray-100 font-sans">
-    <div class="container mx-auto p-4">
-      <!-- Header -->
-      <div class="bg-blue-900 text-white p-4 rounded-t-md flex justify-between items-center">
-        <h1 class="text-2xl font-semibold uppercase">Special Menus</h1>
-        <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded" @click="showAddModal">
-          <i class="fas fa-plus mr-1"></i> Add Menu
+  <div class="min-h-screen bg-gray-50">
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Header Section -->
+      <div class="sm:flex sm:items-center sm:justify-between mb-8">
+        <div class="mb-4 sm:mb-0">
+          <h1 class="text-3xl font-bold text-gray-900">Special Menus Management</h1>
+          <p class="mt-1 text-sm text-gray-500">Manage your restaurant's special menu categories</p>
+        </div>
+        <button @click="showAddModal"
+          class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
+          <i class="fas fa-plus mr-2"></i>
+          Add New Menu
         </button>
       </div>
 
-      <!-- Table -->
-      <div class="bg-white shadow-md rounded-b-md overflow-x-auto">
-        <table class="w-full table-auto">
-          <thead>
-            <tr class="bg-gray-200 text-gray-700">
-              <th class="p-3 text-left">ID</th>
-              <th class="p-3 text-left">Name</th>
-              <th class="p-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="menu in paginatedMenus" :key="menu.id" class="border-b hover:bg-gray-50">
-              <td class="p-3 text-left">{{ menu.id }}</td>
-              <td class="p-3 text-left">{{ menu.name }}</td>
-              <td class="p-3 text-left">
-                <button class="text-blue-500 hover:text-blue-700 mr-2" @click="showViewModal(menu)">
-                  <i class="fas fa-eye"></i>
+      <!-- Table Section -->
+      <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+        <!-- Search and Filter -->
+        <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-4">
+          <div class="relative flex-grow">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-search text-gray-400"></i>
+            </div>
+            <input 
+              type="text" 
+              v-model="searchQuery"
+              class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+              placeholder="Search menus..."
+            >
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loading" class="p-8 text-center text-gray-500">
+          <i class="fas fa-spinner fa-spin mr-2"></i>Loading special menus...
+        </div>
+
+        <!-- Error State -->
+        <div v-if="error" class="p-8 text-center text-red-500">
+          <i class="fas fa-exclamation-triangle mr-2"></i>{{ error }}
+        </div>
+
+        <!-- Table Content -->
+        <div v-if="!loading && !error">
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-max">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Menu Name
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Created At
+                  </th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Last Updated
+                  </th>
+                  <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <tr v-for="menu in paginatedMenus" :key="menu.id"
+                  class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4 font-medium text-gray-900">
+                    {{ menu.name }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-500">
+                    {{ formatDate(menu.created_at) }}
+                  </td>
+                  <td class="px-6 py-4 text-gray-500">
+                    {{ formatDate(menu.updated_at) }}
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-right">
+                    <div class="flex items-center justify-end space-x-4">
+                      <button @click="showViewModal(menu)"
+                        class="text-gray-400 hover:text-indigo-600 transition-colors"
+                        title="View details">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button @click="showEditModal(menu)"
+                        class="text-gray-400 hover:text-yellow-600 transition-colors"
+                        title="Edit menu">
+                        <i class="fas fa-pencil-alt"></i>
+                      </button>
+                      <button @click="showDeleteModal(menu)"
+                        class="text-gray-400 hover:text-red-600 transition-colors"
+                        title="Delete menu">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="specialMenus.length === 0">
+                  <td colspan="4" class="px-6 py-4 text-center text-gray-500">
+                    No special menus found
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="border-t border-gray-200 px-6 py-4">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+              <div class="text-sm text-gray-700">
+                Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ specialMenus.length }} menus
+                <select v-model="menusPerPage" class="ml-2 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="5">5 per page</option>
+                  <option value="10">10 per page</option>
+                  <option value="20">20 per page</option>
+                </select>
+              </div>
+              <div class="flex items-center gap-1">
+                <button @click="prevPage" :disabled="currentPage === 1"
+                  class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                  <i class="fas fa-chevron-left text-xs"></i>
                 </button>
-                <button class="text-yellow-500 hover:text-yellow-700 mr-2" @click="showEditModal(menu)">
-                  <i class="fas fa-pen"></i>
-                </button>
-                <button class="text-red-500 hover:text-red-700" @click="showDeleteModal(menu)">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <!-- Pagination -->
-        <div class="flex justify-between items-center p-4">
-          <p class="text-gray-600">Showing {{ startIndex + 1 }} to {{ endIndex }} out of {{ specialMenus.length }}
-            entries
-          </p>
-          <div class="flex gap-2">
-            <button class="text-gray-600" :disabled="currentPage === 1" @click="prevPage">
-              < Previous</button>
-                <button v-for="page in totalPages" :key="page" class="text-gray-600"
-                  :class="{ 'bg-blue-500 text-white p-2 rounded': currentPage === page }" @click="goToPage(page)">
+                <button v-for="page in visiblePages" :key="page" @click="goToPage(page)"
+                  class="w-9 h-9 flex items-center justify-center rounded-md border text-sm" :class="currentPage === page
+                    ? 'border-indigo-600 bg-indigo-600 text-white'
+                    : 'border-gray-300 hover:bg-gray-50'">
                   {{ page }}
                 </button>
-                <button class="text-gray-600" :disabled="currentPage === totalPages" @click="nextPage">Next ></button>
+                <button @click="nextPage" :disabled="currentPage === totalPages"
+                  class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                  <i class="fas fa-chevron-right text-xs"></i>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Modal -->
-      <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal">
-        <div class="flex justify-center items-center">
-          <template v-if="modalType === 'add'">
-            <form @submit.prevent="handleCreateMenu" class="space-y-4 w-96">
-              <!-- Name -->
-              <div class="mb-4">
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-                <input type="text" id="name" v-model="newMenu.name"
-                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Enter Menu Name" required />
-              </div>
-
-
-              <!-- Submit Button -->
-              <div class="text-right">
-                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                  Add Menu
-                </button>
-              </div>
-            </form>
-          </template>
-
-          <template v-else-if="modalType === 'view'">
-            <div class="p-6 w-full bg-white rounded-md">
-              <h2 class="text-lg font-semibold text-gray-800 mb-4">Menu Details</h2>
-
-              <!-- Menu Information -->
-              <div class="space-y-4">
-                <div class="flex items-center">
-                  <label class="w-1/3 text-gray-600 font-medium">Name:</label>
-                  <p class="text-gray-700">{{ currentMenu.name }}</p>
+      <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal" size="lg">
+        <div class="p-6">
+          <template v-if="modalType === 'view'">
+            <!-- View Mode Content -->
+            <div class="space-y-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                  <h3 class="text-sm font-medium text-gray-500 mb-2">Menu Details</h3>
+                  <dl class="space-y-2">
+                    <div class="flex justify-between">
+                      <dt class="text-sm text-gray-500">Menu Name</dt>
+                      <dd class="text-sm text-gray-900">{{ currentMenu.name }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-sm text-gray-500">Created At</dt>
+                      <dd class="text-sm text-gray-900">{{ formatDate(currentMenu.created_at) }}</dd>
+                    </div>
+                    <div class="flex justify-between">
+                      <dt class="text-sm text-gray-500">Last Updated</dt>
+                      <dd class="text-sm text-gray-900">{{ formatDate(currentMenu.updated_at) }}</dd>
+                    </div>
+                  </dl>
                 </div>
-
-                <div class="flex items-center">
-                  <label class="w-1/3 text-gray-600 font-medium">Created At:</label>
-                  <p class="text-gray-700">{{ formatDate(currentMenu.created_at) }}</p>
-                </div>
-                <div class="flex items-center">
-                  <label class="w-1/3 text-gray-600 font-medium">Updated At:</label>
-                  <p class="text-gray-700">{{ formatDate(currentMenu.updated_at) }}</p>
-                </div>
-              </div>
-
-              <!-- Close Button -->
-              <div class="mt-6 text-right">
-                <button @click="closeModal"
-                  class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                  Close
-                </button>
               </div>
             </div>
-          </template>
-
-          <template v-else-if="modalType === 'edit'">
-            <form @submit.prevent="handleUpdateMenu" class="space-y-4 w-96">
-              <!-- Name -->
-              <div class="mb-4">
-                <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-                <input type="text" id="name" v-model="editMenu.name"
-                  class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  placeholder="Enter Menu Name" required />
-              </div>
-
-              <!-- Submit Button -->
-              <div class="text-right">
-                <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                  Save Menu
-                </button>
-              </div>
-            </form>
           </template>
 
           <template v-else-if="modalType === 'delete'">
-            <p class="text-gray-700">Are you sure you want to delete menu: <strong>{{ currentMenu.name
-                }}</strong>?
-            </p>
-            <div class="flex justify-end space-x-4 mt-4">
-              <button @click="closeModal"
-                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                Cancel
-              </button>
-              <button @click="handleDeleteMenu(currentMenu.id)"
-                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                Confirm
-              </button>
+            <!-- Delete Confirmation -->
+            <div class="text-center py-6">
+              <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                <i class="fas fa-exclamation-triangle text-red-600"></i>
+              </div>
+              <h3 class="mt-3 text-lg font-medium text-gray-900">Delete special menu</h3>
+              <div class="mt-2 text-sm text-gray-500">
+                Are you sure you want to delete "{{ currentMenu.name }}"? This action cannot be undone.
+              </div>
+              <div class="mt-6 flex justify-center space-x-4">
+                <button @click="closeModal" type="button"
+                  class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                  Cancel
+                </button>
+                <button @click="handleDeleteMenu(currentMenu.id)" type="button"
+                  class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700">
+                  Delete
+                </button>
+              </div>
             </div>
+          </template>
+
+          <template v-else>
+            <!-- Add/Edit Form -->
+            <form @submit.prevent="modalType === 'add' ? handleCreateMenu() : handleUpdateMenu()"
+              class="space-y-6">
+              <div class="grid grid-cols-1 gap-6">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Menu Name *</label>
+                  <input type="text" v-model="activeMenu.name" required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="Seasonal Specials">
+                </div>
+              </div>
+
+              <!-- Form Actions -->
+              <div class="flex justify-end space-x-4 border-t pt-6">
+                <button type="button" @click="closeModal"
+                  class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md">
+                  Cancel
+                </button>
+                <button type="submit"
+                  class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md">
+                  {{ modalType === 'add' ? 'Create Menu' : 'Save Changes' }}
+                </button>
+              </div>
+            </form>
           </template>
         </div>
       </Modal>
@@ -149,8 +219,8 @@
 </template>
 
 <script>
-import api from "../../../../axios/Axios";
 import Modal from "./user/Modal.vue";
+import api from "../../../../axios/Axios";
 
 export default {
   components: { Modal },
@@ -163,20 +233,14 @@ export default {
       modalType: null,
       modalTitle: "",
       currentMenu: null,
-      newMenu: {
-        name: "",
-      },
-      editMenu: {
+      activeMenu: {
         id: null,
         name: ''
       },
-      currentMenu: {
-        name: '',
-        created_at: null,
-        updated_at: null
-      },
+      searchQuery: "",
       currentPage: 1,
-      menusPerPage: 5,
+      menusPerPage: 10,
+      maxVisiblePages: 5
     };
   },
   computed: {
@@ -192,163 +256,137 @@ export default {
     paginatedMenus() {
       return this.specialMenus.slice(this.startIndex, this.endIndex);
     },
-
+    visiblePages() {
+      const pages = [];
+      let startPage = Math.max(1, this.currentPage - Math.floor(this.maxVisiblePages / 2));
+      let endPage = Math.min(this.totalPages, startPage + this.maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < this.maxVisiblePages) {
+        startPage = Math.max(1, endPage - this.maxVisiblePages + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      return pages;
+    }
   },
   methods: {
     async fetchSpecialMenus() {
       this.loading = true;
-      this.error = null;
       try {
         const token = sessionStorage.getItem("auth_token");
         const response = await api.get("/special-menus", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` }
         });
         this.specialMenus = response.data.data;
       } catch (err) {
         console.error("Fetch error:", err);
-        this.error = "Error fetching special menus!";
+        this.error = "Failed to load special menus";
       } finally {
         this.loading = false;
       }
     },
     showAddModal() {
       this.modalType = 'add';
+      this.modalTitle = 'Add New Special Menu';
+      this.activeMenu = { id: null, name: '' };
       this.modalVisible = true;
-      this.modalTitle = 'Add Menu';
-      // Reset form
-      this.newMenu = {
-        name: "",
-      };
-      this.currentMenu = null;
     },
     showEditModal(menu) {
       this.modalType = 'edit';
+      this.modalTitle = 'Edit Special Menu';
+      this.activeMenu = { ...menu };
       this.modalVisible = true;
-      this.modalTitle = 'Edit Menu';
-      this.editMenu = { ...menu };
-      this.currentMenu = { ...menu }; // use for view and delete
     },
     showViewModal(menu) {
       this.modalType = 'view';
-      this.modalVisible = true;
-      this.modalTitle = 'View Menu';
+      this.modalTitle = 'Menu Details';
       this.currentMenu = { ...menu };
+      this.modalVisible = true;
     },
     showDeleteModal(menu) {
       this.modalType = 'delete';
-      this.modalVisible = true;
-      this.modalTitle = 'Delete Menu';
+      this.modalTitle = 'Confirm Deletion';
       this.currentMenu = { ...menu };
+      this.modalVisible = true;
     },
     async handleCreateMenu() {
       try {
         const token = sessionStorage.getItem("auth_token");
-        if (!token) {
-          alert('Authentication token is missing. Please log in again.');
-          return;
-        }
-
-        const response = await api.post("/addspecial-menus", this.newMenu, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        await api.post("/addspecial-menus", this.activeMenu, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        console.log(response.data);
-        alert('Menu added successfully!');
-        this.closeModal();
         this.fetchSpecialMenus();
-
+        this.closeModal();
       } catch (error) {
-        console.error('Error adding menu:', error.response?.data || error.message);
-
-        if (error.response) {
-          if (error.response.status === 401) {
-            alert('Unauthorized! Please log in again.');
-          } else if (error.response.status === 422) {
-            alert('Validation error: ' + error.response.data.message);
-          } else {
-            alert('Failed to add menu. Server error occurred.');
-          }
-        } else if (error.request) {
-          alert('No response from the server. Please try again.');
-        } else {
-          alert('Failed to add menu. Please check your credentials.');
-        }
+        console.error('Create error:', error);
+        alert(error.response?.data?.message || 'Failed to create menu');
       }
     },
     async handleUpdateMenu() {
       try {
-        await api.put(`/updatespecial-menus/${this.editMenu.id}`, { name: this.editMenu.name }, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`
-          }
+        const token = sessionStorage.getItem("auth_token");
+        await api.put(`/updatespecial-menus/${this.activeMenu.id}`, this.activeMenu, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        alert('Menu updated successfully!');
-        this.closeModal();
         this.fetchSpecialMenus();
+        this.closeModal();
       } catch (error) {
-        console.error('Error updating menu:', error);
-        if (error.response && error.response.status === 401) {
-          alert('Unauthorized: Please check your token or login again.');
-        } else {
-          alert('Failed to save menu. Please try again later.');
-        }
+        console.error('Update error:', error);
+        alert(error.response?.data?.message || 'Failed to update menu');
       }
     },
-    async handleDeleteMenu(menuId) {
+    async handleDeleteMenu(id) {
       try {
-        await api.delete(`/deletespecial-menus/${menuId}`, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem('auth_token')}`
-          }
+        const token = sessionStorage.getItem("auth_token");
+        await api.delete(`/deletespecial-menus/${id}`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-        alert('Menu deleted successfully!');
-        this.closeModal();
         this.fetchSpecialMenus();
+        this.closeModal();
       } catch (error) {
-        console.error('Error deleting menu:', error);
-        if (error.response && error.response.status === 401) {
-          alert('Unauthorized: Please check your token or login again.');
-        } else {
-          alert('Failed to delete menu. Please try again later.');
-        }
+        console.error('Delete error:', error);
+        alert('Failed to delete menu');
       }
     },
     closeModal() {
       this.modalVisible = false;
       this.modalType = null;
       this.currentMenu = null;
-      this.editMenu = {
-        id: null,
-        name: ''
-      };
+      this.activeMenu = { id: null, name: '' };
     },
     goToPage(page) {
       this.currentPage = page;
     },
     prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+      if (this.currentPage > 1) this.currentPage--;
     },
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
+      if (this.currentPage < this.totalPages) this.currentPage++;
     },
-    formatDate(date) {
-      if (!date) return 'N/A';
+    formatDate(dateString) {
+      if (!dateString) return 'N/A';
       const options = { year: 'numeric', month: 'short', day: 'numeric' };
-      return new Date(date).toLocaleDateString(undefined, options);
-    },
+      return new Date(dateString).toLocaleDateString(undefined, options);
+    }
+  },
+  watch: {
+    menusPerPage() {
+      this.currentPage = 1;
+    }
   },
   mounted() {
     this.fetchSpecialMenus();
-  },
+  }
 };
 </script>
+
 <style scoped>
 @import "font-awesome/css/font-awesome.min.css";
+
+.transition-colors {
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
 </style>

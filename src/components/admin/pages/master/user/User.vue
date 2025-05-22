@@ -1,223 +1,281 @@
 <template>
   <div class="container mx-auto p-4">
-    <!-- Header -->
-    <div class="bg-blue-900 text-white p-4 rounded-t-md flex justify-between items-center mb-4">
-      <h1 class="text-2xl font-semibold">User List</h1>
-      <button @click="showAddModal" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        <i class="fas fa-plus mr-1"></i>Add User
-      </button>
+    <!-- Header Section -->
+    <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-800">User Management</h1>
+          <p class="text-gray-600 mt-1">Manage your platform users and permissions</p>
+        </div>
+        <button @click="showAddModal"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2">
+          <i class="fas fa-plus"></i>
+          Add New User
+        </button>
+      </div>
     </div>
 
-    <!-- Loading and Error Messages -->
-    <div v-if="loading" class="text-center text-blue-600 text-lg">Loading...</div>
-    <div v-if="error" class="text-center text-red-600 text-lg">{{ error }}</div>
+    <!-- Status Messages -->
+    <div v-if="loading" class="p-4 mb-4 bg-blue-50 text-blue-800 rounded-lg flex items-center gap-3">
+      <i class="fas fa-spinner fa-spin"></i>
+      Loading users...
+    </div>
+
+    <div v-if="error" class="p-4 mb-4 bg-red-50 text-red-800 rounded-lg flex items-center gap-3">
+      <i class="fas fa-exclamation-circle"></i>
+      {{ error }}
+    </div>
 
     <!-- User Table -->
-    <div v-if="users.length > 0" class="bg-white shadow-md rounded-b-md overflow-x-auto">
-      <table class="w-full table-auto">
-        <thead class="bg-gray-200 text-gray-700">
-          <tr>
-            <th class="p-3 text-left">ID</th>
-            <th class="p-3 text-left">Name</th>
-            <th class="p-3 text-left">Type</th>
-            <th class="p-3 text-left">Email</th>
-            <th class="p-3 text-center">Status</th>
-            <th class="p-3 text-left">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="user in paginatedUsers" :key="user.id" class="border-b hover:bg-gray-50">
-            <td class="p-3 text-left">{{ user.id }}</td>
-            <td class="p-3 text-left">{{ user.name }}</td>
-            <td class="p-3 text-left">{{ user.type }}</td>
-            <td class="p-3 text-left">{{ user.email }}</td>
-            <td class="p-3 text-center">
-              <span class="inline-block px-2 py-1 rounded text-white"
-                :class="user.is_online ? 'bg-green-500' : 'bg-gray-500'">
-                {{ user.is_online ? "Online" : "Offline" }}
-              </span>
-            </td>
-            <td class="p-3 text-left">
-              <button @click="showViewModal(user)" class="text-blue-500 hover:text-blue-700 mr-2">
-                <i class="fas fa-eye" aria-label="View"></i>
-              </button>
-              <button @click="showEditModal(user)" class="text-yellow-500 hover:text-yellow-700 mr-2">
-                <i class="fas fa-pen" aria-label="Edit"></i>
-              </button>
-              <button @click="showDeleteModal(user)" class="text-red-500 hover:text-red-700">
-                <i class="fas fa-trash" aria-label="Delete"></i>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="bg-white rounded-xl shadow-sm overflow-hidden" v-if="users.length > 0">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Role</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Last Active</th>
+              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <tr v-for="user in paginatedUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-full bg-indigo-100 flex items-center justify-center">
+                    <i class="fas fa-user text-indigo-600"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium text-gray-900">{{ user.name }}</p>
+                    <p class="text-sm text-gray-500">{{ user.email }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium"
+                  :class="roleBadgeClass(user.type)">
+                  {{ user.type }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full" :class="user.is_online ? 'bg-green-500' : 'bg-gray-400'"></span>
+                  <span :class="user.is_online ? 'text-green-700' : 'text-gray-600'">
+                    {{ user.is_online ? "Online" : "Offline" }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                {{ user.is_online ? 'Active now' : formatLastActive(user.last_active) }}
+              </td>
+              <td class="px-6 py-4 text-right">
+                <div class="flex justify-end items-center gap-3">
+                  <button @click="showViewModal(user)" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button @click="showEditModal(user)" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                    <i class="fas fa-pen"></i>
+                  </button>
+                  <button @click="showDeleteModal(user)" class="text-gray-500 hover:text-red-600 transition-colors">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
-      <div class="flex justify-between items-center p-4">
-        <p class="text-gray-600">Showing {{ startIndex + 1 }} to {{ endIndex }} out of {{ users.length }} entries</p>
-        <div class="flex gap-2">
-          <button class="text-gray-600" :disabled="currentPage === 1" @click="prevPage">
-            < Previous</button>
-              <button v-for="page in totalPages" :key="page" class="text-gray-600"
-                :class="{ 'bg-blue-500 text-white p-2 rounded': currentPage === page }" @click="goToPage(page)">
-                {{ page }}
-              </button>
-              <button class="text-gray-600" :disabled="currentPage === totalPages" @click="nextPage">Next ></button>
+      <div class="border-t border-gray-200 px-6 py-4">
+        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-gray-600">
+            Showing <span class="font-medium">{{ startIndex + 1 }}</span> to
+            <span class="font-medium">{{ endIndex }}</span> of
+            <span class="font-medium">{{ users.length }}</span> results
+          </p>
+
+          <div class="flex items-center gap-1">
+            <button @click="prevPage" :disabled="currentPage === 1"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
+              <i class="fas fa-chevron-left text-sm"></i>
+            </button>
+
+            <button v-for="page in totalPages" :key="page" @click="goToPage(page)"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border" :class="currentPage === page
+                ? 'border-indigo-600 bg-indigo-600 text-white'
+                : 'border-gray-300 hover:bg-gray-50'">
+              {{ page }}
+            </button>
+
+            <button @click="nextPage" :disabled="currentPage === totalPages"
+              class="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white">
+              <i class="fas fa-chevron-right text-sm"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Empty State -->
+    <div v-else-if="!loading" class="bg-white rounded-xl p-12 text-center border-2 border-dashed border-gray-200">
+      <div class="max-w-md mx-auto">
+        <div class="w-16 h-16 mx-auto bg-indigo-100 rounded-full flex items-center justify-center mb-6">
+          <i class="fas fa-users text-indigo-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+        <p class="text-gray-500 mb-6">Get started by adding a new user to your system</p>
+        <button @click="showAddModal"
+          class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2 mx-auto">
+          <i class="fas fa-plus"></i>
+          Add User
+        </button>
+      </div>
+    </div>
+
+    <!-- Modals -->
     <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal">
-      <div class="flex justify-center items-center">
-        <template v-if="modalType === 'add'">
-          <form @submit.prevent="handleCreateUser" class="space-y-4 w-96">
-            <!-- Name -->
-            <div class="mb-4">
-              <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-              <input type="text" id="name" v-model="newUser.name"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter username" required />
+      <!-- Add/Edit User Form -->
+      <template v-if="['add', 'edit'].includes(modalType)">
+        <form @submit.prevent="modalType === 'add' ? handleCreateUser() : handleUpdateUser()" class="space-y-6">
+          <div class="grid grid-cols-1 gap-6">
+            <!-- Name Input -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <input type="text" v-model="editUser.name" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="John Doe">
             </div>
 
-            <!-- Type -->
-            <div class="mb-4">
-              <label for="type" class="block text-gray-700 text-sm font-bold mb-2">Type:</label>
-              <select id="type" v-model="newUser.type"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+            <!-- Email Input -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <input type="email" v-model="editUser.email" required
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder="john@example.com">
+            </div>
+
+            <!-- Role Select -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">User Role</label>
+              <select v-model="editUser.type"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="user">Standard User</option>
+                <option value="admin">Administrator</option>
                 <option value="cooker">Cooker</option>
               </select>
             </div>
 
-            <!-- Email -->
-            <div class="mb-4">
-              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-              <input type="email" id="email" v-model="newUser.email"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter email" required />
-            </div>
-
-            <!-- Password -->
-            <div class="mb-4">
-              <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
-              <input type="password" id="password" v-model="newUser.password"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter password" required />
-            </div>
-
-            <!-- Submit Button -->
-            <div class="text-right">
-              <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Add User
-              </button>
-            </div>
-          </form>
-        </template>
-
-        <template v-else-if="modalType === 'view'">
-          <div class="p-6 w-full bg-white rounded-md">
-            <h2 class="text-lg font-semibold text-gray-800 mb-4">User Details</h2>
-
-            <!-- User Information -->
-            <div class="space-y-4">
-              <div class="flex items-center">
-                <label class="w-1/3 text-gray-600 font-medium">Name:</label>
-                <p class="text-gray-700">{{ currentUser.name }}</p>
-              </div>
-              <div class="flex items-center">
-                <label class="w-1/3 text-gray-600 font-medium">Email:</label>
-                <p class="text-gray-700">{{ currentUser.email }}</p>
-              </div>
-              <div class="flex items-center">
-                <label class="w-1/3 text-gray-600 font-medium">Role:</label>
-                <p class="text-gray-700">{{ currentUser.type }}</p>
-              </div>
-              <div class="flex items-center">
-                <label class="w-1/3 text-gray-600 font-medium">Verified At:</label>
-                <p class="text-gray-700">{{ currentUser.email_verified_at || "Not Verified" }}</p>
-              </div>
-              <div class="flex items-center">
-                <label class="w-1/3 text-gray-600 font-medium">Created At:</label>
-                <p class="text-gray-700">{{ formatDate(currentUser.created_at) }}</p>
-              </div>
-            </div>
-
-            <!-- Close Button -->
-            <div class="mt-6 text-right">
-              <button @click="closeModal"
-                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                Close
-              </button>
+            <!-- Password Input -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                {{ modalType === 'add' ? 'Create Password' : 'Change Password' }}
+              </label>
+              <input type="password" v-model="editUser.password" :required="modalType === 'add'"
+                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                :placeholder="modalType === 'add' ? 'Enter password' : 'Leave blank to keep current'">
             </div>
           </div>
-        </template>
 
-        <template v-else-if="modalType === 'edit'">
-          <form @submit.prevent="handleUpdateUser" class="space-y-4 w-96">
-            <!-- Name -->
-            <div class="mb-4">
-              <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-              <input type="text" id="name" v-model="editUser.name"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter username" required />
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+            <button type="button" @click="closeModal"
+              class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-colors">
+              Cancel
+            </button>
+            <button type="submit"
+              class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+              {{ modalType === 'add' ? 'Create User' : 'Save Changes' }}
+            </button>
+          </div>
+        </form>
+      </template>
+
+      <!-- View User Details -->
+      <template v-else-if="modalType === 'view'">
+        <div class="space-y-6">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+              <i class="fas fa-user text-indigo-600 text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-xl font-semibold text-gray-900">{{ currentUser.name }}</h2>
+              <p class="text-gray-600">{{ currentUser.email }}</p>
+            </div>
+          </div>
+
+          <dl class="grid grid-cols-2 gap-4 text-sm">
+            <div class="border-t border-gray-200 pt-4">
+              <dt class="font-medium text-gray-500">Account Status</dt>
+              <dd class="mt-1 text-gray-900">
+                <span class="inline-flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full"
+                    :class="currentUser.is_online ? 'bg-green-500' : 'bg-gray-400'"></span>
+                  {{ currentUser.is_online ? 'Active Now' : 'Last Active ' + formatLastActive(currentUser.last_active)
+                  }}
+                </span>
+              </dd>
             </div>
 
-            <!-- Type -->
-            <div class="mb-4">
-              <label for="type" class="block text-gray-700 text-sm font-bold mb-2">Type:</label>
-              <select id="type" v-model="editUser.type"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                required>
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
-                <option value="cooker">Cooker</option>
-              </select>
+            <div class="border-t border-gray-200 pt-4">
+              <dt class="font-medium text-gray-500">User Role</dt>
+              <dd class="mt-1">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                  :class="roleBadgeClass(currentUser.type)">
+                  {{ currentUser.type }}
+                </span>
+              </dd>
             </div>
 
-            <!-- Email -->
-            <div class="mb-4">
-              <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
-              <input type="email" id="email" v-model="editUser.email"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter email" required />
+            <div class="border-t border-gray-200 pt-4">
+              <dt class="font-medium text-gray-500">Account Created</dt>
+              <dd class="mt-1 text-gray-900">{{ formatDate(currentUser.created_at) }}</dd>
             </div>
 
-            <!-- Password -->
-            <div class="mb-4">
-              <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Password:</label>
-              <input type="password" id="password" v-model="editUser.password"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                placeholder="Enter password" />
+            <div class="border-t border-gray-200 pt-4">
+              <dt class="font-medium text-gray-500">Email Verification</dt>
+              <dd class="mt-1 text-gray-900">
+                {{ currentUser.email_verified_at ? formatDate(currentUser.email_verified_at) : 'Pending' }}
+              </dd>
             </div>
+          </dl>
 
-            <!-- Submit Button -->
-            <div class="text-right">
-              <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Save User
-              </button>
+          <div class="border-t border-gray-200 pt-6">
+            <button @click="closeModal"
+              class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
+              Close Details
+            </button>
+          </div>
+        </div>
+      </template>
+
+      <!-- Delete Confirmation -->
+      <template v-else-if="modalType === 'delete'">
+        <div class="space-y-6">
+          <div class="flex flex-col items-center text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+              <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
             </div>
-          </form>
-        </template>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Confirm User Deletion</h3>
+            <p class="text-gray-600">
+              Are you sure you want to permanently remove
+              <span class="font-semibold text-gray-900">{{ currentUser.name }}</span>
+              from the system? This action cannot be undone.
+            </p>
+          </div>
 
-        <template v-else-if="modalType === 'delete'">
-          <p class="text-gray-700">
-            Are you sure you want to delete user:
-            <strong>{{ currentUser.name }}</strong>?
-          </p>
-          <div class="flex justify-end space-x-4 mt-4">
-            <button @click="closeModal" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+          <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+            <button @click="closeModal"
+              class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-colors">
               Cancel
             </button>
             <button @click="handleDeleteUser(currentUser.id)"
-              class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-              Confirm
+              class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
+              Delete User
             </button>
           </div>
-        </template>
-      </div>
+        </div>
+      </template>
     </Modal>
   </div>
 </template>
@@ -238,28 +296,10 @@ export default {
       modalType: null,
       modalTitle: "",
       currentUser: null,
-      newUser: {
-        name: "",
-        type: "user",
-        email: "",
-        password: "",
-      },
-      editUser: {
-        id: null,
-        name: "",
-        type: "user",
-        email: "",
-        password: "",
-      },
-      currentUser: {
-        name: "",
-        email: "",
-        type: "",
-        email_verified_at: null,
-        created_at: "",
-      },
+      newUser: { name: "", type: "user", email: "", password: "" },
+      editUser: { id: null, name: "", type: "user", email: "", password: "" },
       currentPage: 1,
-      usersPerPage: 5,
+      usersPerPage: 10,
     };
   },
   computed: {
@@ -281,61 +321,91 @@ export default {
     this.listenForUserStatusUpdates();
   },
   methods: {
+    roleBadgeClass(role) {
+      const classes = {
+        admin: 'bg-purple-100 text-purple-800',
+        user: 'bg-blue-100 text-blue-800',
+        cooker: 'bg-orange-100 text-orange-800'
+      };
+      return classes[role] || 'bg-gray-100 text-gray-800';
+    },
+
+    formatLastActive(date) {
+      if (!date) return 'N/A';
+      return new Date(date).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    },
+
+    formatDate(date) {
+      if (!date) return "N/A";
+      const options = {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(date).toLocaleDateString(undefined, options);
+    },
+
     async fetchUsers() {
       this.loading = true;
       try {
         const response = await api.get("/users");
-        this.users = response.data.data;
-        console.log("user" , response.data)
+        this.users = response.data.data.map(user => ({
+          ...user,
+          last_active: user.last_active || user.updated_at
+        }));
         this.listenForUserStatusUpdates();
       } catch (err) {
-        this.error = "Error fetching users!";
-        console.error(err);
+        this.error = "Failed to load users. Please try again later.";
+        console.error("Fetch users error:", err);
       } finally {
         this.loading = false;
       }
     },
+
     listenForUserStatusUpdates() {
       echo.channel("user-status")
         .listen("UserStatusUpdated", (event) => {
-          if (event.user) {
-            const userIndex = this.users.findIndex(user => user.id === event.user.id);
-            if (userIndex !== -1) {
-              this.users[userIndex].is_online = event.user.is_online;
-            }
+          const index = this.users.findIndex(u => u.id === event.user.id);
+          if (index !== -1) {
+            this.users[index] = {
+              ...this.users[index],
+              is_online: event.user.is_online,
+              last_active: new Date().toISOString()
+            };
           }
         });
     },
     showAddModal() {
       this.modalType = "add";
+      this.modalTitle = "Add New User";
       this.modalVisible = true;
-      this.modalTitle = "Add User";
-      // Reset form
-      this.newUser = {
-        name: "",
-        type: "user",
-        email: "",
-        password: "",
-      };
-      this.currentUser = null;
     },
+
     showEditModal(user) {
       this.modalType = "edit";
-      this.modalVisible = true;
       this.modalTitle = "Edit User";
-      this.editUser = { ...user }; // Use the spread operator for deep copy
-      this.currentUser = { ...user }; // use for view and delete
+      this.modalVisible = true;
+      this.editUser = { ...user };
     },
+
     showViewModal(user) {
       this.modalType = "view";
+      this.modalTitle = "User Details";
       this.modalVisible = true;
-      this.modalTitle = "View User";
-      this.currentUser = { ...user }; // use for view and delete
+      this.currentUser = { ...user };
     },
+
     showDeleteModal(user) {
       this.modalType = "delete";
+      this.modalTitle = "Confirm Deletion";
       this.modalVisible = true;
-      this.modalTitle = "Delete User";
       this.currentUser = { ...user };
     },
 
@@ -346,36 +416,40 @@ export default {
             Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
           },
         });
-        alert("User added successfully!");
+
+        this.users.unshift(response.data.data);
         this.closeModal();
-        this.fetchUsers();
-        console.log(response.data);
+        this.$toast.success("User created successfully");
       } catch (error) {
-        console.error("Error adding user:", error);
-        alert("Failed to add user. Please check your credentials.");
+        console.error("Create user error:", error);
+        this.$toast.error(error.response?.data?.message || "Failed to create user");
       }
     },
 
     async handleUpdateUser() {
       try {
-        console.log("Request data:", this.editUser);
-        await api.put(`/updateusers/${this.editUser.id}`, { ...this.editUser }, {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
-          },
-        });
-        alert("User updated successfully!");
-        this.closeModal();
-        this.fetchUsers();
-      } catch (error) {
-        console.error("Error updating user:", error);
-        if (error.response && error.response.status === 401) {
-          alert("Unauthorized: Please check your token or login again.");
-        } else {
-          alert("Failed to save user. Please try again later.");
+        const response = await api.put(
+          `/updateusers/${this.editUser.id}`,
+          this.editUser,
+          {
+            headers: {
+              Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+            },
+          }
+        );
+
+        const index = this.users.findIndex(u => u.id === this.editUser.id);
+        if (index !== -1) {
+          this.$set(this.users, index, response.data.data);
         }
+        this.closeModal();
+        this.$toast.success("User updated successfully");
+      } catch (error) {
+        console.error("Update user error:", error);
+        this.$toast.error(error.response?.data?.message || "Failed to update user");
       }
     },
+
     async handleDeleteUser(userId) {
       try {
         await api.delete(`/deleteusers/${userId}`, {
@@ -383,52 +457,66 @@ export default {
             Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
           },
         });
-        alert("User deleted successfully!");
+
+        this.users = this.users.filter(user => user.id !== userId);
         this.closeModal();
-        this.fetchUsers();
+        this.$toast.success("User deleted successfully");
       } catch (error) {
-        console.error("Error deleting user:", error);
-        if (error.response && error.response.status === 401) {
-          alert("Unauthorized: Please check your token or login again.");
-        } else {
-          alert("Failed to delete user. Please try again later.");
-        }
+        console.error("Delete user error:", error);
+        this.$toast.error(error.response?.data?.message || "Failed to delete user");
       }
     },
+
     closeModal() {
       this.modalVisible = false;
       this.modalType = null;
       this.currentUser = null;
-      this.editUser = {
-        id: null,
-        name: "",
-        type: "user",
-        email: "",
-        password: "",
-      };
+      this.newUser = { name: "", type: "user", email: "", password: "" };
+      this.editUser = { id: null, name: "", type: "user", email: "", password: "" };
     },
+
     goToPage(page) {
       this.currentPage = page;
     },
+
     prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
+      if (this.currentPage > 1) this.currentPage--;
     },
+
     nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    formatDate(date) {
-      if (!date) return "N/A";
-      const options = { year: "numeric", month: "short", day: "numeric" };
-      return new Date(date).toLocaleDateString(undefined, options);
-    },
-  },
+      if (this.currentPage < this.totalPages) this.currentPage++;
+    }
+  }
 };
 </script>
 <style scoped>
 /* Import Font Awesome for Icons */
 @import "font-awesome/css/font-awesome.min.css";
+
+/* Custom transitions for modal */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+/* Smooth table row transitions */
+tr {
+  transition: background-color 0.2s ease;
+}
+
+/* Loading spinner animation */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fa-spinner {
+  animation: spin 1s linear infinite;
+}
 </style>

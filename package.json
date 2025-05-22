@@ -30,7 +30,8 @@
     "vue-icons-plus": "^0.1.7",
     "vue-qr": "^4.0.9",
     "vue-qrcode": "^2.2.2",
-    "vue-router": "^4.4.5"
+    "vue-router": "^4.4.5",
+    "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {
     "@types/qrcode": "^1.5.5",

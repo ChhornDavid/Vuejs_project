@@ -1,80 +1,122 @@
 <template>
-    <div class="container mx-auto p-4">
-        <h1 class="font-bold text-3xl mb-6 text-gray-900">Order / OrderList</h1>
+    <div class="mx-auto p-4 max-w-7xl">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Pending Orders</h1>
+            <p class="mt-2 text-gray-600">Manage incoming customer orders</p>
+        </div>
 
-        <div v-if="loading">
-            <p class="text-center text-gray-500">Loading orders...</p>
+        <!-- Loading State -->
+        <div v-if="loading" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="i in 3" :key="i" class="animate-pulse bg-white rounded-xl p-6 shadow-sm">
+                <div class="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
+                <div class="space-y-3">
+                    <div v-for="j in 2" :key="j" class="h-4 bg-gray-100 rounded"></div>
+                </div>
+            </div>
         </div>
-        <div v-else-if="error">
-            <p class="text-center text-red-500">{{ error }}</p>
-        </div>
-        <div v-else-if="pendingOrders.length === 0">
-            <p class="text-center text-gray-500">No pending orders to display.</p>
-        </div>
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            <div v-for="order in pendingOrders" :key="order.id"
-                class="bg-white rounded-2xl p-4 shadow-md hover:shadow-lg transition-shadow duration-200">
-                <div class="flex flex-col sm:flex-row sm:items-start sm:space-x-4">
-                    <div class="mt-4 sm:mt-0 sm:w-full">
-                        <div class="flex items-center mb-3">
-                            <h2 class="text-lg font-semibold text-gray-800">Table:</h2>
-                            <h2 class="text-lg pl-2 font-semibold text-gray-800">{{ order.user_id }}</h2>
-                        </div>
-                        <div class="mb-4">
-                            <div class="grid grid-cols-4 gap-2 text-sm">
-                                <p class="text-gray-500 font-medium">Item</p>
-                                <p class="text-gray-500 font-medium">Qty</p>
-                                <p class="text-gray-500 font-medium">Price</p>
-                                <p class="text-gray-500 font-medium">Total</p>
-                            </div>
 
-                            <div v-for="item in safeParseJSON(order.items)" :key="item.product_id"
-                                class="grid grid-cols-4 gap-2 py-2 border-b border-gray-200 last:border-b-0">
-                                <p class="text-gray-700 text-sm">{{ item.product_name }}</p>
-                                <p class="text-gray-700 text-sm">{{ item.quantity }}</p>
-                                <p class="text-gray-700 text-sm">{{ formatCurrency(item.amount) }}</p>
-                                <p class="text-gray-700 text-sm">{{ formatCurrency(item.quantity * item.amount) }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between mt-2 text-gray-700">
-                            <span class="text-sm">Sub Total:</span>
-                            <span class="text-sm font-medium">{{ formatCurrency(order.amount) }}</span>
-                        </div>
-                        <div class="flex items-center justify-between mt-2 text-gray-700">
-                            <span class="text-sm">Discount:</span>
-                            <span class="text-sm font-medium">$0.00</span>
-                        </div>
-                        <div class="flex items-center justify-between mt-2 text-gray-700">
-                            <span class="text-sm">Total:</span>
-                            <span class="text-sm font-semibold">{{ formatCurrency(order.amount) }}</span>
-                        </div>
-                        <div class="flex items-center justify-center gap-4 mt-6">
-                            <button @click="confirmApprove(order.id)"
-                                class="w-full py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600">
-                                Accept
-                            </button>
-                            <button @click="confirmDecline(order.id)"
-                                class="w-full py-2 px-4 bg-red-500 text-white rounded-md hover:bg-red-600">
-                                Decline
-                            </button>
-                        </div>
+        <!-- Error State -->
+        <div v-else-if="error" class="p-6 bg-red-50 rounded-xl text-red-700">
+            <p>{{ error }}</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="pendingOrders.length === 0" class="text-center py-12">
+            <div class="max-w-md mx-auto">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">No pending orders</h3>
+                <p class="mt-1 text-sm text-gray-500">New orders will appear here as they come in</p>
+            </div>
+        </div>
+
+        <!-- Order Grid -->
+        <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div v-for="order in pendingOrders" :key="order.id" 
+                 class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <!-- Order Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Table #{{ order.user_id }}</h3>
+                        <p class="text-sm text-gray-500">Order ID: {{ order.id }}</p>
+                    </div>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Pending</span>
+                </div>
+
+                <!-- Order Items -->
+                <div class="border-t border-gray-100 pt-4">
+                    <div class="grid grid-cols-6 gap-4 text-sm font-medium text-gray-600 mb-2">
+                        <span>Item</span>
+                        <span>Size</span>
+                        <span>Qty</span>
+                        <span>Price</span>
+                        <span class="text-right">Total</span>
+                    </div>
+                    
+                    <div v-for="item in safeParseJSON(order.items)" :key="item.product_id"
+                         class="grid grid-cols-6 gap-4 border-b border-gray-100 last:border-b-0">
+                        <p class="font-medium text-gray-900 truncate">{{ item.product_name }}</p>
+                        <p class="text-gray-600">{{ item.size }}</p>
+                        <p class="text-gray-600 px-3">{{ item.quantity }}</p>
+                        <p class="text-gray-600">{{ formatCurrency(item.amount) }}</p>
+                        <p class="text-right font-medium text-gray-900">
+                            {{ formatCurrency(item.quantity * item.amount) }}
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="mt-6 space-y-2 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Subtotal</span>
+                        <span class="font-medium text-gray-900">{{ formatCurrency(order.amount) }}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Service Fee</span>
+                        <span class="font-medium text-gray-900">$0.00</span>
+                    </div>
+                    <div class="flex justify-between pt-2 border-t border-gray-100">
+                        <span class="text-base font-semibold text-gray-900">Total</span>
+                        <span class="text-base font-semibold text-gray-900">{{ formatCurrency(order.amount) }}</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex gap-3">
+                    <button @click="confirmDecline(order.id)"
+                        class="flex-1 py-2 px-4 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-colors">
+                        Decline
+                    </button>
+                    <button @click="confirmApprove(order.id)"
+                        class="flex-1 py-2 px-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors">
+                        Accept
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Dialog -->
+        <transition enter-active-class="ease-out duration-300" leave-active-class="ease-in duration-200">
+            <div v-if="showConfirmation" class="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center p-4">
+                <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-xl">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirm action</h3>
+                    <p class="text-gray-600 mb-6">{{ confirmationMessage }}</p>
+                    <div class="flex justify-end gap-3">
+                        <button @click="cancelConfirmation"
+                            class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">
+                            Cancel
+                        </button>
+                        <button @click="confirmAction"
+                            :class="['px-4 py-2 rounded-lg text-white transition-colors',
+                                actionType === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']">
+                            Confirm
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div v-if="showConfirmation"
-            class="fixed top-0 left-0 w-full h-full bg-gray-500 bg-opacity-75 flex items-center justify-center">
-            <div class="bg-white p-6 rounded-md shadow-lg">
-                <p class="mb-4">{{ confirmationMessage }}</p>
-                <div class="flex justify-end gap-4">
-                    <button @click="cancelConfirmation"
-                        class="py-2 px-4 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Cancel</button>
-                    <button @click="confirmAction"
-                        class="py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600">Confirm</button>
-                </div>
-            </div>
-        </div>
+        </transition>
     </div>
 </template>
 
@@ -83,18 +125,16 @@ import api from '../../../../../axios/Axios';
 import { echo } from '../../../../../services/echo';
 
 export default {
-    emits: ["close-modal", "approve-success"],
-    name: "Order",
+    name: "OrderList",
     data() {
         return {
             pendingOrders: [],
-            loading: false,
+            loading: true,
             error: null,
             showConfirmation: false,
             confirmationMessage: '',
             orderIdToProcess: null,
             actionType: null,
-            approveStatus: '',
         };
     },
     created() {
@@ -106,108 +146,80 @@ export default {
             return new Intl.NumberFormat('en-US', {
                 style: 'currency',
                 currency: 'USD',
+                minimumFractionDigits: 2
             }).format(amount);
         },
 
         safeParseJSON(data) {
             try {
                 return JSON.parse(data) || [];
-            } catch (error) {
-                console.error("Invalid JSON:", data);
+            } catch {
                 return [];
             }
         },
 
         async fetchPendingOrders() {
-            this.loading = true;
-            this.error = null;
             try {
                 const token = sessionStorage.getItem("auth_token");
-                const response = await api.get("/admin/pending-orders", {
-                    headers: { Authorization: `Bearer ${token}` },
+                const { data } = await api.get("/admin/pending-orders", {
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                this.pendingOrders = response.data;
+                this.pendingOrders = data;
             } catch (error) {
-                this.error = "Failed to get pending orders: " + error.message;
-                console.error("Failed to get pending orders", error);
+                this.error = "Failed to load orders: " + error.message;
             } finally {
                 this.loading = false;
             }
         },
 
         listenForUserOrderUpdates() {
-            echo.channel("order-status").listen("OrderApprovedCash", (event) => {
-                console.log("cash order: ", event)
-                if (!event.order) return;
-
-                const index = this.pendingOrders.findIndex(order => order.id === event.order.id);
-
-                if (index !== -1) {
-                    this.pendingOrders.splice(index, 1, event.order);
-                } else {
-                    this.pendingOrders.push(event.order);
-                }
-            });
+            echo.channel("order-status")
+                .listen("OrderApprovedCash", ({ order }) => {
+                    console.log("Even", order);
+                    if (!order) return;
+                    const index = this.pendingOrders.findIndex(o => o.id === order.id);
+                    index === -1 ? this.pendingOrders.push(order) : this.pendingOrders.splice(index, 1, order);
+                });
         },
 
-        async approveOrder(id) {
-            const originalOrders = [...this.pendingOrders];
-            this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
-
+        async processOrder(action, id) {
             try {
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.post(`/admin/approve/${id}`, {}, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const endpoint = action === 'approve' ? `approve/${id}` : `decline/${id}`;
+                await api.post(`/admin/${endpoint}`, {}, {
+                    headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` }
                 });
-
-                if (response.status !== 200) throw new Error(`Failed to approve order.`);
+                this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
             } catch (error) {
-                console.error("Error approving order:", error);
-                this.error = 'Failed to approve order.';
-                this.pendingOrders = originalOrders;
-            }
-        },
-
-        async declineOrder(id) {
-            const originalOrders = [...this.pendingOrders];
-            this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
-
-            try {
-                const token = sessionStorage.getItem("auth_token");
-                const response = await api.post(`admin/decline/${id}`, {}, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (response.status !== 200) throw new Error(`Failed to decline order.`);
-            } catch (error) {
-                console.error("Error declining order:", error);
-                this.error = 'Failed to decline order.';
-                this.pendingOrders = originalOrders;
+                this.error = `Failed to ${action} order: ${error.message}`;
+                console.error(error);
             }
         },
 
         confirmApprove(id) {
-            this.orderIdToProcess = id;
             this.actionType = 'approve';
-            this.confirmationMessage = 'Are you sure you want to approve this order?';
+            this.orderIdToProcess = id;
+            this.confirmationMessage = 'This will immediately confirm the order. Continue?';
             this.showConfirmation = true;
         },
 
         confirmDecline(id) {
-            this.orderIdToProcess = id;
             this.actionType = 'decline';
-            this.confirmationMessage = 'Are you sure you want to decline this order?';
+            this.orderIdToProcess = id;
+            this.confirmationMessage = 'This will permanently decline the order. Continue?';
             this.showConfirmation = true;
         },
 
         cancelConfirmation() {
             this.showConfirmation = false;
+            this.orderIdToProcess = null;
         },
 
         async confirmAction() {
             this.showConfirmation = false;
-            if (this.actionType === 'approve') this.approveOrder(this.orderIdToProcess);
-            else if (this.actionType === 'decline') this.declineOrder(this.orderIdToProcess);
+            if (this.orderIdToProcess) {
+                await this.processOrder(this.actionType, this.orderIdToProcess);
+                this.orderIdToProcess = null;
+            }
         },
     },
 }

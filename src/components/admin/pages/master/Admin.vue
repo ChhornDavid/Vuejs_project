@@ -1,159 +1,213 @@
 <template>
-    <div class="flex w-screen h-screen">
-        <div class="bg-white text-gray-700 h-full transition-all"
-            :class="{ 'w-[280px]': showSide, 'w-0 overflow-hidden': !showSide }">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <div class="text-xl font-bold text-blue-600 flex items-center">
-                    <span class="mr-1">NPIC 2025</span><span
-                        class="text-xs font-medium uppercase text-gray-500">ADMIN</span>
+    <div class="flex h-screen bg-gray-50">
+        <!-- Sidebar -->
+        <aside class="bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden"
+            :class="showSide ? 'w-64' : 'w-0 md:w-20'">
+            <!-- Sidebar Header -->
+            <div class="px-4 py-5 border-b border-gray-100 flex items-center">
+                <div class="flex items-center transition-all duration-200"
+                    :class="showSide ? 'opacity-100' : 'opacity-0 md:opacity-100 justify-center w-full'">
+                    <span class="text-xl font-bold text-emerald-600">NPIC</span>
+                    <span v-if="showSide" class="ml-1 text-xs font-medium uppercase text-gray-400">
+                        2025 ADMIN
+                    </span>
                 </div>
             </div>
-            <nav class="flex-1 overflow-y-auto px-2 py-2">
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto px-2 py-4">
                 <ul class="space-y-1">
                     <!-- Dashboard -->
-                    <li class="hover:bg-gray-100 rounded-md">
+                    <li>
                         <router-link to="/admin/home"
-                            class="text-xl font-bold flex items-center py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <i class="fas fa-tv text-xl w-6 h-4 mr-4"></i>
-                            Dashboard
+                            class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                            :class="{ 'justify-center': !showSide }" active-class="bg-emerald-50 text-emerald-600">
+                            <i class="fas fa-tv text-2xl w-6 text-center"></i>
+                            <span v-if="showSide" class="ml-3 font-bold text-3xl">Dashboard</span>
                         </router-link>
                     </li>
-                    <li class="hover:bg-gray-100 rounded-md" :class="{ 'expanded': orderDropdownOpen }">
+
+                    <!-- Order Dropdown -->
+                    <li>
                         <button @click="toggleOrderDropdown"
-                            class=" text-xl font-bold flex items-center w-full py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <i class="fas fa-list text-xl w-6 h-4 mr-4"></i>
-                            Order
-                            <span :class="{
-                                'rotate-90 transition-transform duration-200': orderDropdownOpen,
-                                '-rotate-90': !orderDropdownOpen
-                            }" class="ml-1 inline-block">></span>
+                            class="flex items-center w-full p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                            :class="{ 'justify-center': !showSide }">
+                            <i class="fas fa-list text-2xl w-6 text-center"></i>
+                            <span v-if="showSide" class="flex-1 ml-3 text-3xl font-bold text-left">Orders</span>
+                            <span v-if="showSide" class="transform transition-transform duration-200"
+                                :class="{ 'rotate-90': orderDropdownOpen }">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </span>
                         </button>
-                        <ul v-if="orderDropdownOpen"
-                            class="w-full mt-1 rounded-md bg-white shadow-md border border-gray-200">
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/order"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order</router-link>
-                            </li>
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/orderHistory"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Order
-                                    History</router-link>
-                            </li>
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/invoice"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                                    Invoice
-                                </router-link>
-                            </li>
-                        </ul>
+
+                        <transition name="slide">
+                            <ul v-if="orderDropdownOpen && showSide"
+                                class="ml-2 mt-1 space-y-1 pl-8 border-l-2 border-emerald-100">
+                                <li>
+                                    <router-link to="/admin/order"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Current Orders
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link to="/admin/orderHistory"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Order History
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link to="/admin/invoice"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Invoices
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </transition>
                     </li>
-                    <!-- Payments (with dropdown) -->
-                    <li class="hover:bg-gray-100 rounded-md" :class="{ 'expanded': productsDropdownOpen }">
+
+                    <!-- Products Dropdown -->
+                    <li>
                         <button @click="toggleProductsDropdown"
-                            class=" text-xl font-bold flex items-center w-full py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <i class="fas fa-box text-xl w-6 h-4 mr-4"></i>
-                            Product
-                            <span :class="{
-                                'rotate-90 transition-transform duration-200': productsDropdownOpen,
-                                '-rotate-90': !productsDropdownOpen
-                            }" class="ml-1 inline-block">></span>
+                            class="flex items-center w-full p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                            :class="{ 'justify-center': !showSide }">
+                            <i class="fas fa-box text-2xl w-6 text-center"></i>
+                            <span v-if="showSide" class="flex-1 ml-3 font-bold text-3xl text-left">Products</span>
+                            <span v-if="showSide" class="transform transition-transform duration-200"
+                                :class="{ 'rotate-90': productsDropdownOpen }">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </span>
                         </button>
-                        <ul v-if="productsDropdownOpen"
-                            class="w-full mt-1 rounded-md bg-white shadow-md border border-gray-200">
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/specialmenu"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">SpecialMenus</router-link>
-                            </li>
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/menu"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Menus</router-link>
-                            </li>
-                            <li class="hover:bg-gray-100">
-                                <router-link to="/admin/food"
-                                    class="block py-2 px-8 text-gray-700 hover:text-blue-600 rounded-md transition-colors">Foods</router-link>
-                            </li>
-                        </ul>
+
+                        <transition name="slide">
+                            <ul v-if="productsDropdownOpen && showSide"
+                                class="ml-2 mt-1 space-y-1 pl-8 border-l-2 border-emerald-100">
+                                <li>
+                                    <router-link to="/admin/specialmenu"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Special Menus
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link to="/admin/menu"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Menus
+                                    </router-link>
+                                </li>
+                                <li>
+                                    <router-link to="/admin/food"
+                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        active-class="text-emerald-600 font-medium">
+                                        Foods
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </transition>
                     </li>
+
                     <!-- Users -->
-                    <li class="hover:bg-gray-100 rounded-md">
+                    <li>
                         <router-link to="/admin/user"
-                            class="flex text-xl font-bold items-center py-3 px-6 text-gray-700 hover:text-blue-600 rounded-md transition-colors">
-                            <i class="fas fa-solid fa-users w-6 h-4 mr-4"></i>
-                            Users
+                            class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
+                            :class="{ 'justify-center': !showSide }" active-class="bg-emerald-50 text-emerald-600">
+                            <i class="fas fa-users text-2xl w-6 text-center"></i>
+                            <span v-if="showSide" class="ml-3 font-bold text-3xl">Users</span>
                         </router-link>
                     </li>
                 </ul>
             </nav>
-        </div>
-        <div class="flex-1 h-full bg-gray-100">
-            <div
-                class="h-[50px] bg-gray-100 flex items-center shadow-sm px-5 w-full py-2 z-10 border-b justify-between">
-                <div class="cursor-pointer w-[30px]" @click="toggleSideBar">
-                    <i class="fas fa-bars text-xl"></i>
-                </div>
-                <div class="h-[50px] flex items-center px-5 w-full justify-center">
-                    <div class="flex items-center w-full max-w-md border rounded-lg shadow-sm bg-white">
-                        <button class="p-2 text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-search text-xl"></i>
-                        </button>
-                        <input type="text" placeholder="Search here..."
-                            class="flex-1 p-3 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring focus:ring-blue-300" />
-                        <button class="p-2 text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-microphone text-xl"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="w-[200px] relative flex items-center space-x-4">
-                    <div class="relative flex items-center space-x-4">
-                        <!-- Bell Icon (Always visible) -->
-                        <div class="w-10 h-10 rounded-full border border-gray-50 flex items-center justify-center bg-gray-200 text-gray-500 cursor-pointer"
-                            @click="toggleMessage">
-                            <i class="fas fa-bell text-xl"></i>
-                        </div>
+        </aside>
 
-                        <!-- Notification Message (Only visible when showMessage is true) -->
-                        <div v-if="showMessage"
-                            class="absolute top-12 right-0 w-72 p-2 mt-2 bg-gray-800 text-white rounded-md shadow-lg z-50">
-                            <div>Welcome back to message</div>
-                        </div>
-                    </div>
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Navigation -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between h-16 px-4">
+                    <!-- Hamburger Menu -->
+                    <button @click="toggleSideBar"
+                        class="p-2 rounded-md text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
 
-                    <div class="flex items-center space-x-4 cursor-pointer" @click="toggleDrop">
-                        <div
-                            class="w-10 h-10 rounded-full border border-gray-50 flex items-center justify-center bg-gray-200 text-gray-500">
-                            <i class="fas fa-user text-xl"></i>
-                        </div>
-                        <div class="font-semibold text-left dark:text-white">
-                            <div v-if="userData && userData.name">
-                                <p>{{ userData.name }}</p>
+                    <!-- Search Bar -->
+                    <div class="flex-1 max-w-md mx-4">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
                             </div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400" v-if="userData && userData.role">
-                                <p>{{ userData.role }}</p>
-                            </div>
+                            <input type="text" placeholder="Search..."
+                                class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
                         </div>
                     </div>
 
-                    <!-- Dropdown Menu (Only visible when showDropDown is true) -->
-                    <div v-show="showDropDown"
-                        class="absolute right-0 z-10 mt-[200px] w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                        <div class="py-1 text-left">
-                            <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem"
-                                tabindex="-1">Account Setting</a>
-                            <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem"
-                                tabindex="-1">Support</a>
-                            <a href="#" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem"
-                                tabindex="-1">License</a>
-                            <button @click="logout"
-                                class="text-gray-700 block w-full px-4 py-2 text-left text-sm">Logout</button>
+                    <!-- User Controls -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Notifications -->
+                        <div class="relative">
+                            <button @click="toggleMessage"
+                                class="p-2 rounded-full text-gray-500 hover:text-gray-600 hover:bg-gray-100 focus:outline-none relative">
+                                <i class="fas fa-bell text-lg"></i>
+                                <span v-if="hasNotifications"
+                                    class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+                            </button>
+
+                            <transition name="fade">
+                                <div v-if="showMessage"
+                                    class="absolute right-0 mt-2 w-72 bg-white rounded-md shadow-lg overflow-hidden z-20">
+                                    <div class="py-2 px-4 bg-emerald-600 text-white text-sm font-medium">
+                                        Notifications
+                                    </div>
+                                    <div class="p-4 text-sm text-gray-700">
+                                        Welcome back to your dashboard!
+                                    </div>
+                                </div>
+                            </transition>
+                        </div>
+
+                        <!-- User Profile -->
+                        <div class="relative">
+                            <button @click="toggleDrop" class="flex items-center space-x-2 focus:outline-none">
+                                <div
+                                    class="h-8 w-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span v-if="userData?.name"
+                                    class="text-sm font-medium text-gray-700 hidden md:inline-block">
+                                    {{ userData.name }}
+                                </span>
+                            </button>
+
+                            <transition name="fade">
+                                <div v-show="showDropDown"
+                                    class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20">
+                                    <div class="py-1">
+                                        <a href="#"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account
+                                            Settings</a>
+                                        <a href="#"
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Support</a>
+                                        <button @click="logout"
+                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                            Sign out
+                                        </button>
+                                    </div>
+                                </div>
+                            </transition>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="h-[calc(100vh-50px)] bg-gray-50 p-5">
-                <div class="border border-gray-300 rounded-md h-full overflow-y-auto p-5">
+            </header>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto p-4 bg-gray-50">
+                <div class="bg-white rounded-lg shadow-sm p-6 h-full">
                     <router-view></router-view>
                 </div>
-            </div>
+            </main>
         </div>
     </div>
 </template>
@@ -252,4 +306,44 @@ export default {
 
 <style scoped>
 @import "font-awesome/css/font-awesome.min.css";
+
+/* Transition effects */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s;
+}
+
+.fade-enter,
+.fade-leave-to {
+    opacity: 0;
+}
+
+.slide-enter-active,
+.slide-leave-active {
+    transition: all 0.3s ease;
+}
+
+.slide-enter,
+.slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Custom scrollbar for sidebar */
+nav::-webkit-scrollbar {
+    width: 4px;
+}
+
+nav::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+nav::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+}
+
+nav::-webkit-scrollbar-thumb:hover {
+    background: #ccc;
+}
 </style>

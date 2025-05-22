@@ -1,317 +1,460 @@
 <template>
-    <div class="bg-gray-100 font-sans">
-        <div class="container mx-auto p-4">
-            <!-- Header -->
-            <div class="bg-blue-900 text-white p-4 rounded-t-md flex justify-between items-center">
-                <h1 class="text-2xl font-semibold uppercase">Food</h1>
-                <button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                    @click="showAddModal">
-                    <i class="fas fa-plus mr-1"></i> Add Food
+    <div class="min-h-screen bg-gray-50">
+        <!-- Main Container -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Header Section -->
+            <div class="sm:flex sm:items-center sm:justify-between mb-8">
+                <div class="mb-4 sm:mb-0">
+                    <h1 class="text-3xl font-bold text-gray-900">Food Management</h1>
+                    <p class="mt-1 text-sm text-gray-500">Manage your restaurant's menu items and special offers</p>
+                </div>
+                <button @click="showAddModal"
+                    class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add New Item
                 </button>
             </div>
 
-            <!-- Table -->
-            <div class="bg-white shadow-md rounded-b-md overflow-x-auto">
-                <table class="w-full table-auto">
-                    <thead>
-                        <tr class="bg-gray-200 text-gray-700">
-                            <th class="p-3 text-left">ID</th>
-                            <th class="p-3 text-left">Menu</th>
-                            <th class="p-3 text-left">SpecialMenu</th>
-                            <th class="p-3 text-left">Name</th>
-                            <th class="p-3 text-left">Image</th>
-                            <th class="p-3 text-left">Description</th>
-                            <th class="p-3 text-left">Rating</th>
-                            <th class="p-3 text-left">Price</th>
-                            <th class="p-3 text-left">Size</th>
-                            <th class="p-3 text-left">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="foods in paginatedFoods" :key="foods.id" class="border-b hover:bg-gray-50">
-                            <td class="p-3 text-left">{{ foods.id }}</td>
-                            <td class="p-3 text-left">
-                                {{ getCategoryName(foods.id_category) }}
-                            </td>
-                            <td class="p-3 text-left">
-                                {{ getSpecialMenuName(foods.id_specialmenu) }}
-                            </td>
-                            <td class="p-3 text-left">{{ foods.name }}</td>
-                            <td class="p-3 text-left">
-                                <img v-if="foods.image" :src="foods.image" alt="Food Image"
-                                    class="w-16 h-16 object-cover" />
-                            </td>
-                            <td class="p-3 text-left">{{ foods.description }}</td>
-                            <td class="p-3 text-left">{{ foods.rating }}</td>
-                            <td class="p-3 text-left">{{ foods.price }}</td>
-                            <td class="p-3 text-left">{{ foods.size }}</td>
-                            <td class="p-3 text-left">
-                                <button class="text-blue-500 hover:text-blue-700 mr-2" @click="showViewModal(foods)">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="text-yellow-500 hover:text-yellow-700 mr-2"
-                                    @click="showEditModal(foods)">
-                                    <i class="fas fa-pen"></i>
-                                </button>
-                                <button class="text-red-500 hover:text-red-700" @click="showDeleteModal(foods)">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <!-- Pagination -->
-                <div class="flex justify-between items-center p-4">
-                    <p class="text-gray-600">Showing {{ startIndex + 1 }} to {{ endIndex }} out of {{ foods.length
-                        }} entries
-                    </p>
-                    <div class="flex gap-2">
-                        <button class="text-gray-600" :disabled="currentPage === 1" @click="prevPage">
-                            < Previous </button>
-                                <button v-for="page in totalPages" :key="page" class="text-gray-600"
-                                    :class="{ 'bg-blue-500 text-white p-2 rounded': currentPage === page }"
-                                    @click="goToPage(page)">
-                                    {{ page }}
-                                </button>
-                                <button class="text-gray-600" :disabled="currentPage === totalPages"
-                                    @click="nextPage">Next
-                                    >
-                                </button>
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Total Items</p>
+                            <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ foods.length }}</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-50 text-blue-600">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Available Items</p>
+                            <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ availableItemsCount }}</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-50 text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Categories</p>
+                            <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ categories.length }}</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-purple-50 text-purple-600">
+                            <i class="fas fa-tags"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-gray-500 text-sm font-medium">Special Menus</p>
+                            <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ specialMenus.length }}</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
+                            <i class="fas fa-star"></i>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Modal -->
-            <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal">
-                <div class="flex justify-center items-center">
-                    <template v-if="modalType === 'add'">
-                        <form @submit.prevent="handleCreateFood" class="grid grid-cols-2 gap-4 w-96">
-                            <!-- Special Menu -->
-                            <div>
-                                <label for="specialMenu" class="block text-sm font-bold mb-1">Special:</label>
-                                <select id="specialMenu" v-model="newFood.specialMenu" class="input">
-                                    <option value="">Select Special Menu</option>
-                                    <option v-for="special in specialMenus" :key="special.id" :value="special.id">
-                                        {{ special.name }}
-                                    </option>
+            <!-- Table Section -->
+            <div class="bg-white shadow-sm rounded-lg overflow-hidden">
+                <!-- Search and Filter -->
+                <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-4">
+                    <div class="relative flex-grow">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input 
+                            type="text" 
+                            v-model="searchQuery"
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
+                            placeholder="Search items..."
+                        >
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select v-model="categoryFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">All Categories</option>
+                            <option v-for="category in categories" :key="category.id" :value="category.id">
+                                {{ category.name }}
+                            </option>
+                        </select>
+                        <select v-model="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">All Status</option>
+                            <option value="true">Available</option>
+                            <option value="false">Unavailable</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Loading State -->
+                <div v-if="loading" class="p-8 text-center text-gray-500">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>Loading menu items...
+                </div>
+
+                <!-- Error State -->
+                <div v-if="error" class="p-8 text-center text-red-500">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>{{ error }}
+                </div>
+
+                <!-- Table Content -->
+                <div v-if="!loading && !error">
+                    <div class="overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('name')">
+                                        Item
+                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'name'}"></i>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Category
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('price')">
+                                        Price
+                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'price'}"></i>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('rating')">
+                                        Rating
+                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'rating'}"></i>
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr v-for="food in paginatedFoods" :key="food.id"
+                                    class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center">
+                                            <div class="flex-shrink-0 h-16 w-16">
+                                                <img :src="food.image || '/placeholder-food.jpg'"
+                                                    class="h-full w-full object-cover rounded" alt="Food item">
+                                            </div>
+                                            <div class="ml-4">
+                                                <div class="text-sm font-medium text-gray-900">{{ food.name }}</div>
+                                                <div class="text-sm text-gray-500 line-clamp-2 max-w-xs">{{ food.description }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm text-gray-900">{{ getCategoryName(food.id_category) }}</div>
+                                        <div v-if="getSpecialMenuName(food.id_specialmenu)"
+                                            class="text-sm text-gray-500">
+                                            {{ getSpecialMenuName(food.id_specialmenu) }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                            ${{ food.price }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-400 mr-1">{{ food.rating }}</span>
+                                            <i class="fas fa-star text-yellow-400 text-xs"></i>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" :checked="food.available" @change="toggleAvailability(food)" class="sr-only peer">
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                        </label>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right">
+                                        <div class="flex items-center justify-end space-x-4">
+                                            <button @click="showViewModal(food)"
+                                                class="text-gray-400 hover:text-indigo-600 transition-colors"
+                                                title="View details">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button @click="showEditModal(food)"
+                                                class="text-gray-400 hover:text-yellow-600 transition-colors"
+                                                title="Edit item">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <button @click="showDeleteModal(food)"
+                                                class="text-gray-400 hover:text-red-600 transition-colors"
+                                                title="Delete item">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredFoods.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                        No items found matching your criteria
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="border-t border-gray-200 px-6 py-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                            <div class="text-sm text-gray-700">
+                                Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filteredFoods.length }} items
+                                <select v-model="foodsPerPage" class="ml-2 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="5">5 per page</option>
+                                    <option value="10">10 per page</option>
+                                    <option value="20">20 per page</option>
+                                    <option value="50">50 per page</option>
                                 </select>
                             </div>
-
-                            <!-- Category -->
-                            <div>
-                                <label for="category" class="block text-sm font-bold mb-1">Menu:</label>
-                                <select id="category" v-model="newFood.menu" class="input">
-                                    <option value="">Select Menu</option>
-                                    <option v-for="category in categories" :key="category.id" :value="category.id">
-                                        {{ category.name }}
-                                    </option>
-                                </select>
-                            </div>
-                            <!-- Name -->
-                            <div>
-                                <label for="name" class="block text-sm font-bold mb-1">Name:</label>
-                                <input type="text" id="name" v-model="newFood.name" class="input"
-                                    placeholder="Food Name" required />
-                            </div>
-
-                            <!-- Image -->
-                            <div>
-                                <label for="image" class="block text-sm font-bold mb-1">Image:</label>
-                                <input type="file" id="image" @change="handleImageUpload" class="input" />
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-span-2">
-                                <label for="description" class="block text-sm font-bold mb-1">Description:</label>
-                                <textarea id="description" v-model="newFood.description" rows="2" class="input"
-                                    placeholder="Description"></textarea>
-                            </div>
-
-                            <!-- Rating -->
-                            <div>
-                                <label for="rating" class="block text-sm font-bold mb-1">Rating:</label>
-                                <input type="number" id="rating" v-model="newFood.rating" class="input"
-                                    placeholder="Rating" />
-                            </div>
-
-                            <!-- Price -->
-                            <div>
-                                <label for="price" class="block text-sm font-bold mb-1">Price:</label>
-                                <input type="number" id="price" v-model="newFood.price" class="input"
-                                    placeholder="Price" required />
-                            </div>
-
-                            <!-- Size -->
-                            <div class="col-span-2">
-                                <label for="size" class="block text-sm font-bold mb-1">Size:</label>
-                                <select id="size" v-model="newFood.size" class="input">
-                                    <option value="Small">Small</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Large">Large</option>
-                                </select>
-                            </div>
-
-                            <!-- Submit Button -->
-                            <div class="col-span-2 text-right">
-                                <button type="submit"
-                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                                    Add Food
+                            <div class="flex items-center gap-1">
+                                <button @click="prevPage" :disabled="currentPage === 1"
+                                    class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                                    <i class="fas fa-chevron-left text-xs"></i>
                                 </button>
-                            </div>
-                        </form>
-                    </template>
-                    <template v-else-if="modalType === 'view'">
-                        <div class="p-6 w-full bg-white rounded-md">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-4">Food Details</h2>
-                            <!-- Food Information -->
-                            <div class="space-y-4">
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Menu:</label>
-                                    <p class="text-gray-700">{{ getCategoryName(currentFood.id_category) }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">SpecialMenu:</label>
-                                    <p class="text-gray-700">{{ getSpecialMenuName(currentFood.id_specialmenu) }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Name:</label>
-                                    <p class="text-gray-700">{{ currentFood.name }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Image:</label>
-                                    <img v-if="currentFood.image" :src="currentFood.image" alt="Food Image"
-                                        class="w-16 h-16 object-cover" />
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Description:</label>
-                                    <p class="text-gray-700">{{ currentFood.description }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Rating:</label>
-                                    <p class="text-gray-700">{{ currentFood.rating }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Price:</label>
-                                    <p class="text-gray-700">{{ currentFood.price }}</p>
-                                </div>
-                                <div class="flex items-center">
-                                    <label class="w-1/3 text-gray-600 font-medium">Size:</label>
-                                    <p class="text-gray-700">{{ currentFood.size }}</p>
-                                </div>
-
-                            </div>
-
-                            <!-- Close Button -->
-                            <div class="mt-6 text-right">
-                                <button @click="closeModal"
-                                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
-                                    Close
+                                <button v-for="page in visiblePages" :key="page" @click="goToPage(page)"
+                                    class="w-9 h-9 flex items-center justify-center rounded-md border text-sm" :class="currentPage === page
+                                        ? 'border-indigo-600 bg-indigo-600 text-white'
+                                        : 'border-gray-300 hover:bg-gray-50'">
+                                    {{ page }}
+                                </button>
+                                <button @click="nextPage" :disabled="currentPage === totalPages"
+                                    class="w-9 h-9 flex items-center justify-center rounded-md border border-gray-300 hover:bg-gray-50 disabled:opacity-50">
+                                    <i class="fas fa-chevron-right text-xs"></i>
                                 </button>
                             </div>
                         </div>
-                    </template>
-                    <template v-else-if="modalType === 'edit'">
-                        <form @submit.prevent="handleUpdateFood" enctype="multipart/form-data"
-                            class="grid grid-cols-2 gap-4 w-96">
-                            <!-- Special Menu -->
-                            <div>
-                                <label for="specialMenu" class="block text-sm font-bold mb-1">Special:</label>
-                                <select id="specialMenu" v-model="editFood.specialMenu" class="input">
-                                    <option value="">Select Special Menu</option>
-                                    <option v-for="special in specialMenus" :key="special.id" :value="special.id">
-                                        {{ special.name }}
-                                    </option>
-                                </select>
-                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                            <!-- Category -->
-                            <div>
-                                <label for="category" class="block text-sm font-bold mb-1">Category:</label>
-                                <select id="category" v-model="editFood.menu" class="input">
-                                    <option value="">Select Category</option>
-                                    <option v-for="category in categories" :key="category.id" :value="category.id">
-                                        {{ category.name }}
-                                    </option>
-                                </select>
+        <!-- Food Form Modal -->
+        <Modal :isVisible="modalVisible" :title="modalTitle" @close="closeModal" size="lg">
+            <div class="p-6">
+                <template v-if="modalType === 'view'">
+                    <!-- View Mode Content -->
+                    <div class="space-y-6">
+                        <div class="flex flex-col md:flex-row items-start gap-6">
+                            <div class="flex-shrink-0 w-full md:w-1/3">
+                                <img :src="currentFood.image || '/placeholder-food.jpg'"
+                                    class="w-full h-64 object-cover rounded-lg" alt="Food image">
                             </div>
+                            <div class="flex-1 w-full md:w-2/3">
+                                <h2 class="text-xl font-semibold text-gray-900">{{ currentFood.name }}</h2>
+                                <div class="mt-2 flex items-center space-x-4">
+                                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
+                                        ${{ currentFood.price }}
+                                    </span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
+                                        {{ currentFood.size }}
+                                    </span>
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-400 mr-1">{{ currentFood.rating }}</span>
+                                        <i class="fas fa-star text-yellow-400"></i>
+                                    </div>
+                                </div>
+                                <div class="mt-4 text-gray-700 whitespace-pre-line">{{ currentFood.description }}</div>
+                            </div>
+                        </div>
 
-                            <!-- Name -->
-                            <div>
-                                <label for="name" class="block text-sm font-bold mb-1">Name:</label>
-                                <input type="text" id="name" v-model="editFood.name" class="input"
-                                    placeholder="Food Name" required />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">Category Information</h3>
+                                <dl class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Category</dt>
+                                        <dd class="text-sm text-gray-900">{{ getCategoryName(currentFood.id_category) }}</dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Special Menu</dt>
+                                        <dd class="text-sm text-gray-900">{{ getSpecialMenuName(currentFood.id_specialmenu) || 'None' }}</dd>
+                                    </div>
+                                </dl>
                             </div>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                                <dl class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Availability</dt>
+                                        <dd class="text-sm text-gray-900">{{ currentFood.available ? 'Available' : 'Unavailable' }}</dd>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <dt class="text-sm text-gray-500">Created At</dt>
+                                        <dd class="text-sm text-gray-900">{{ formatDate(currentFood.created_at) }}</dd>
+                                    </div>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </template>
 
-                            <!-- Image -->
-                            <div>
-                                <label for="image" class="block text-sm font-bold mb-1">Image:</label>
-                                <input type="file" id="image" @change="handleImageEditUpload" class="input" />
-                            </div>
-
-                            <!-- Description -->
-                            <div class="col-span-2">
-                                <label for="description" class="block text-sm font-bold mb-1">Description:</label>
-                                <textarea id="description" v-model="editFood.description" rows="2" class="input"
-                                    placeholder="Description"></textarea>
-                            </div>
-
-                            <!-- Rating -->
-                            <div>
-                                <label for="rating" class="block text-sm font-bold mb-1">Rating:</label>
-                                <input type="number" id="rating" v-model="editFood.rating" class="input"
-                                    placeholder="Rating" />
-                            </div>
-
-                            <!-- Price -->
-                            <div>
-                                <label for="price" class="block text-sm font-bold mb-1">Price:</label>
-                                <input type="number" id="price" v-model="editFood.price" class="input"
-                                    placeholder="Price" required />
-                            </div>
-                            <!-- Size -->
-                            <div class="col-span-2">
-                                <label for="size" class="block text-sm font-bold mb-1">Size:</label>
-                                <select id="size" v-model="editFood.size" class="input">
-                                    <option value="Small">Small</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Large">Large</option>
-                                </select>
-                            </div>
-
-
-                            <!-- Submit Button -->
-                            <div class="col-span-2 text-right">
-                                <button type="submit"
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                    Save Food
-                                </button>
-                            </div>
-                        </form>
-                    </template>
-                    <template v-else-if="modalType === 'delete'">
-                        <p class="text-gray-700">Are you sure you want to delete food:
-                            <strong>{{ currentFood.name }}</strong>?
-                        </p>
-                        <div class="flex justify-end space-x-4 mt-4">
-                            <button @click="closeModal"
-                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded">
+                <template v-else-if="modalType === 'delete'">
+                    <!-- Delete Confirmation -->
+                    <div class="text-center py-6">
+                        <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+                            <i class="fas fa-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <h3 class="mt-3 text-lg font-medium text-gray-900">Delete menu item</h3>
+                        <div class="mt-2 text-sm text-gray-500">
+                            Are you sure you want to delete "{{ currentFood.name }}"? This action cannot be undone.
+                        </div>
+                        <div class="mt-6 flex justify-center space-x-4">
+                            <button @click="closeModal" type="button"
+                                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                 Cancel
                             </button>
-                            <button @click="handleDeleteFood(currentFood.id)"
-                                class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
-                                Confirm
+                            <button @click="handleDeleteFood(currentFood.id)" type="button"
+                                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                Delete
                             </button>
                         </div>
-                    </template>
-                </div>
-            </Modal>
-        </div>
+                    </div>
+                </template>
+
+                <template v-else>
+                    <!-- Add/Edit Form -->
+                    <form @submit.prevent="modalType === 'add' ? handleCreateFood() : handleUpdateFood()"
+                        class="space-y-6">
+                        <div class="grid grid-cols-1 gap-6">
+                            <!-- Image Upload -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Food Image</label>
+                                <div class="mt-1 flex flex-col items-start">
+                                    <div class="relative group mb-4">
+                                        <img :src="activeFood.imagePreview || '/placeholder-food.jpg'"
+                                            class="w-32 h-32 object-cover rounded-lg border-2 border-dashed border-gray-300 cursor-pointer"
+                                            @click="$refs.imageInput.click()">
+                                        <div
+                                            class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="text-white text-sm">Click to change</span>
+                                        </div>
+                                    </div>
+                                    <input type="file" ref="imageInput" class="hidden" @change="handleImageUpload"
+                                        accept="image/*">
+                                    <button type="button" @click="$refs.imageInput.click()"
+                                        class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                        Upload Image
+                                    </button>
+                                    <p class="mt-1 text-xs text-gray-500">JPG, PNG up to 2MB</p>
+                                </div>
+                            </div>
+
+                            <!-- Basic Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                                    <input type="text" v-model="activeFood.name" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2.5 text-gray-400">$</span>
+                                        <input type="number" v-model="activeFood.price" required step="0.01" min="0"
+                                            class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                                    <select v-model="activeFood.id_category" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Select Category</option>
+                                        <option v-for="category in categories" :key="category.id" :value="category.id">
+                                            {{ category.name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Special Menu</label>
+                                    <select v-model="activeFood.id_specialmenu"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="">Select Special Menu</option>
+                                        <option v-for="special in specialMenus" :key="special.id" :value="special.id">
+                                            {{ special.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                                    <select v-model="activeFood.size"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <option value="Small">Small</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Large">Large</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="number" v-model="activeFood.rating" min="0" max="5" step="0.1"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                        <span class="text-gray-500 text-sm">/5</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <textarea v-model="activeFood.description" rows="4"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                            </div>
+                            
+                            <!-- Availability -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" v-model="activeFood.available" class="sr-only peer">
+                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <span class="ml-3 text-sm font-medium text-gray-700">{{ activeFood.available ? 'Available' : 'Unavailable' }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="flex justify-end space-x-4 border-t pt-6">
+                            <button type="button" @click="closeModal"
+                                class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit"
+                                class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition-colors">
+                                {{ modalType === 'add' ? 'Create Item' : 'Save Changes' }}
+                            </button>
+                        </div>
+                    </form>
+                </template>
+            </div>
+        </Modal>
     </div>
 </template>
 
 <script>
 import Modal from "./user/Modal.vue";
 import api from "../../../../axios/Axios";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
     components: { Modal },
@@ -326,44 +469,106 @@ export default {
             modalType: null,
             modalTitle: "",
             currentFood: null,
-            newFood: {
-                specialMenu: '',
-                menu: '',
-                name: '',
-                description: '',
-                rating: null,
-                price: null,
-                size: '',
-                image: null,
-            },
-            editFood: {
+            activeFood: {
                 id: null,
-                specialMenu: "",
-                menu: "",
+                id_category: "",
+                id_specialmenu: "",
                 name: "",
                 description: "",
                 rating: null,
                 price: null,
                 image: null,
-                size: "Small"
+                imagePreview: null,
+                size: "Medium",
+                available: true
             },
             currentPage: 1,
-            foodsPerPage: 5,
+            foodsPerPage: 10,
+            searchQuery: "",
+            categoryFilter: "",
+            statusFilter: "",
+            sortField: "name",
+            sortDirection: "asc",
+            maxVisiblePages: 5
         };
     },
     computed: {
+        availableItemsCount() {
+            return this.foods.filter(food => food.available).length;
+        },
+        filteredFoods() {
+            let filtered = this.foods;
+            
+            // Apply search filter
+            if (this.searchQuery) {
+                const query = this.searchQuery.toLowerCase();
+                filtered = filtered.filter(food => 
+                    food.name.toLowerCase().includes(query) ||
+                    food.description.toLowerCase().includes(query) ||
+                    this.getCategoryName(food.id_category).toLowerCase().includes(query)
+                );
+            }
+            
+            // Apply category filter
+            if (this.categoryFilter) {
+                filtered = filtered.filter(food => food.id_category == this.categoryFilter);
+            }
+            
+            // Apply status filter
+            if (this.statusFilter !== "") {
+                filtered = filtered.filter(food => food.available === (this.statusFilter === "true"));
+            }
+            
+            // Apply sorting
+            if (this.sortField) {
+                filtered = filtered.sort((a, b) => {
+                    let valA = a[this.sortField];
+                    let valB = b[this.sortField];
+                    
+                    // Handle special cases for sorting
+                    if (this.sortField === 'id_category') {
+                        valA = this.getCategoryName(a.id_category);
+                        valB = this.getCategoryName(b.id_category);
+                    } else if (this.sortField === 'id_specialmenu') {
+                        valA = this.getSpecialMenuName(a.id_specialmenu);
+                        valB = this.getSpecialMenuName(b.id_specialmenu);
+                    }
+                    
+                    if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
+                    if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
+                    return 0;
+                });
+            }
+            
+            return filtered;
+        },
         totalPages() {
-            return Math.ceil(this.foods.length / this.foodsPerPage);
+            return Math.ceil(this.filteredFoods.length / this.foodsPerPage);
         },
         startIndex() {
             return (this.currentPage - 1) * this.foodsPerPage;
         },
         endIndex() {
-            return Math.min(this.startIndex + this.foodsPerPage, this.foods.length);
+            return Math.min(this.startIndex + this.foodsPerPage, this.filteredFoods.length);
         },
         paginatedFoods() {
-            return this.foods.slice(this.startIndex, this.endIndex);
+            return this.filteredFoods.slice(this.startIndex, this.endIndex);
         },
+        visiblePages() {
+            const pages = [];
+            let startPage = Math.max(1, this.currentPage - Math.floor(this.maxVisiblePages / 2));
+            let endPage = Math.min(this.totalPages, startPage + this.maxVisiblePages - 1);
+            
+            if (endPage - startPage + 1 < this.maxVisiblePages) {
+                startPage = Math.max(1, endPage - this.maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+            }
+            
+            return pages;
+        }
     },
     methods: {
         async fetchFoods() {
@@ -379,14 +584,13 @@ export default {
                 this.foods = response.data.data;
             } catch (err) {
                 console.error("Fetch error:", err);
-                this.error = "Error fetching categories!";
+                this.error = "Error fetching menu items!";
+                toast.error("Failed to load menu items", { position: toast.POSITION.TOP_RIGHT });
             } finally {
                 this.loading = false;
             }
         },
         async fetchSpecialMenus() {
-            this.loading = true;
-            this.error = null;
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.get("/special-menus", {
@@ -397,14 +601,10 @@ export default {
                 this.specialMenus = response.data.data;
             } catch (err) {
                 console.error("Fetch error:", err);
-                this.error = "Error fetching special menus!";
-            } finally {
-                this.loading = false;
+                toast.error("Failed to load special menus", { position: toast.POSITION.TOP_RIGHT });
             }
         },
         async fetchCategories() {
-            this.loading = true;
-            this.error = null;
             try {
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.get("/categories", {
@@ -415,64 +615,93 @@ export default {
                 this.categories = response.data.data;
             } catch (err) {
                 console.error("Fetch error:", err);
-                this.error = "Error fetching categories!";
-            } finally {
-                this.loading = false;
+                toast.error("Failed to load categories", { position: toast.POSITION.TOP_RIGHT });
             }
         },
         showAddModal() {
             this.modalType = 'add';
             this.modalVisible = true;
-            this.modalTitle = 'Add Food';
-            this.newFood = {
-                menu: "",
-                specialMenu: "",
+            this.modalTitle = 'Add New Menu Item';
+            this.activeFood = {
+                id: null,
+                id_category: "",
+                id_specialmenu: "",
                 name: "",
                 description: "",
                 rating: null,
                 price: null,
                 image: null,
-                size: "Small"
+                imagePreview: null,
+                size: "Medium",
+                available: true
             };
             this.currentFood = null;
         },
-        showEditModal(foods) {
+        showEditModal(food) {
             this.modalType = 'edit';
             this.modalVisible = true;
-            this.modalTitle = 'Edit Food';
-            this.editFood = { ...foods };
-            this.currentFood = { ...foods };
+            this.modalTitle = 'Edit Menu Item';
+            this.activeFood = {
+                id: food.id,
+                id_category: food.id_category,
+                id_specialmenu: food.id_specialmenu,
+                name: food.name,
+                description: food.description,
+                rating: food.rating,
+                price: food.price,
+                image: null,
+                imagePreview: food.image,
+                size: food.size || "Medium",
+                available: food.available
+            };
+            this.currentFood = { ...food };
         },
-        showViewModal(foods) {
-            console.log('Food object:', foods);
+        showViewModal(food) {
             this.modalType = 'view';
             this.modalVisible = true;
-            this.modalTitle = 'View Food';
-            this.currentFood = { ...foods };
-            console.log('Current food set for view:', this.currentFood);
+            this.modalTitle = 'Menu Item Details';
+            this.currentFood = { ...food };
         },
-        showDeleteModal(foods) {
+        showDeleteModal(food) {
             this.modalType = 'delete';
             this.modalVisible = true;
-            this.modalTitle = 'Delete Food';
-            this.currentFood = { ...foods };
+            this.modalTitle = 'Confirm Deletion';
+            this.currentFood = { ...food };
         },
         handleImageUpload(event) {
-            this.newFood.image = event.target.files[0];
+            const file = event.target.files[0];
+            if (file && file.size > 2 * 1024 * 1024) {
+                toast.warning("Image size should be less than 2MB", { position: toast.POSITION.TOP_RIGHT });
+                return;
+            }
+            
+            if (file && file.type.startsWith('image/')) {
+                this.activeFood.image = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.activeFood.imagePreview = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            } else if (file) {
+                toast.warning("Please select a valid image file", { position: toast.POSITION.TOP_RIGHT });
+            }
         },
         async handleCreateFood() {
             try {
                 const formData = new FormData();
-                formData.append("name", this.newFood.name);
-                formData.append("description", this.newFood.description);
-                formData.append("rating", this.newFood.rating);
-                formData.append("price", this.newFood.price);
-                formData.append("size", this.newFood.size);
-                formData.append("id_category", this.newFood.menu);
-                formData.append("id_specialmenu", this.newFood.specialMenu);
-                if (this.newFood.image) {
-                    formData.append("image", this.newFood.image);
+                formData.append("name", this.activeFood.name);
+                formData.append("description", this.activeFood.description);
+                formData.append("rating", this.activeFood.rating);
+                formData.append("price", this.activeFood.price);
+                formData.append("size", this.activeFood.size);
+                formData.append("id_category", this.activeFood.id_category);
+                formData.append("id_specialmenu", this.activeFood.id_specialmenu || "");
+                formData.append("available", this.activeFood.available);
+                
+                if (this.activeFood.image) {
+                    formData.append("image", this.activeFood.image);
                 }
+                
                 const token = sessionStorage.getItem("auth_token");
                 const response = await api.post("/addproducts", formData, {
                     headers: {
@@ -480,31 +709,37 @@ export default {
                         "Content-Type": "multipart/form-data"
                     },
                 });
-                console.log(response.data);
-                alert('Food added successfully!');
+                
+                toast.success("Menu item created successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
             } catch (error) {
                 console.error('Error adding food:', error);
-                alert("Failed to add food. Please check your credentials or try again.");
+                const errorMsg = error.response?.data?.message || "Failed to create menu item";
+                toast.error(errorMsg, { position: toast.POSITION.TOP_RIGHT });
             }
         },
         async handleUpdateFood() {
             try {
                 const formData = new FormData();
-                formData.append("id_category", this.editFood.menu);
-                formData.append("id_specialmenu", this.editFood.specialMenu);
-                formData.append("name", this.editFood.name);
-                formData.append("description", this.editFood.description);
-                formData.append("rating", this.editFood.rating);
-                formData.append("price", this.editFood.price);
-                formData.append("size", this.editFood.size);
-                if (this.editFood.image instanceof File) {
-                    formData.append("image", this.editFood.image);
-                }
+                formData.append("name", this.activeFood.name);
+                formData.append("description", this.activeFood.description);
+                formData.append("rating", this.activeFood.rating);
+                formData.append("price", this.activeFood.price);
+                formData.append("size", this.activeFood.size);
+                formData.append("id_category", this.activeFood.id_category);
+                formData.append("id_specialmenu", this.activeFood.id_specialmenu || "");
+                formData.append("available", this.activeFood.available);
                 formData.append("_method", "PUT");
+                
+                if (this.activeFood.image) {
+                    formData.append("image", this.activeFood.image);
+                }
+                
                 const token = sessionStorage.getItem("auth_token");
-                const response = await api.post(`/updateproducts/${this.editFood.id}`, formData,
+                const response = await api.post(
+                    `/updateproducts/${this.activeFood.id}`,
+                    formData,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -512,54 +747,76 @@ export default {
                         },
                     }
                 );
-                console.log(response.data);
-                alert('Category updated successfully!');
+                
+                toast.success("Menu item updated successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
             } catch (error) {
                 console.error('Error updating food:', error);
-                alert('Failed to update food. Please try again.');
+                const errorMsg = error.response?.data?.message || "Failed to update menu item";
+                toast.error(errorMsg, { position: toast.POSITION.TOP_RIGHT });
             }
         },
         async handleDeleteFood(foodId) {
             try {
                 const token = sessionStorage.getItem("auth_token");
                 await api.delete(`/deleteproduct/${foodId}`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                    data: {}
+                    headers: { 
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
                 });
-                alert('Food deleted successfully!');
+                
+                toast.success("Menu item deleted successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.fetchFoods();
                 this.closeModal();
             } catch (error) {
                 console.error('Error deleting food:', error);
-                alert('Failed to delete food.');
+                toast.error("Failed to delete menu item", { position: toast.POSITION.TOP_RIGHT });
+            }
+        },
+        async toggleAvailability(food) {
+            try {
+                const token = sessionStorage.getItem("auth_token");
+                const response = await api.post(
+                    `/updateproducts/${food.id}`,
+                    {
+                        available: !food.available,
+                        _method: "PUT"
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+                
+                food.available = !food.available;
+                toast.success(`Item marked as ${food.available ? 'available' : 'unavailable'}`, { 
+                    position: toast.POSITION.TOP_RIGHT 
+                });
+            } catch (error) {
+                console.error('Error toggling availability:', error);
+                toast.error("Failed to update availability", { position: toast.POSITION.TOP_RIGHT });
             }
         },
         closeModal() {
             this.modalVisible = false;
             this.modalType = null;
             this.currentFood = null;
-            this.newFood = {
-                menu: "",
-                specialMenu: "",
-                name: "",
-                description: "",
-                rating: null,
-                price: null,
-                image: null,
-                size: "Small"
-            };
-            this.editFood = {
+            this.activeFood = {
                 id: null,
-                menu: "",
-                specialMenu: "",
+                id_category: "",
+                id_specialmenu: "",
                 name: "",
                 description: "",
                 rating: null,
                 price: null,
                 image: null,
-                size: "Small"
+                imagePreview: null,
+                size: "Medium",
+                available: true
             };
         },
         goToPage(page) {
@@ -575,26 +832,45 @@ export default {
                 this.currentPage++;
             }
         },
-        handleImageEditUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                if (file.type.startsWith('image/')) {
-                    this.editFood.image = file;
-                } else {
-                    alert('Please select a valid image file.');
-                }
+        sortBy(field) {
+            if (this.sortField === field) {
+                this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
             } else {
-                this.editFood.image = null;
+                this.sortField = field;
+                this.sortDirection = 'asc';
             }
         },
         getCategoryName(id) {
-            const category = this.categories.find(category => category.id === id);
-            return category ? category.name : 'Null';
+            const category = this.categories.find(c => c.id === id);
+            return category ? category.name : 'None';
         },
         getSpecialMenuName(id) {
-            const specialMenu = this.specialMenus.find(specialMenu => specialMenu.id === id);
-            return specialMenu ? specialMenu.name : 'Null';
+            if (!id) return 'None';
+            const specialMenu = this.specialMenus.find(sm => sm.id === id);
+            return specialMenu ? specialMenu.name : 'None';
         },
+        formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+    },
+    watch: {
+        foodsPerPage() {
+            this.currentPage = 1;
+        },
+        categoryFilter() {
+            this.currentPage = 1;
+        },
+        statusFilter() {
+            this.currentPage = 1;
+        }
     },
     mounted() {
         this.fetchFoods();
@@ -603,10 +879,18 @@ export default {
     },
 };
 </script>
+
 <style scoped>
 @import "font-awesome/css/font-awesome.min.css";
 
-.input {
-    @apply shadow border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline;
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.transition-colors {
+    transition: color 0.2s ease, background-color 0.2s ease;
 }
 </style>
