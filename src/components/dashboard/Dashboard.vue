@@ -223,6 +223,7 @@ import PaymentScan from './payment/PaymentScan.vue';
 import Order from '../admin/pages/master/order/Order.vue';
 import { echo } from '../../services/echo';
 import Status from './Status.vue';
+import Modal from '../admin/pages/master/user/Modal.vue';
 
 export default {
   data() {
@@ -307,6 +308,7 @@ export default {
     this.updateTotals();
     this.listenForOrderApprove();
     this.listenForKitchenStatus();
+    this.listenCreditForStatus();
   },
   beforeUnmount() {
     this.stopStatusUpdates();
@@ -349,11 +351,34 @@ export default {
       clearInterval(this.intervalId);
     },
     listenAddItem() {
-      echo.channel("ordersItem").listen("OrderCreated", (event) => {
-        this.selectedItems = event.items;
-        this.updateTotals();
-        this.calculateTotals();
+      const userId = sessionStorage.getItem('id');
+      echo.channel(`ordersItem`).listen("OrderCreated", (event) => {
+        if (event.userId == userId) {
+          this.selectedItems = event.items;
+          this.updateTotals();
+          this.calculateTotals();
+        } else {
+          console.log('Ignoring update for other user', event.userId);
+        }
       });
+    },
+    listenCreditForStatus() {
+      echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
+        this.showStatus = true;
+        this.resultMessage = 'Food is at kitchen.';
+        localStorage.setItem("order_status_step", "At Kitchen");
+        localStorage.setItem("order_status_message", this.resultMessage);
+
+        this.$nextTick(() => {
+          const modal = this.$refs.Status;
+          if (modal && typeof modal.moveToStep === 'function') {
+            modal.moveToStep('At Kitchen');
+          }
+          else {
+            console.error('Status component not ready or method missing');
+          }
+        });
+      })
     },
     listenForOrderApprove() {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
@@ -564,10 +589,12 @@ export default {
       console.log("Selected category:", category);
     },
     updateOrderOnServer() {
-      const userId = sessionStorage.getItem('user_id');
+      const userId = sessionStorage.getItem('id');
+      const sessionId = sessionStorage.getItem('session_id');
 
-      api.post('/order/add-items', {
+      const response = api.post('/order/add-items', {
         user_id: userId,
+        session_id: sessionId,
         items: this.selectedItems.map(i => ({
           id: i.id,
           image: i.image,

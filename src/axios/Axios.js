@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   withCredentials: true,
 });
@@ -42,7 +42,7 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({
             resolve: (token) => {
-              originalRequest.headers.Authorization = 'Bearer ' + token;
+              originalRequest.headers.Authorization = `Bearer ${token}`;
               resolve(api(originalRequest));
             },
             reject: (err) => reject(err),
@@ -53,16 +53,25 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshResponse = await api.post("/refresh", {}, {
-          withCredentials: true,
-        });
+        // Send expired token in Authorization header
+        const oldToken = sessionStorage.getItem("auth_token");
+
+        const refreshResponse = await axios.post(
+          "http://localhost:8000/api/refresh",
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${oldToken}`,
+            },
+          }
+        );
 
         const newToken = refreshResponse.data.token;
-        sessionStorage.setItem("auth_token", newToken);
-        api.defaults.headers.common.Authorization = `Bearer ${newToken}`;
 
+        sessionStorage.setItem("auth_token", newToken);
+        api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
         processQueue(null, newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);
