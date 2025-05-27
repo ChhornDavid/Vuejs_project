@@ -12,6 +12,14 @@
         </div>
 
         <div class="flex items-center space-x-4">
+          <div class="language-switcher">
+            <button @click="switchLanguage('en')" :class="{ active: currentLocale === 'en' }">
+              English
+            </button>
+            <button @click="switchLanguage('km')" :class="{ active: currentLocale === 'km' }">
+              ភាសាខ្មែរ
+            </button>
+          </div>
           <div class="relative">
             <button @click="showStatus = true"
               class="relative p-2 rounded-full bg-white shadow-sm hover:bg-gray-100 transition-colors">
@@ -34,22 +42,39 @@
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Menu Categories</h2>
         <div class="relative">
           <div ref="scrollContainer" class="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-            <button v-for="(category, index) in categories" :key="index" @click="changeCategory(category.name)"
-              class="flex flex-col items-center px-4 py-2 rounded-xl bg-white shadow-sm hover:bg-emerald-50 transition-colors border border-gray-100 min-w-[100px]">
+
+            <!-- All Items Button -->
+            <button @click="changeCategory(null)" :class="[
+              'flex flex-col items-center px-4 py-2 rounded-xl shadow-sm transition-colors border min-w-[100px]',
+              !activeCategory ? 'bg-emerald-100 border-emerald-300' : 'bg-white border-gray-100 hover:bg-emerald-50'
+            ]">
+              <span class="text-lg font-medium pt-5 text-gray-700 text-center">All Items</span>
+            </button>
+
+            <!-- Category Buttons -->
+            <button v-for="(category, index) in categories" :key="index" @click="changeCategory(category)" :class="[
+              'flex flex-col items-center px-4 py-2 rounded-xl shadow-sm transition-colors border min-w-[100px]',
+              activeCategory?.id === category.id
+                ? 'bg-emerald-100 border-emerald-300'
+                : 'bg-white border-gray-100 hover:bg-emerald-50'
+            ]">
               <img :src="category.image" class="w-8 h-8 mb-2 object-contain" />
               <span class="text-sm font-medium text-gray-700">{{ category.name }}</span>
             </button>
+
           </div>
         </div>
       </section>
 
       <!-- Menu Items -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory || 'All Items' }}</h2>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory ? activeCategory.name : 'All Items' }}
+        </h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
           <div v-for="(item, index) in filterMenuItems()" :key="index"
             class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+            <!-- Rest of your item content remains the same -->
             <div class="flex flex-col md:flex-row">
               <!-- Item Image -->
               <div class="md:w-1/3 h-48 bg-gray-100 overflow-hidden">
@@ -122,9 +147,10 @@
       <div class="flex-1 overflow-hidden flex flex-col">
         <h3 class="text-sm font-medium text-gray-500 mb-3">ORDER ITEMS ({{ selectedItems.length }})</h3>
 
-        <div class="flex-1 overflow-y-auto">
-          <div class="space-y-4">
-            <div v-for="(item, index) in selectedItems" :key="index" class="flex items-start p-3 bg-gray-50 rounded-lg">
+        <div class="flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
+          <div class="space-y-4 p-2">
+            <div v-for="(item, index) in selectedItems" :key="index"
+              class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
               <img :src="item.image" class="w-12 h-12 rounded-lg object-cover mr-3" />
 
               <div class="flex-1">
@@ -178,6 +204,10 @@
               <span>Total</span>
               <span>${{ total.toFixed(2) }}</span>
             </div>
+            <div class="flex justify-between text-lg font-bold pt-2">
+              <span>Paid here ↓</span>
+            </div>
+
           </div>
 
           <!-- Payment Options -->
@@ -228,6 +258,7 @@ import Modal from '../admin/pages/master/user/Modal.vue';
 export default {
   data() {
     return {
+      currentLocale: 'en',
       userData: null,
       dataUrl: null,
       qrCodeSrc: '',
@@ -256,6 +287,8 @@ export default {
       approveStatus: '',
       OrderId: [],
       sharedOrders: null,
+      activeCategory: null,
+      isLoading: false,
     };
   },
   setup() {
@@ -544,8 +577,11 @@ export default {
           }
         });
         this.menuItems = response.data.data;
+        console.log(this.menuItems);
       } catch (error) {
         console.error("Error fetch food: ", error);
+      } finally {
+        this.isLoading = false;
       }
 
     },
@@ -586,7 +622,22 @@ export default {
       }
     },
     changeCategory(category) {
-      console.log("Selected category:", category);
+      if (!category) {
+        // Show all items
+        this.activeCategory = null;
+        this.filteredItems = this.allItems;
+      } else {
+        this.activeCategory = category;
+        this.filteredItems = this.allItems.filter(item => item.category_id === category.id);
+      }
+    },
+    filterMenuItems() {
+      if (!this.activeCategory) {
+        return this.menuItems;
+      }
+      return this.menuItems.filter(
+        item => Number(item.id_category) === Number(this.activeCategory.id)
+      );
     },
     updateOrderOnServer() {
       const userId = sessionStorage.getItem('id');
@@ -648,25 +699,6 @@ export default {
       this.showPaymentScan = false;
       this.showStatus = false;
     },
-    changeCategory(category) {
-      this.selectedCategory = category;
-    },
-    filterMenuItems() {
-      if (!this.selectedCategory) {
-        return this.menuItems;
-      }
-
-      if (this.selectedCategory === "all") {
-        return this.menuItems;
-      }
-      if (!isNaN(Number(this.selectedCategory))) {
-        // Filter by item ID
-        const selectedId = Number(this.selectedCategory);
-        return this.menuItems.filter(item => item.id === selectedId);
-      } else {
-        return this.menuItems.filter(item => item.category === this.selectedCategory);
-      }
-    },
     removeFromOrder(index) {
       this.selectedItems.splice(index, 1);
       this.calculateTotals();
@@ -697,6 +729,15 @@ export default {
     formatCurrency(value) {
       return `$${value.toFixed(2)}`;
     },
+  },
+  created() {
+    // Get initial language from cookie or browser
+    this.currentLocale = localStorage.getItem('locale') || 
+                         navigator.language.split('-')[0] || 
+                         'en';
+    if (!['en', 'km'].includes(this.currentLocale)) {
+      this.currentLocale = 'en';
+    }
   },
 };
 </script>
