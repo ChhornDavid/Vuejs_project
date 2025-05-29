@@ -258,7 +258,6 @@ import Modal from '../admin/pages/master/user/Modal.vue';
 export default {
   data() {
     return {
-      currentLocale: 'en',
       userData: null,
       dataUrl: null,
       qrCodeSrc: '',
@@ -729,15 +728,6 @@ export default {
     formatCurrency(value) {
       return `$${value.toFixed(2)}`;
     },
-  },
-  created() {
-    // Get initial language from cookie or browser
-    this.currentLocale = localStorage.getItem('locale') || 
-                         navigator.language.split('-')[0] || 
-                         'en';
-    if (!['en', 'km'].includes(this.currentLocale)) {
-      this.currentLocale = 'en';
-    }
   },
 };
 </script>
