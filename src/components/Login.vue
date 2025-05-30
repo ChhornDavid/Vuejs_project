@@ -74,6 +74,15 @@ const router = useRouter();
 
 const login = async () => {
   try {
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      alert('You are already logged in in another tab.');
+      const role = sessionStorage.getItem('role');
+      const redirectPath = role === 'admin' ? '/admin' :
+        role === 'cooker' ? '/kitchen' : '/dashboard';
+      router.push(redirectPath);
+      return;
+    }
+
     const response = await api.post('/login', {
       email: email.value,
       password: password.value,
@@ -83,11 +92,16 @@ const login = async () => {
 
     const sessionId = sessionStorage.getItem('session_id') || crypto.randomUUID();
     sessionStorage.setItem('session_id', sessionId);
+
     if (token) {
       sessionStorage.setItem('auth_token', token);
       sessionStorage.setItem('name', name);
       sessionStorage.setItem('role', role);
       sessionStorage.setItem('id', id);
+
+      localStorage.setItem('auth_token', token);
+      localStorage.setItem('role', role);
+      localStorage.setItem('isLoggedIn', 'true');
 
       const redirectPath = role === 'admin' ? '/admin' :
         role === 'cooker' ? '/kitchen' : '/dashboard';
@@ -100,6 +114,7 @@ const login = async () => {
     alert(error.response?.data?.message || 'Login failed. Please check your credentials.');
   }
 };
+
 </script>
 
 <style scoped>

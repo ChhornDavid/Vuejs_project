@@ -123,13 +123,12 @@ const router = createRouter({
     routes: routes
 })
 
-// Global variable to control navigation
 let allowNavigation = true;
 
 // Function to allow navigation
 export const allowRouteNavigation = () => {
     allowNavigation = true;
-    router.push(router.currentRoute); // Trigger navigation
+    router.push(router.currentRoute);
 };
 
 // Function to deny navigation
