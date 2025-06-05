@@ -642,11 +642,9 @@ export default {
     },
     updateOrderOnServer() {
       const userId = sessionStorage.getItem('id');
-      const sessionId = sessionStorage.getItem('session_id');
 
       const response = api.post('/order/add-items', {
         user_id: userId,
-        session_id: sessionId,
         items: this.selectedItems.map(i => ({
           id: i.id,
           image: i.image,
