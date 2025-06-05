@@ -710,7 +710,7 @@ export default {
                     },
                 });
                 
-                toast.success("Menu item created successfully", { position: toast.POSITION.TOP_RIGHT });
+                toast.success("Food item created successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
             } catch (error) {
@@ -748,7 +748,7 @@ export default {
                     }
                 );
                 
-                toast.success("Menu item updated successfully", { position: toast.POSITION.TOP_RIGHT });
+                toast.success("Food item updated successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
             } catch (error) {
@@ -767,7 +767,7 @@ export default {
                     }
                 });
                 
-                toast.success("Menu item deleted successfully", { position: toast.POSITION.TOP_RIGHT });
+                toast.success("Food item deleted successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.fetchFoods();
                 this.closeModal();
             } catch (error) {

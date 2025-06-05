@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-purple-600 to-indigo-700 flex items-center justify-center p-4">
+  <div class="min-h-screen bg-gradient-to-br from-purple-200 to-indigo-300 flex items-center justify-center p-4">
     <div class="w-full max-w-lg transform transition-all duration-300 hover:scale-[1.005]">
       <div class="bg-white rounded-2xl shadow-2xl p-8 sm:p-12 relative overflow-hidden">
         <!-- Decorative elements -->
@@ -36,14 +36,6 @@
                             placeholder-gray-400">
               <i class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
             </div>
-          </div>
-
-          <div class="flex items-center justify-between text-sm">
-            <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" class="rounded text-purple-500 focus:ring-purple-400">
-              <span class="text-gray-600">Remember me</span>
-            </label>
-            <a href="#" class="text-purple-600 hover:text-purple-700 font-medium">Forgot password?</a>
           </div>
 
           <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white py-3.5 rounded-xl

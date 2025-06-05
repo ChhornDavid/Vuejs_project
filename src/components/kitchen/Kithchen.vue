@@ -15,6 +15,10 @@
             <div class="text-right text-gray-600">
               <p class="text-sm">{{ currentDate }}</p>
               <p class="text-lg font-medium">{{ currentTime }}</p>
+              <button @click="logout" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+                title="Logout">
+                <i class="fas fa-sign-out-alt"></i>
+              </button>
             </div>
           </div>
         </div>
@@ -112,6 +116,7 @@
 <script>
 import api from '../../axios/Axios';
 import { echo } from '../../services/echo';
+import { useRouter } from 'vue-router';
 
 export default {
   data() {
@@ -133,6 +138,10 @@ export default {
       currentTime: '',
       currentDate: '',
     };
+  },
+  setup(){
+    const router = useRouter();
+    return { router };
   },
   computed: {
     filteredOrders() {
@@ -274,6 +283,32 @@ export default {
       echo.channel("robot-channel").listen("EventForRobot", (event) => {
         console.log("Robot Event Received:", event.robot);
       });
+    },
+    async logout() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        if (!token) {
+          alert("No token found. Please log in.");
+          return;
+        }
+        await api.post(
+          "/logout", {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        sessionStorage.clear();
+        localStorage.clear();
+        localStorage.setItem('isLoggedIn', 'false');
+        localStorage.removeItem('isLoggedIn');
+        this.router.push("/");
+        alert("Logged out successfully!");
+      } catch (error) {
+        console.error("Logout failed:", error.response?.data || error.message);
+        alert("Failed to logout. Please try again.");
+      }
     },
     scrollToTop() {
       this.$nextTick(() => {

@@ -27,6 +27,7 @@
     "qrcode": "^1.5.4",
     "vue": "^3.5.12",
     "vue-chartjs": "^5.3.2",
+    "vue-i18n": "^11.1.5",
     "vue-icons-plus": "^0.1.7",
     "vue-qr": "^4.0.9",
     "vue-qrcode": "^2.2.2",

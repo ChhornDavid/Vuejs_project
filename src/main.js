@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import './style.css'
+import { createI18n } from 'vue-i18n'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -24,7 +25,22 @@ import Invoice from './components/admin/pages/master/order/Invoice.vue'
 import Kithchen from './components/kitchen/Kithchen.vue'
 import Test from './components/Test.vue'
 
+const messages = {
+  en: {
+    welcome: 'Welcome!',
+    price: 'Price: {amount} USD'
+  },
+  km: {
+    welcome: 'សូមស្វាគមន៍!',
+    price: 'តម្លៃ៖ {amount} ដុល្លារ'
+  }
+}
 
+const i18n = createI18n({
+  locale: 'en',
+  fallbackLocale: 'en',
+  messages
+})
 // Define Routes
 const routes = [
     {
@@ -164,12 +180,8 @@ router.beforeEach((to, _from, next) => {
 
 // Create App Instance
 const app = createApp(App)
-
-// Register Font Awesome Icon Component
 app.component('font-awesome-icon', FontAwesomeIcon)
-
-// Use Router
+app.use(i18n) // make sure this comes after i18n is defined
 app.use(router)
-
-// Mount App
 app.mount('#app')
+

@@ -13,12 +13,8 @@
 
         <div class="flex items-center space-x-4">
           <div class="language-switcher">
-            <button @click="switchLanguage('en')" :class="{ active: currentLocale === 'en' }">
-              English
-            </button>
-            <button @click="switchLanguage('km')" :class="{ active: currentLocale === 'km' }">
-              ភាសាខ្មែរ
-            </button>
+            <button @click="switchLang('km')">Khmer</button>
+            <button @click="switchLang('en')">English</button>
           </div>
           <div class="relative">
             <button @click="showStatus = true"
@@ -362,6 +358,9 @@ export default {
     }
   },
   methods: {
+    switchLang(lang) {
+      this.$i18n.locale = lang
+    },
     switchStatus() {
       const currentIndex = this.statuses.indexOf(this.currentStatus);
       this.currentStatus = this.statuses[(currentIndex + 1) % this.statuses.length];

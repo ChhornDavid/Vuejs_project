@@ -280,6 +280,9 @@ export default {
                     }
                 );
                 sessionStorage.clear();
+                localStorage.clear();
+                localStorage.setItem('isLoggedIn', 'false');
+                localStorage.removeItem('isLoggedIn');
                 this.router.push("/");
                 alert("Logged out successfully!");
             } catch (error) {

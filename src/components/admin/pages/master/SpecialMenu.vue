@@ -221,6 +221,7 @@
 <script>
 import Modal from "./user/Modal.vue";
 import api from "../../../../axios/Axios";
+import { toast } from 'vue3-toastify';
 
 export default {
   components: { Modal },
@@ -318,6 +319,7 @@ export default {
         await api.post("/addspecial-menus", this.activeMenu, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success("Menu item create successfully", { position: toast.POSITION.TOP_RIGHT });
         this.fetchSpecialMenus();
         this.closeModal();
       } catch (error) {
@@ -331,6 +333,7 @@ export default {
         await api.put(`/updatespecial-menus/${this.activeMenu.id}`, this.activeMenu, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success("Menu item update successfully", { position: toast.POSITION.TOP_RIGHT });
         this.fetchSpecialMenus();
         this.closeModal();
       } catch (error) {
@@ -344,6 +347,7 @@ export default {
         await api.delete(`/deletespecial-menus/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+        toast.success("Menu item delete successfully", { position: toast.POSITION.TOP_RIGHT });
         this.fetchSpecialMenus();
         this.closeModal();
       } catch (error) {
