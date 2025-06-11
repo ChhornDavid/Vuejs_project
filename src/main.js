@@ -1,7 +1,7 @@
 import { createApp } from 'vue'
 import './style.css'
-import { createI18n } from 'vue-i18n'
 import App from './App.vue'
+import { createI18n } from 'vue-i18n'
 import { createRouter, createWebHistory } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
@@ -11,8 +11,8 @@ import Dashboard from './components/dashboard/Dashboard.vue'
 import Admin from './components/admin/pages/master/Admin.vue'
 import Home from './components/admin/pages/master/Home.vue'
 import User from './components/admin/pages/master/user/User.vue'
-import Menu from './components/admin/pages/master/Menu.vue'
-import Food from './components/admin/pages/master/Food.vue'
+import Menu from './components/admin/pages/master/Menu_Category.vue'
+import Food from './components/admin/pages/master/Menu.vue'
 import SpecialMenu from './components/admin/pages/master/SpecialMenu.vue'
 import Unauthorized from './components/Authorized/Unauthorized.vue'
 import NotFound from './components/Authorized/NotFound.vue'
@@ -27,20 +27,123 @@ import Test from './components/Test.vue'
 
 const messages = {
   en: {
-    welcome: 'Welcome!',
-    price: 'Price: {amount} USD'
+    restaurant: "Restaurant",
+    menuCategories: "Menu Categories",
+    allItems: "All Items",
+    addToOrder: "Add to Order",
+    orderItems: "ORDER ITEMS",
+    size: "SIZE",
+    total: "Total",
+    tax: "Tax (10%)",
+    subtotal: "Subtotal",
+    yourOrderEmpty: "Your order is empty",
+    addItemsFromMenu: "Add items from the menu",
+    logout: "Logout",
+    language: "Language",
+    khmer: "Khmer",
+    english: "English",
+    ordering:"Ordering",
+    tablenumber: "TableNumer",
+    cash: "Cash",
+    card: "Card",
+    itemname: "Ttem.name",
+    e_pay: "E_Pay",
+    kh: "khmer",
+    en: "English",
+    paid_here: "Paid here",
+    add_category:"Add Category",
+    category_management:"Category Management",
+    total_category:"total_category",
+    show:"Show:",
+    id:"ID",
+    name:"Name",
+    image:"Image",
+    actions:"Actions",
+    category_name:"Catrgory Name",
+    no_categories_found:'No categories found',
+    search_categories:"Search categories",
+    menu_management:"Menu Management",
+    add_menu:"Add menu",
+    dashboard: 'Dashboard',
+    orders:"Order",
+    special_menu:"Special Menu",
+    menu_category:"Menu Category",
+    menu:"Menu",
+    user:"User",
+    food:"Food",
+    user_management:"User Management",
+    add_user:"Add user",
+    user:"User",
+    role:"Role",
+    status:"Status",
+    active:"Active",
+    invoice:"Invoice",
+    order_history:"Order history",
+    current_order:"Current Orders"
   },
-  km: {
-    welcome: 'សូមស្វាគមន៍!',
-    price: 'តម្លៃ៖ {amount} ដុល្លារ'
+  kh: {
+    restaurant: "ភោជនីយដ្ឋាន",
+    menuCategories: "ប្រភេទម៉ឺនុយ",
+    allItems: "ម៉ឺនុយទាំងអស់",
+    addToOrder: "កម្មង់",
+    orderItems: "មុខម្ហូបបានទិញ",
+    size: "ទំហំ",
+    total: "សរុប",
+    tax: "ពន្ធ (១០%)",
+    subtotal: "សរុប",
+    yourOrderEmpty: "មិនទាន់មានការបញ្ជាទិញ",
+    addItemsFromMenu: "បន្ថែមមុខម្ហូបពីម៉ឺនុយ",
+    logout: "ចាកចេញ",
+    language: "ភាសា",
+    khmer: "ខ្មែរ",
+    english: "អង់គ្លេស",
+    ordering: "ការកម្មង់",
+    tablenumber: "តុលេខ",
+    cash: "សាច់ប្រាក់",
+    card: "កាត",
+    e_pay: "ការទូទាត់តាមអេឡិចត្រូនិក",
+    kh: "ភាសាខ្មែរ",
+    en: "ភាសាអង់គ្លេស",
+    paid_here: "បង់នៅទីនេះ",
+    add_category:"បន្ថែមប្រភេទម៉ឺនុយថ្មី",
+    category_management:"ការគ្រប់គ្រងប្រភេទនៃម៉ឺនុយ",
+    total_category:"ម៉ឺនុយសរុប",
+    show:"បង្ហាញៈ",
+    id:"លេខ",
+    name:"ឈ្មោះ",
+    image:"រូបភាព",
+    actions:"មុខងារ",
+    category_name:"ឈ្មោះ ម៉ឺនុយ",
+    no_categories_found:'រកមិនឃើញម៉ឺនុយទេ',
+    search_categories:"ស្វែងរកប្រភេទម៉ឺនុយ",
+    menu_management:"ការគ្រប់គ្រងម៉ឺនុយ",
+    add_menu:"បន្ថែមម៉ឺនុយថ្មី",
+    dashboard: 'ផ្ទាំងគ្រប់គ្រង',
+    orders:"ការកម្មង់",
+    special_menu:"ម៉ឺនុយពិសេស",
+    menu_category:"ប្រភេទនៃម៉ឺនុយ",
+    menu:"ម៉ឺនុយ",
+    user:"អ្នកប្រើប្រាស់",
+    food:"អាហារ",
+    user_management:"ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
+    add_user:"បញ្ចូលអ្នកប្រើប្រាស់ថ្មី",
+    user:"អ្នកប្រើប្រាស់",
+    role:"តួនាទី",
+    status:"ស្ថានភាព",
+    active:"សកម្មភាព",
+    invoice:"វិក្កយបត្រ",
+    order_history:"ប្រវត្តិនៃការកម្មង់",
+    current_order:"ការកម្មង់បច្ចុប្បន្ន"
+    
   }
 }
 
 const i18n = createI18n({
   locale: 'en',
   fallbackLocale: 'en',
-  messages
+  messages,
 })
+
 // Define Routes
 const routes = [
     {
@@ -180,8 +283,8 @@ router.beforeEach((to, _from, next) => {
 
 // Create App Instance
 const app = createApp(App)
-app.component('font-awesome-icon', FontAwesomeIcon)
-app.use(i18n) // make sure this comes after i18n is defined
+app.component('font-awesome-icon', FontAwesomeIcon) 
 app.use(router)
+app.use(i18n)
 app.mount('#app')
 
