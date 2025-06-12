@@ -111,7 +111,8 @@
       <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold text-gray-800">{{ $t('ordering') }} {{ OrderId }}</h2>
-          <button @click="logout" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" :title="$t('logout')">
+          <button @click="logout" 
+          class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" :title="$t('logout')">
           {{ $t('logout') }}
             <i class="fas fa-sign-out-alt"></i>
           </button>

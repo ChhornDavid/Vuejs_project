@@ -106,7 +106,8 @@ const messages = {
     accept:"Accept",
     decline:"Decline",
     cancel:"Cancel",
-    confirm:"Confirm"
+    confirm:"Confirm",
+    admin:"Admin"
 
 
   },
@@ -189,7 +190,8 @@ const messages = {
     accept:"ទទួល",
     decline:"បដិសេធ",
     cancel:"លុបចោល",
-    confirm:"បញ្ជាក់"
+    confirm:"បញ្ជាក់",
+    admin:"អ្នកគ្រប់គ្រង"
     
   }
 }
