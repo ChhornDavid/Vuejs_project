@@ -2,7 +2,7 @@
     <div class="mx-auto p-4 max-w-7xl">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-900">Pending Orders</h1>
+            <h1 class="text-2xl font-bold text-gray-900">{{ $t('pending_order') }}</h1>
             <p class="mt-2 text-gray-600">Manage incoming customer orders</p>
         </div>
 
@@ -27,7 +27,7 @@
                 <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
                 </svg>
-                <h3 class="mt-2 text-lg font-medium text-gray-900">No pending orders</h3>
+                <h3 class="mt-2 text-lg font-medium text-gray-900">{{$t('no_pending_order')}}</h3>
                 <p class="mt-1 text-sm text-gray-500">New orders will appear here as they come in</p>
             </div>
         </div>
@@ -42,17 +42,17 @@
                         <h3 class="text-lg font-semibold text-gray-900">Table #{{ order.user_id }}</h3>
                         <p class="text-sm text-gray-500">Order ID: {{ order.id }}</p>
                     </div>
-                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">Pending</span>
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"> {{$t('pending')}} </span>
                 </div>
 
                 <!-- Order Items -->
                 <div class="border-t border-gray-100 pt-4">
                     <div class="grid grid-cols-6 gap-4 text-sm font-medium text-gray-600 mb-2">
                         <span>Item</span>
-                        <span>Size</span>
-                        <span>Qty</span>
-                        <span>Price</span>
-                        <span class="text-right">Total</span>
+                        <span>{{$t('size')}}</span>
+                        <span>{{ $t('qty') }}</span>
+                        <span>{{$t('price')}}</span>
+                        <span class="text-right">{{$t('total')}}</span>
                     </div>
                     
                     <div v-for="item in safeParseJSON(order.items)" :key="item.product_id"
@@ -70,7 +70,7 @@
                 <!-- Order Summary -->
                 <div class="mt-6 space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <span class="text-gray-600">Subtotal</span>
+                        <span class="text-gray-600">{{ $t('subtotal') }}</span>
                         <span class="font-medium text-gray-900">{{ formatCurrency(order.amount) }}</span>
                     </div>
                     <div class="flex justify-between">
@@ -78,7 +78,7 @@
                         <span class="font-medium text-gray-900">$0.00</span>
                     </div>
                     <div class="flex justify-between pt-2 border-t border-gray-100">
-                        <span class="text-base font-semibold text-gray-900">Total</span>
+                        <span class="text-base font-semibold text-gray-900">{{ $t('total') }}</span>
                         <span class="text-base font-semibold text-gray-900">{{ formatCurrency(order.amount) }}</span>
                     </div>
                 </div>
@@ -87,11 +87,11 @@
                 <div class="mt-6 flex gap-3">
                     <button @click="confirmDecline(order.id)"
                         class="flex-1 py-2 px-4 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-colors">
-                        Decline
+                        {{$t('decline')}}
                     </button>
                     <button @click="confirmApprove(order.id)"
                         class="flex-1 py-2 px-4 bg-green-600 text-white hover:bg-green-700 rounded-lg transition-colors">
-                        Accept
+                        {{ $t('accept') }}
                     </button>
                 </div>
             </div>
@@ -106,12 +106,12 @@
                     <div class="flex justify-end gap-3">
                         <button @click="cancelConfirmation"
                             class="px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg">
-                            Cancel
+                            {{ $t('cancel') }}
                         </button>
                         <button @click="confirmAction"
                             :class="['px-4 py-2 rounded-lg text-white transition-colors',
                                 actionType === 'approve' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700']">
-                            Confirm
+                            {{ $t('confirm') }}
                         </button>
                     </div>
                 </div>

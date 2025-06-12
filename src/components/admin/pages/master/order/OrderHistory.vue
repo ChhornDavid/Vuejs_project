@@ -2,7 +2,7 @@
     <div class="container mx-auto p-4 lg:p-6">
         <!-- Page Header -->
         <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-800 lg:text-3xl">Order History</h1>
+            <h1 class="text-2xl font-bold text-gray-800 lg:text-3xl">{{$t('order_history')}}</h1>
             <p class="mt-2 text-gray-600">View and manage customer orders</p>
         </div>
 

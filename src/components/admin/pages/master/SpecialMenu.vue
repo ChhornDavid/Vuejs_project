@@ -5,13 +5,13 @@
       <!-- Header Section -->
       <div class="sm:flex sm:items-center sm:justify-between mb-8">
         <div class="mb-4 sm:mb-0">
-          <h1 class="text-3xl font-bold text-gray-900">Special Menus Management</h1>
+          <h1 class="text-3xl font-bold text-gray-900">{{$t('special_menu_management')}}</h1>
           <p class="mt-1 text-sm text-gray-500">Manage your restaurant's special menu categories</p>
         </div>
         <button @click="showAddModal"
           class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors">
           <i class="fas fa-plus mr-2"></i>
-          Add New Menu
+          {{$t('add_new_menu')}}
         </button>
       </div>
 
@@ -27,7 +27,7 @@
               type="text" 
               v-model="searchQuery"
               class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-              placeholder="Search menus..."
+              :placeholder="$t('search_menu')"
             >
           </div>
         </div>
@@ -49,7 +49,7 @@
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Menu Name
+                    {{$t('menu_name')}}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Created At

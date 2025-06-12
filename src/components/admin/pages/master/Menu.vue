@@ -20,7 +20,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Total Items</p>
+                            <p class="text-gray-500 text-sm font-medium">{{$t('total_items') }}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ foods.length }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-blue-50 text-blue-600">
@@ -32,7 +32,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Available Items</p>
+                            <p class="text-gray-500 text-sm font-medium">{{$t('available_item')}}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ availableItemsCount }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-green-50 text-green-600">
@@ -44,7 +44,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Categories</p>
+                            <p class="text-gray-500 text-sm font-medium">{{$t('categries')}}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ categories.length }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-purple-50 text-purple-600">
@@ -56,7 +56,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">Special Menus</p>
+                            <p class="text-gray-500 text-sm font-medium">{{ $t('special_menu') }}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ specialMenus.length }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
@@ -78,20 +78,20 @@
                             type="text" 
                             v-model="searchQuery"
                             class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                            placeholder="Search items..."
+                            :placeholder="$t('search_item')"
                         >
                     </div>
                     <div class="flex items-center gap-2">
                         <select v-model="categoryFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">All Categories</option>
+                            <option value="">{{$t('all_categories')}}</option>
                             <option v-for="category in categories" :key="category.id" :value="category.id">
                                 {{ category.name }}
                             </option>
                         </select>
                         <select v-model="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">All Status</option>
-                            <option value="true">Available</option>
-                            <option value="false">Unavailable</option>
+                            <option value="">{{$t('all_status')}}</option>
+                            <option value="true">{{ $t('available') }}</option>
+                            <option value="false">{{$t('unavailable')}}</option>
                         </select>
                     </div>
                 </div>
@@ -113,25 +113,25 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('name')">
-                                        Item
+                                        {{$t('items')}}
                                         <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'name'}"></i>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Category
+                                        {{$t('category')}}
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('price')">
-                                        Price
+                                        {{$t('price')}}
                                         <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'price'}"></i>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('rating')">
-                                        Rating
+                                        {{$t('rating') }}
                                         <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'rating'}"></i>
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
+                                        {{$t('status')}}
                                     </th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
+                                        {{$t('actions')}}
                                     </th>
                                 </tr>
                             </thead>
