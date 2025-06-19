@@ -7,7 +7,10 @@ export default {
   theme: {
     extend: {
       boxShadow: {
-        'outline': '0 0 0 3px rgba(66, 153, 225, 0.5)', // Custom outline shadow
+        'outline': '0 0 0 3px rgba(66, 153, 225, 0.5)',
+      },
+      fontFamily: {
+        khmer: ['"Noto Serif Khmer"', 'serif'],
       },
     },
   },
@@ -16,4 +19,3 @@ export default {
   },
   plugins: [],
 }
-

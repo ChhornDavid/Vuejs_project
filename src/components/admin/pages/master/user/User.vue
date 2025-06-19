@@ -4,13 +4,13 @@
     <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-800">User Management</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{$t('user_management')}}</h1>
           <p class="text-gray-600 mt-1">Manage your platform users and permissions</p>
         </div>
         <button @click="showAddModal"
           class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2">
           <i class="fas fa-plus"></i>
-          Add New User
+          {{ $t('add_user') }}
         </button>
       </div>
     </div>
@@ -32,11 +32,11 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Role</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Last Active</th>
-              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{$t('user')}}</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('role') }}</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('status') }}</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{$t('active')}}</th>
+              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{$t('actions')}}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">

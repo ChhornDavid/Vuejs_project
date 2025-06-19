@@ -1,15 +1,18 @@
 <template>
-    <div class="flex h-screen bg-gray-50">
+    <!-- <div class="flex h-screen bg-gray-50"> -->
+        <div :class="{ 'font-khmer': $i18n.locale === 'kh' }" class="min-h-screen bg-gray-50 flex">
         <!-- Sidebar -->
         <aside class="bg-white shadow-md transition-all duration-300 ease-in-out overflow-hidden"
             :class="showSide ? 'w-64' : 'w-0 md:w-20'">
             <!-- Sidebar Header -->
+             
             <div class="px-4 py-5 border-b border-gray-100 flex items-center">
                 <div class="flex items-center transition-all duration-200"
                     :class="showSide ? 'opacity-100' : 'opacity-0 md:opacity-100 justify-center w-full'">
+                    
                     <span class="text-xl font-bold text-emerald-600">NPIC</span>
                     <span v-if="showSide" class="ml-1 text-xs font-medium uppercase text-gray-400">
-                        2025 ADMIN
+                        2025 Admin 
                     </span>
                 </div>
             </div>
@@ -23,7 +26,7 @@
                             class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                             :class="{ 'justify-center': !showSide }" active-class="bg-emerald-50 text-emerald-600">
                             <i class="fas fa-tv text-2xl w-6 text-center"></i>
-                            <span v-if="showSide" class="ml-3 font-bold text-3xl">Dashboard</span>
+                            <span v-if="showSide" class="ml-3 font-bold text-lg">{{$t('dashboard')}}</span>
                         </router-link>
                     </li>
 
@@ -33,7 +36,7 @@
                             class="flex items-center w-full p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                             :class="{ 'justify-center': !showSide }">
                             <i class="fas fa-list text-2xl w-6 text-center"></i>
-                            <span v-if="showSide" class="flex-1 ml-3 text-3xl font-bold text-left">Orders</span>
+                            <span v-if="showSide" class="flex-1 ml-3 text-lg font-bold text-left">{{$t('orders')}}</span>
                             <span v-if="showSide" class="transform transition-transform duration-200"
                                 :class="{ 'rotate-90': orderDropdownOpen }">
                                 <i class="fas fa-chevron-right text-xs"></i>
@@ -45,23 +48,23 @@
                                 class="ml-2 mt-1 space-y-1 pl-8 border-l-2 border-emerald-100">
                                 <li>
                                     <router-link to="/admin/order"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Current Orders
+                                        {{$t('current_order')}}
                                     </router-link>
                                 </li>
                                 <li>
                                     <router-link to="/admin/orderHistory"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Order History
+                                        {{$t('order_history')}}
                                     </router-link>
                                 </li>
                                 <li>
                                     <router-link to="/admin/invoice"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Invoices
+                                        {{$t('invoice')}}
                                     </router-link>
                                 </li>
                             </ul>
@@ -74,7 +77,7 @@
                             class="flex items-center w-full p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                             :class="{ 'justify-center': !showSide }">
                             <i class="fas fa-box text-2xl w-6 text-center"></i>
-                            <span v-if="showSide" class="flex-1 ml-3 font-bold text-3xl text-left">Products</span>
+                            <span v-if="showSide" class="flex-1 ml-3 font-bold text-lg text-left">{{ $t('food') }}</span>
                             <span v-if="showSide" class="transform transition-transform duration-200"
                                 :class="{ 'rotate-90': productsDropdownOpen }">
                                 <i class="fas fa-chevron-right text-xs"></i>
@@ -86,23 +89,23 @@
                                 class="ml-2 mt-1 space-y-1 pl-8 border-l-2 border-emerald-100">
                                 <li>
                                     <router-link to="/admin/specialmenu"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Special Menus
+                                        {{ $t('special_menu') }}
                                     </router-link>
                                 </li>
                                 <li>
                                     <router-link to="/admin/menu"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Menus
+                                        {{$t('menu_category')}}
                                     </router-link>
                                 </li>
                                 <li>
                                     <router-link to="/admin/food"
-                                        class="block py-2 text-2xl text-gray-500 hover:text-emerald-600 transition-colors"
+                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        Foods
+                                        {{$t('menu')}}
                                     </router-link>
                                 </li>
                             </ul>
@@ -115,7 +118,7 @@
                             class="flex items-center p-3 rounded-lg text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 transition-colors"
                             :class="{ 'justify-center': !showSide }" active-class="bg-emerald-50 text-emerald-600">
                             <i class="fas fa-users text-2xl w-6 text-center"></i>
-                            <span v-if="showSide" class="ml-3 font-bold text-3xl">Users</span>
+                            <span v-if="showSide" class="ml-3 font-bold text-lg">{{ $t('user') }}</span>
                         </router-link>
                     </li>
                 </ul>
@@ -134,7 +137,7 @@
                     </button>
 
                     <!-- Search Bar -->
-                    <div class="flex-1 max-w-md mx-4">
+                    <!-- <div class="flex-1 max-w-md mx-4">
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-search text-gray-400"></i>
@@ -142,10 +145,18 @@
                             <input type="text" placeholder="Search..."
                                 class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm" />
                         </div>
-                    </div>
-
+                    </div> -->
+                    
                     <!-- User Controls -->
                     <div class="flex items-center space-x-4">
+                        <button @click="switchLang('kh')" class="flex items-center space-x-2 font-semibold">
+                        <img src="/images/kh.png" alt="Khmer" class="w-6 h-4 rounded-sm" />
+                            <span class="text-sm">{{ $t('kh') }}</span>
+                        </button>
+                        <button @click="switchLang('en')" class="flex items-center space-x-2 font-semibol">
+                        <img src="/images/en.png" alt="English" class="w-6 h-4 rounded-sm" />
+                            <span class="text-sm">{{ $t('en') }}</span>
+                         </button>
                         <!-- Notifications -->
                         <div class="relative">
                             <button @click="toggleMessage"
@@ -185,14 +196,14 @@
                                 <div v-show="showDropDown"
                                     class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-20">
                                     <div class="py-1">
-                                        <a href="#"
+                                        <!-- <a href="#"
                                             class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account
                                             Settings</a>
                                         <a href="#"
-                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Support</a>
+                                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Support</a> -->
                                         <button @click="logout"
                                             class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Sign out
+                                            {{$t('logout')}}
                                         </button>
                                     </div>
                                 </div>
@@ -238,6 +249,9 @@ export default {
         this.loadUserData();
     },
     methods: {
+        switchLang(lang) {
+        this.$i18n.locale = lang
+    },
         toggleMessage() {
             this.showMessage = !this.showMessage;
             if (this.showMessage && (!this.pendingOrders || this.pendingOrders.length === 0)) {
