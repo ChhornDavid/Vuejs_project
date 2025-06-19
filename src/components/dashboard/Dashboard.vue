@@ -235,7 +235,6 @@ export default {
       qrCodeSrc: '',
       categories: [],
       specialMenus: [],
-      currentIndex: 0,
       visibleItems: 3,
       menuItems: [],
       selectedCategory: "all",
