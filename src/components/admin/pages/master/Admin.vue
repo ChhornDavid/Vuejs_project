@@ -95,14 +95,14 @@
                                     </router-link>
                                 </li>
                                 <li>
-                                    <router-link to="/admin/menu"
+                                    <router-link to="/admin/food"
                                         class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
-                                        {{$t('menu_category')}}
+                                        {{$t('food')}}
                                     </router-link>
                                 </li>
                                 <li>
-                                    <router-link to="/admin/food"
+                                    <router-link to="/admin/menu"
                                         class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
                                         active-class="text-emerald-600 font-medium">
                                         {{$t('menu')}}
