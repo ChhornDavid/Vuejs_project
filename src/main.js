@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import './style.css'
 import { createI18n } from 'vue-i18n'
+import VueCookies from 'vue-cookies'
 import App from './App.vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
@@ -182,6 +183,7 @@ router.beforeEach((to, _from, next) => {
 const app = createApp(App)
 app.component('font-awesome-icon', FontAwesomeIcon)
 app.use(i18n) // make sure this comes after i18n is defined
+app.use(VueCookies)
 app.use(router)
 app.mount('#app')
 

@@ -56,58 +56,53 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import api from '../axios/Axios';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '../axios/Axios'
 
-const email = ref('');
-const password = ref('');
-const router = useRouter();
+const email = ref('')
+const password = ref('')
+const router = useRouter()
 
 const login = async () => {
   try {
+    // Prevent login if already logged in (another tab)
     if (localStorage.getItem('isLoggedIn') === 'true') {
-      alert('You are already logged in in another tab.');
-      const role = sessionStorage.getItem('role');
+      alert('You are already logged in in another tab.')
+      const role = sessionStorage.getItem('role')
       const redirectPath = role === 'admin' ? '/admin' :
-        role === 'cooker' ? '/kitchen' : '/dashboard';
-      router.push(redirectPath);
-      return;
+        role === 'cooker' ? '/kitchen' : '/dashboard'
+      router.push(redirectPath)
+      return
     }
 
     const response = await api.post('/login', {
       email: email.value,
       password: password.value,
-    }, { withCredentials: true });
+    }, { withCredentials: true }) // Allows cookies (refresh token)
 
-    const { token, role, name, id } = response.data;
+    const { access_token, role, name, id } = response.data
 
-    const sessionId = sessionStorage.getItem('session_id') || crypto.randomUUID();
-    sessionStorage.setItem('session_id', sessionId);
-
-    if (token) {
-      sessionStorage.setItem('auth_token', token);
-      sessionStorage.setItem('name', name);
-      sessionStorage.setItem('role', role);
-      sessionStorage.setItem('id', id);
-
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('role', role);
-      localStorage.setItem('isLoggedIn', 'true');
+    if (access_token) {
+      sessionStorage.setItem('auth_token', access_token)
+      sessionStorage.setItem('name', name)
+      sessionStorage.setItem('role', role)
+      sessionStorage.setItem('id', id)
+      localStorage.setItem('isLoggedIn', 'true') // only this stays in localStorage
 
       const redirectPath = role === 'admin' ? '/admin' :
-        role === 'cooker' ? '/kitchen' : '/dashboard';
-      router.push(redirectPath);
+        role === 'cooker' ? '/kitchen' : '/dashboard'
+      router.push(redirectPath)
     } else {
-      alert('Authentication failed: No token received');
+      alert('Authentication failed: No token received')
     }
   } catch (error) {
-    console.error('Login error:', error);
-    alert(error.response?.data?.message || 'Login failed. Please check your credentials.');
+    console.error('Login error:', error)
+    alert(error.response?.data?.message || 'Login failed. Please check your credentials.')
   }
-};
-
+}
 </script>
+
 
 <style scoped>
 @keyframes bounce-slow {
