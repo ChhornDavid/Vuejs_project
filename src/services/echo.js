@@ -11,4 +11,5 @@ export const echo = new Echo({
     wsPort: 6001,
     forceTLS: false,
     disableStats: true,
+    self: true
 });

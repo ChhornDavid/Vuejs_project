@@ -45,10 +45,10 @@
             <i class="fas fa-arrow-right ml-2"></i>
           </button>
 
-          <p class="text-center text-gray-500 mt-6">
+          <!-- <p class="text-center text-gray-500 mt-6">
             New here?
             <a href="#" class="text-purple-600 font-medium hover:text-purple-700">Create account</a>
-          </p>
+          </p> -->
         </form>
       </div>
     </div>

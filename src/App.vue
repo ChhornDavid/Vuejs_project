@@ -27,8 +27,6 @@ export default {
         sessionStorage.setItem('auth_token', localToken);
         sessionStorage.setItem('role', localRole);
 
-        // Optional: you might also rehydrate name, id, etc. if you store them
-
         // Redirect to the correct dashboard
         const redirectPath = localRole === 'admin' ? '/admin' :
           localRole === 'cooker' ? '/kitchen' : '/dashboard';

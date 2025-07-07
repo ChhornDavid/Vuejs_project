@@ -1,6 +1,6 @@
 <template>
   <!-- <div class="min-h-screen bg-gray-50 flex"> -->
-    <div :class="{ 'font-khmer': $i18n.locale === 'kh' }" class="min-h-screen bg-gray-50 flex">
+  <div :class="{ 'font-khmer': $i18n.locale === 'kh' }" class="min-h-screen bg-gray-50 flex">
     <!-- Main Content Area -->
     <div class="w-3/4 p-6">
       <!-- Header -->
@@ -66,13 +66,15 @@
 
       <!-- Menu Items -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory ? activeCategory.name : 'All Items' }}</h2>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory ? activeCategory.name : 'All Items' }}
+        </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
           <div v-for="(item, index) in filterMenuItems()" :key="index"
             class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
             <div class="flex flex-col md:flex-row">
               <div class="md:w-1/3 h-48 bg-gray-100 overflow-hidden">
-                <img :src="item.image" :alt="item.name" class="w-full h-full object-cover transition-transform hover:scale-105">
+                <img :src="item.image" :alt="item.name"
+                  class="w-full h-full object-cover transition-transform hover:scale-105">
               </div>
               <div class="p-4 flex-1 flex flex-col">
                 <div class="flex justify-between items-start">
@@ -84,9 +86,10 @@
                 </div>
                 <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ item.description }}</p>
                 <div class="mt-4">
-                  <p class="text-lg font-medium text-gray-500 mb-1">{{$t('size') }}</p>
+                  <p class="text-lg font-medium text-gray-500 mb-1">{{ $t('size') }}</p>
                   <div class="flex space-x-2">
-                    <button class="text-xs font-medium px-3 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-500 hover:text-white transition-colors">
+                    <button
+                      class="text-xs font-medium px-3 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-500 hover:text-white transition-colors">
                       {{ item.size }}
                     </button>
                   </div>
@@ -96,7 +99,7 @@
                   <button @click="addToOrder(item)"
                     class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center">
                     <i class="fas fa-plus mr-2 text-xs"></i>
-                    {{$t('addToOrder')}}
+                    {{ $t('addToOrder') }}
                   </button>
                 </div>
               </div>
@@ -111,24 +114,25 @@
       <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
           <h2 class="text-xl font-semibold text-gray-800">{{ $t('ordering') }} {{ OrderId }}</h2>
-          <button @click="logout" 
-          class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors" :title="$t('logout')">
-          {{ $t('logout') }}
+          <button @click="logout" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+            :title="$t('logout')">
+            {{ $t('logout') }}
             <i class="fas fa-sign-out-alt"></i>
           </button>
         </div>
         <div class="flex items-center space-x-3 bg-emerald-50 p-3 rounded-lg">
-          <div class="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">
+          <div
+            class="w-12 h-12 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold text-lg">
             {{ userData?.name?.charAt(0) || 'U' }}
           </div>
           <div>
             <p class="font-medium text-gray-800">{{ userData?.name || 'Guest' }}</p>
-            <p class="text-xs text-gray-500">{{ $t('tablenumber')}} {{ userData?.tableNumber || '--' }}</p>
+            <p class="text-xs text-gray-500">{{ $t('tablenumber') }} {{ userData?.tableNumber || '--' }}</p>
           </div>
         </div>
       </div>
       <div class="flex-1 overflow-hidden flex flex-col">
-        <h3 class="text-sm font-medium text-gray-500 mb-3">{{$t('orderItems') }} ({{ selectedItems.length }})</h3>
+        <h3 class="text-sm font-medium text-gray-500 mb-3">{{ $t('orderItems') }} ({{ selectedItems.length }})</h3>
         <div class="flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
           <div class="space-y-4 p-2">
             <div v-for="(item, index) in selectedItems" :key="index"
@@ -141,12 +145,15 @@
                     <i class="fas fa-times"></i>
                   </button>
                 </div>
-                <p v-if="item.selectedSize" class="text-xs text-gray-500 mt-1">{{ $t('size') }} {{ item.selectedSize }}</p>
+                <p v-if="item.selectedSize" class="text-xs text-gray-500 mt-1">{{ $t('size') }} {{ item.selectedSize }}
+                </p>
                 <div class="flex justify-between items-center mt-2">
                   <div class="flex items-center border border-gray-200 rounded-lg">
-                    <button @click="decreaseQuantity(index)" class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">-</button>
+                    <button @click="decreaseQuantity(index)"
+                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">-</button>
                     <span class="px-3 text-sm font-medium">{{ item.quantity }}</span>
-                    <button @click="increaseQuantity(index)" class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                    <button @click="increaseQuantity(index)"
+                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">+</button>
                   </div>
                   <span class="font-medium text-gray-800">${{ (item.price * item.quantity).toFixed(2) }}</span>
                 </div>
@@ -162,7 +169,7 @@
         <div class="border-t border-gray-200 pt-4 mt-4">
           <div class="space-y-2 mb-4">
             <div class="flex justify-between text-sm">
-              <span class="text-gray-500">{{ $t('subtotal')}}</span>
+              <span class="text-gray-500">{{ $t('subtotal') }}</span>
               <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-sm">
@@ -170,10 +177,10 @@
               <span class="font-medium">${{ (subtotal * 0.1).toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-lg font-bold pt-2">
-              <span>{{ $t('total')  }}</span>
+              <span>{{ $t('total') }}</span>
               <span>${{ total.toFixed(2) }}</span>
             </div>
-          <div class="flex justify-between text-lg font-bold pt-2">
+            <div class="flex justify-between text-lg font-bold pt-2">
               <span>{{ $t('paid_here') }}</span>
             </div>
 
@@ -312,6 +319,7 @@ export default {
     this.listenForOrderApprove();
     this.listenForKitchenStatus();
     this.listenCreditForStatus();
+    this.getDraftOrder();
   },
   beforeUnmount() {
     this.stopStatusUpdates();
@@ -358,15 +366,38 @@ export default {
     },
     listenAddItem() {
       const userId = sessionStorage.getItem('id');
-      echo.channel(`ordersItem`).listen("OrderCreated", (event) => {
-        if (event.userId == userId) {
-          this.selectedItems = event.items;
-          this.updateTotals();
-          this.calculateTotals();
+      const myGroupKey = sessionStorage.getItem('group_key');
+
+      echo.channel('ordersItem')
+        .listen('OrderCreated', (event) => {
+
+          if (event.userId === userId && event.groupKey === myGroupKey) {
+            this.selectedItems = event.items;
+            this.updateTotals();
+            this.calculateTotals();
+          }
+        });
+    },  
+    async getDraftOrder() {
+      const userId = sessionStorage.getItem('id');
+      const token = sessionStorage.getItem('auth_token');
+
+      try {
+        const res = await api.get(`/order/draft/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        console.log(res.data);
+        if (res.data.items && res.data.items.length > 0) {
+          this.selectedItems = res.data.items;
+          console.log('Draft order loaded:', res.data.items);
         } else {
-          console.log('Ignoring update for other user', event.userId);
+          console.log('No draft order found');
         }
-      });
+      } catch (err) {
+        console.error('Failed to load draft order:', err);
+      }
     },
     listenCreditForStatus() {
       echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
@@ -490,7 +521,7 @@ export default {
 
           setTimeout(() => {
             window.location.reload();
-          }, 20000);
+          }, 10000);
         } else if (event.robot?.status === 'completed') {
           console.log("Status is completed, but user does not match. Not reloading.");
         }
@@ -617,9 +648,13 @@ export default {
     },
     updateOrderOnServer() {
       const userId = sessionStorage.getItem('id');
+      const groupKey = sessionStorage.getItem('group_key');
+
+      api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
 
       const response = api.post('/order/add-items', {
         user_id: userId,
+        group_key: groupKey,
         items: this.selectedItems.map(i => ({
           id: i.id,
           image: i.image,

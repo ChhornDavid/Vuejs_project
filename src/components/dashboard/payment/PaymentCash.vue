@@ -29,7 +29,8 @@
                                 class="flex justify-between items-center text-gray-700">
                                 <div>
                                     <p class="font-medium">{{ item.name }}</p>
-                                    <p class="text-sm text-gray-500">Qty: {{ item.quantity }} • Size: {{ item.selectedSize }}</p>
+                                    <p class="text-sm text-gray-500">Qty: {{ item.quantity }} • Size: {{
+                                        item.selectedSize }}</p>
                                 </div>
                                 <span class="font-medium">${{ (item.price * item.quantity).toFixed(2) }}</span>
                             </div>
