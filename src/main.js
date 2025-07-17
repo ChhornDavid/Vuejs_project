@@ -286,7 +286,7 @@ const routes = [
 
 // Create Router
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHistory('/vuejs_project/'),
     routes: routes
 })
 
@@ -304,29 +304,31 @@ export const preventRouteNavigation = () => {
 };
 
 router.beforeEach((to, _from, next) => {
+  const role = sessionStorage.getItem('role') || localStorage.getItem('role');
+  const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-    const role = sessionStorage.getItem('role');
+  // If trying to access Login and already logged in, redirect to role-based route
+  if (to.name === 'Login' && isLoggedIn && role) {
+    const redirectPath =
+      role === 'admin' ? '/admin' :
+      role === 'cooker' ? '/kitchen' :
+      '/dashboard';
 
-    if (!allowNavigation) {
-        console.log("Navigation cancelled by route guard");
-        allowNavigation = true;
-        next(false);
-        return;
+    return next(redirectPath); // ✅ auto redirect
+  }
+
+  // Protect auth routes
+  if (to.meta.requiresAuth) {
+    if (!role) {
+      return next('/');
+    } else if (to.meta.roles && !to.meta.roles.includes(role)) {
+      return next('/unauthorized');
     }
-    if (to.meta.requiresAuth) {
-        if (!role) {
-            console.log('User not authenticated. Redirecting to login.');
-            next('/');
-        } else if (to.meta.roles && !to.meta.roles.includes(role)) {
-            console.log(`Role '${role}' is not authorized for this route.`);
-            next('/unauthorized');
-        } else {
-            next();
-        }
-    } else {
-        next();
-    }
+  }
+
+  next();
 });
+
 
 
 // Create App Instance

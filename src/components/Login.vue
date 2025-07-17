@@ -66,10 +66,12 @@ const router = useRouter()
 
 const login = async () => {
   try {
-    // Prevent login if already logged in (another tab)
     if (localStorage.getItem('isLoggedIn') === 'true') {
       alert('You are already logged in in another tab.')
-      const role = sessionStorage.getItem('role')
+
+      // Check role from localStorage (persistent across tabs)
+      const role = localStorage.getItem('role') || sessionStorage.getItem('role')
+
       const redirectPath = role === 'admin' ? '/admin' :
         role === 'cooker' ? '/kitchen' : '/dashboard'
       router.push(redirectPath)
@@ -79,7 +81,7 @@ const login = async () => {
     const response = await api.post('/login', {
       email: email.value,
       password: password.value,
-    }, { withCredentials: true }) // Allows cookies (refresh token)
+    }, { withCredentials: true })
 
     const { access_token, role, name, id } = response.data
 
@@ -88,7 +90,10 @@ const login = async () => {
       sessionStorage.setItem('name', name)
       sessionStorage.setItem('role', role)
       sessionStorage.setItem('id', id)
-      localStorage.setItem('isLoggedIn', 'true') // only this stays in localStorage
+
+      // Also save role and isLoggedIn in localStorage for cross-tab detection
+      localStorage.setItem('isLoggedIn', 'true')
+      localStorage.setItem('role', role)
 
       const redirectPath = role === 'admin' ? '/admin' :
         role === 'cooker' ? '/kitchen' : '/dashboard'

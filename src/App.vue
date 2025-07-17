@@ -24,8 +24,8 @@ export default {
 
       if (localToken && localRole) {
         // Rehydrate sessionStorage
-        sessionStorage.setItem('auth_token', localToken);
-        sessionStorage.setItem('role', localRole);
+        localStorage.setItem('auth_token', localToken);
+        localStorage.setItem('role', localRole);
 
         // Redirect to the correct dashboard
         const redirectPath = localRole === 'admin' ? '/admin' :

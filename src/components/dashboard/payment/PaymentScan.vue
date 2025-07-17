@@ -54,7 +54,7 @@
                             </div>
                             
                             <button @click="generatePaymentLink" 
-                                :disabled="loading"
+                                :disabled="loading && isPaidAlready"
                                 class="w-full py-3 px-6 flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg v-if="loading" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -132,6 +132,11 @@ export default {
             handler() { this.calculateTotal(); },
             deep: true,
         },
+    },
+    computed: {
+        isPaidAlready() {
+            return sessionStorage.getItem('order_paid') === 'true';
+        }
     },
     beforeUnmount() {
         if (this.pollingInterval) clearInterval(this.pollingInterval);

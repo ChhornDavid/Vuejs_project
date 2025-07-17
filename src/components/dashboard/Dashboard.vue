@@ -66,7 +66,8 @@
 
       <!-- Menu Items -->
       <section>
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">{{ activeCategory ? activeCategory.name : 'All Items' }}
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">
+          {{ activeCategory ? activeCategory.name : $t('allItems') }}
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
           <div v-for="(item, index) in filterMenuItems()" :key="index"
@@ -84,7 +85,8 @@
                     <span class="text-xs font-medium text-emerald-800">{{ item.rating }}</span>
                   </div>
                 </div>
-                <p class="text-sm text-gray-500 mt-2 line-clamp-2">{{ item.description }}</p>
+                <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ item.description }}</p>
+
                 <div class="mt-4">
                   <p class="text-lg font-medium text-gray-500 mb-1">{{ $t('size') }}</p>
                   <div class="flex space-x-2">
@@ -94,9 +96,19 @@
                     </button>
                   </div>
                 </div>
+
                 <div class="mt-auto pt-4 flex justify-between items-center">
-                  <span class="text-lg font-bold text-gray-800">${{ item.price }}</span>
-                  <button @click="addToOrder(item)"
+                  <div>
+                    <!-- Show original price if discounted -->
+                    <span class="text-xs text-red-500 line-through block">
+                      {{ item.discount }}
+                    </span>
+                    <span class="text-lg font-bold text-gray-800">
+                      ${{ item.price }}
+                    </span>
+                  </div>
+
+                  <button @click="addToOrder(item)" :disabled="orderPaid"
                     class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center">
                     <i class="fas fa-plus mr-2 text-xs"></i>
                     {{ $t('addToOrder') }}
@@ -132,37 +144,64 @@
         </div>
       </div>
       <div class="flex-1 overflow-hidden flex flex-col">
-        <h3 class="text-sm font-medium text-gray-500 mb-3">{{ $t('orderItems') }} ({{ selectedItems.length }})</h3>
-        <div class="flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
-          <div class="space-y-4 p-2">
-            <div v-for="(item, index) in selectedItems" :key="index"
-              class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-              <img :src="item.image" class="w-12 h-12 rounded-lg object-cover mr-3" />
-              <div class="flex-1">
-                <div class="flex justify-between">
-                  <h4 class="font-medium text-gray-800">{{ item.name }}</h4>
-                  <button @click="removeFromOrder(index)" class="text-gray-400 hover:text-red-500 transition-colors">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-                <p v-if="item.selectedSize" class="text-xs text-gray-500 mt-1">{{ $t('size') }} {{ item.selectedSize }}
-                </p>
-                <div class="flex justify-between items-center mt-2">
-                  <div class="flex items-center border border-gray-200 rounded-lg">
-                    <button @click="decreaseQuantity(index)"
-                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">-</button>
-                    <span class="px-3 text-sm font-medium">{{ item.quantity }}</span>
-                    <button @click="increaseQuantity(index)"
-                      class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+        <!-- Add New Order Button -->
+        <div class="p-2 border border-gray-300 bg-emerald-500 rounded-lg w-fit hover:shadow-md transition">
+          <button @click="addNewOrder" :disabled="!orderPaid || orderAdded"
+            class="text-sm font-medium text-white hover:text-blue-600 text-left disabled:opacity-50 disabled:cursor-not-allowed">
+            Add New
+          </button>
+        </div>
+
+        <!-- Tabs for Orders -->
+        <div class="flex space-x-2 mt-3">
+          <div v-for="(order, index) in orders" :key="order.id" @click="switchOrder(index)" :class="[
+            'p-2 border rounded-lg cursor-pointer hover:shadow-md transition',
+            index === activeOrderIndex ? 'bg-blue-100 border-blue-400' : 'bg-white text-gray-500'
+          ]">
+            {{ order.name }}
+          </div>
+        </div>
+
+        <!-- Display Items in Selected Order -->
+        <h3 v-if="orders[activeOrderIndex]" class="text-sm font-medium text-gray-500 mt-3 mb-3">
+          {{ orders[activeOrderIndex].name }} ({{ orders[activeOrderIndex].items.length }})
+        </h3>
+
+        <div class="border border-gray-200 rounded-lg overflow-hidden">
+          <div class="flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
+            <div class="space-y-4 p-2">
+              <div v-for="(item, index) in orders[activeOrderIndex].items" :key="index"
+                class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <img :src="item.image" class="w-12 h-12 rounded-lg object-cover mr-3" />
+                <div class="flex-1">
+                  <div class="flex justify-between">
+                    <h4 class="font-medium text-gray-800">{{ item.name }}</h4>
+                    <button @click="removeFromOrder(index)" :disabled="orderPaid"
+                      class="text-gray-400 hover:text-red-500 transition-colors">
+                      <i class="fas fa-times"></i>
+                    </button>
                   </div>
-                  <span class="font-medium text-gray-800">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                  <p v-if="item.selectedSize" class="text-xs text-gray-500 mt-1">
+                    {{ $t('size') }} {{ item.selectedSize }}
+                  </p>
+                  <div class="flex justify-between items-center mt-2">
+                    <div class="flex items-center border border-gray-200 rounded-lg">
+                      <button @click="decreaseQuantity(index)" :disabled="orderPaid"
+                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">-</button>
+                      <span class="px-3 text-sm font-medium">{{ item.quantity }}</span>
+                      <button @click="increaseQuantity(index)" :disabled="orderPaid"
+                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                    </div>
+                    <span class="font-medium text-gray-800">${{ (item.price * item.quantity).toFixed(2) }}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div v-if="selectedItems.length === 0" class="text-center py-8 text-gray-400">
-              <i class="fas fa-shopping-basket text-3xl mb-2"></i>
-              <p>{{ $t('yourOrderEmpty') }}</p>
-              <p class="text-sm mt-1">{{ $t('addItemsFromMenu') }}</p>
+
+              <div v-if="orders[activeOrderIndex].items.length === 0" class="text-center py-8 text-gray-400">
+                <i class="fas fa-shopping-basket text-3xl mb-2"></i>
+                <p>{{ $t('yourOrderEmpty') }}</p>
+                <p class="text-sm mt-1">{{ $t('addItemsFromMenu') }}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -173,7 +212,7 @@
               <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-sm">
-              <span class="text-gray-500">{{ $t('tax') }}</span>
+              <span class="text-gray-500">{{ $t('discount') }}</span>
               <span class="font-medium">${{ (subtotal * 0.1).toFixed(2) }}</span>
             </div>
             <div class="flex justify-between text-lg font-bold pt-2">
@@ -183,7 +222,6 @@
             <div class="flex justify-between text-lg font-bold pt-2">
               <span>{{ $t('paid_here') }}</span>
             </div>
-
           </div>
 
           <!-- Payment Options -->
@@ -220,235 +258,339 @@
 
 
 <script>
-import { ref } from 'vue';
-import VueQrcode from 'vue-qrcode'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n';
 import api from '../../axios/Axios';
 import PaymentCreditCard from './payment/PaymentCreditCard.vue';
 import PaymentCash from './payment/PaymentCash.vue';
 import PaymentScan from './payment/PaymentScan.vue';
-import Order from '../admin/pages/master/order/Order.vue';
-import { echo } from '../../services/echo';
 import Status from './Status.vue';
-import Modal from '../admin/pages/master/user/Modal.vue';
-
-
+import { echo } from '../../services/echo';
 
 export default {
-  data() {
-    return {
-      userData: null,
-      dataUrl: null,
-      qrCodeSrc: '',
-      categories: [],
-      specialMenus: [],
-      visibleItems: 3,
-      menuItems: [],
-      selectedCategory: "all",
-      selectedItems: [],
-      subtotal: 0,
-      total: 0,
-      showNoteModal: false,
-      note: '',
-      itemToAdd: null,
-      showPaymentCash: false,
-      showPaymentCard: false,
-      showPaymentScan: false,
-      showStatus: false,
-      cardName: '',
-      statuses: [],
-      currentStatus: "Free",
-      currentIndex: 0,
-      resultMessage: '',
-      paymentStatus: '',
-      approveStatus: '',
-      OrderId: [],
-      sharedOrders: null,
-      activeCategory: null,
-      isLoading: false,
-    };
-  },
-  setup() {
-    const router = useRouter();
-    return { router };
-    const scrollContainer = ref(null);
-
-    onMounted(() => {
-      if (scrollContainer.value) {
-        scrollContainer.value.style.setProperty('scroll-behavior', 'smooth');
-        scrollContainer.value.style.setProperty('overflow-x', 'auto');
-        scrollContainer.value.style.setProperty('white-space', 'nowrap');
-      };
-    });
-  },
-  mounted() {
-    const savedItems = sessionStorage.getItem('selectedItems');
-    if (savedItems) {
-      this.selectedItems = JSON.parse(savedItems);
-    };
-    const token = sessionStorage.getItem('auth_token');
-    if (!token) {
-      this.$router.push('/');
-    };
-    const savedStep = localStorage.getItem("order_status_step");
-    const savedMessage = localStorage.getItem("order_status_message");
-
-    if (savedStep && savedMessage) {
-      this.showStatus = true;
-      this.resultMessage = savedMessage;
-
-      this.$nextTick(() => {
-        const modal = this.$refs.Status;
-        if (modal && typeof modal.moveToStep === 'function') {
-          modal.moveToStep(savedStep);
-        }
-      });
-    };
-    this.fetchSpecialMenus();
-    this.fetchSpecialMenus();
-    this.fetchMenus();
-    this.fetchFood();
-    this.loadUserData();
-    this.startStatusUpdates();
-    this.fetchIdOrder();
-    this.listenForCallRobot();
-    this.listenAddItem();
-    this.updateOrderOnServer();
-    this.calculateTotals();
-    this.updateTotals();
-    this.listenForOrderApprove();
-    this.listenForKitchenStatus();
-    this.listenCreditForStatus();
-    this.getDraftOrder();
-  },
-  beforeUnmount() {
-    this.stopStatusUpdates();
-  },
   components: {
-    VueQrcode,
     PaymentCreditCard,
     PaymentCash,
     PaymentScan,
     Status,
-    Order,
   },
-  watch: {
-    selectedItems: {
-      handler(newItems) {
-        sessionStorage.setItem('selectedItems', JSON.stringify(newItems));
-      },
-      deep: true
+
+  data() {
+    return {
+      orderPaid: this.orderPaid = sessionStorage.getItem('order_paid') === 'true',
+      orderAdded: false,
+      userData: null,
+      categories: [],
+      menuItems: [],
+      specialMenus: [],
+      selectedItems: [],
+      showPaymentCash: false,
+      showPaymentCard: false,
+      showPaymentScan: false,
+      showStatus: false,
+      resultMessage: '',
+      orderId: '',
+      activeCategory: null,
+      isLoading: false,
+      hasNotifications: false,
+      activeOrderIndex: 0,
+      orders: [
+        {
+          id: 1,
+          name: 'Order1',
+          items: [],
+        },
+      ],
+      orderCounter: 2,
+    };
+  },
+  beforeDestroy() {
+    window.removeEventListener('storage', this.syncOrderPaid);
+  },
+  computed: {
+    activeOrder() {
+      return this.orders[this.activeOrderIndex] || { items: [] };
+    },
+    selectedItems() {
+      return this.activeOrder.items;
+    },
+    filteredMenuItems() {
+      if (!this.activeCategory) return this.menuItems;
+      return this.menuItems.filter(item => Number(item.id_category) === Number(this.activeCategory.id));
+    },
+    subtotal() {
+      return this.orders[this.activeOrderIndex].items.reduce(
+        (sum, item) => sum + item.price * item.quantity, 0);
+    },
+    taxAmount() {
+      return this.subtotal * 0.1;
+    },
+    total() {
+      return this.subtotal;
     }
   },
+
   methods: {
+    syncOrderPaid() {
+      this.orderPaid = sessionStorage.getItem('order_paid') === 'true';
+    },
     switchLang(lang) {
-      this.$i18n.locale = lang
+      this.$i18n.locale = lang;
     },
-    switchStatus() {
-      const currentIndex = this.statuses.indexOf(this.currentStatus);
-      this.currentStatus = this.statuses[(currentIndex + 1) % this.statuses.length];
-    },
+
     toggleModal() {
       this.showPaymentCard = false;
       this.showPaymentCash = false;
       this.showPaymentScan = false;
       this.showStatus = false;
     },
-    updateStatus() {
-      this.currentStatus = this.statuses[this.currentIndex];
-      this.currentIndex = (this.currentIndex + 1) % this.statuses.length;
-    },
-    startStatusUpdates() {
-      this.intervalId = setInterval(this.updateStatus, 10000);
-    },
-    stopStatusUpdates() {
-      clearInterval(this.intervalId);
-    },
-    listenAddItem() {
-      const userId = sessionStorage.getItem('id');
-      const myGroupKey = sessionStorage.getItem('group_key');
 
-      echo.channel('ordersItem')
-        .listen('OrderCreated', (event) => {
+    addNewOrder() {
+      this.orders.push({
+        id: this.orderCounter,
+        name: `Order${this.orderCounter}`,
+        items: [],
+      });
+      this.orderAdded = true;
+      this.activeOrderIndex = this.orders.length - 1;
+      this.orderCounter++;
+    },
 
-          if (event.userId === userId && event.groupKey === myGroupKey) {
-            this.selectedItems = event.items;
-            this.updateTotals();
-            this.calculateTotals();
-          }
+    switchOrder(index) {
+      this.activeOrderIndex = index;
+    },
+
+    changeCategory(category) {
+      this.activeCategory = category;
+    },
+
+    addToOrder(item) {
+      const currentOrder = this.orders[this.activeOrderIndex];
+      const existingItem = currentOrder.items.find(i => i.id === item.id);
+
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        currentOrder.items.push({
+          ...item,
+          quantity: 1,
+          selectedSize: item.size || 'default'
         });
-    },  
+      }
+      this.updateOrderOnServer();
+    },
+
+    removeFromOrder(index) {
+      this.orders[this.activeOrderIndex].items.splice(index, 1);
+      this.updateOrderOnServer();
+    },
+
+    increaseQuantity(index) {
+      this.orders[this.activeOrderIndex].items[index].quantity += 1;
+      this.updateOrderOnServer();
+    },
+
+    decreaseQuantity(index) {
+      const items = this.orders[this.activeOrderIndex].items;
+      if (items[index].quantity > 1) {
+        items[index].quantity -= 1;
+      } else {
+        this.removeFromOrder(index);
+      }
+      this.updateOrderOnServer();
+    },
+
+    async updateOrderOnServer() {
+      const userId = sessionStorage.getItem('id');
+      const groupKey = sessionStorage.getItem('group_key');
+
+      try {
+        api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
+
+        await api.post('/order/add-items', {
+          user_id: userId,
+          group_key: groupKey,
+          items: this.activeOrder.items.map(i => ({
+            id: i.id,
+            image: i.image,
+            name: i.name,
+            quantity: i.quantity,
+            selectedSize: i.selectedSize,
+            price: i.price
+          }))
+        });
+      } catch (err) {
+        console.error("Failed to sync order:", err);
+      }
+    },
+
+    async logout() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        if (!token) {
+          alert("No token found. Please log in.");
+          return;
+        }
+
+        await api.post("/logout", {}, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        sessionStorage.clear();
+        localStorage.clear();
+        this.$router.push("/");
+      } catch (error) {
+        console.error("Logout failed:", error);
+        alert("Failed to logout. Please try again.");
+      }
+    },
+
+    async fetchSpecialMenus() {
+      try {
+        const response = await api.get("/special-menus", {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` },
+        });
+        this.specialMenus = response.data.data;
+      } catch (error) {
+        console.error("Error fetching special menus:", error);
+      }
+    },
+
+    async fetchMenus() {
+      try {
+        const response = await api.get("/categories", {
+          headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` },
+        });
+        this.categories = response.data.data;
+      } catch (error) {
+        console.error("Error fetching menus:", error);
+      }
+    },
+
+    async fetchFood() {
+      try {
+        this.isLoading = true;
+        const token = sessionStorage.getItem("auth_token");
+        if (!token) {
+          alert("No token found. Please log in again");
+          return;
+        }
+
+        const response = await api.get(`/products`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.menuItems = response.data.data;
+      } catch (error) {
+        console.error("Error fetching food: ", error);
+      } finally {
+        this.isLoading = false;
+      }
+    },
+
+    async fetchIdOrder() {
+      try {
+        const token = sessionStorage.getItem("auth_token");
+        const response = await api.get("/getitem", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        this.orderId = response.data.id;
+      } catch (error) {
+        console.log("Error fetching order ID: ", error);
+      }
+    },
+
+    loadUserData() {
+      this.userData = {
+        name: sessionStorage.getItem('name'),
+        role: sessionStorage.getItem('role'),
+        tableNumber: sessionStorage.getItem('tableNumber')
+      };
+    },
+
     async getDraftOrder() {
       const userId = sessionStorage.getItem('id');
       const token = sessionStorage.getItem('auth_token');
 
       try {
         const res = await api.get(`/order/draft/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-        console.log(res.data);
+
         if (res.data.items && res.data.items.length > 0) {
-          this.selectedItems = res.data.items;
-          console.log('Draft order loaded:', res.data.items);
-        } else {
-          console.log('No draft order found');
+          this.orders[0].items = res.data.items;
         }
       } catch (err) {
         console.error('Failed to load draft order:', err);
       }
     },
+
     listenCreditForStatus() {
       echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
-        this.showStatus = true;
-        this.resultMessage = 'Food is at kitchen.';
-        localStorage.setItem("order_status_step", "At Kitchen");
-        localStorage.setItem("order_status_message", this.resultMessage);
+        const userId = sessionStorage.getItem('id');
+        if (event.userId == userId) {
+          this.showStatus = true;
+          this.resultMessage = 'Food is at kitchen.';
+          localStorage.setItem("order_status_step", "At Kitchen");
+          localStorage.setItem("order_status_message", this.resultMessage);
 
-        this.$nextTick(() => {
-          const modal = this.$refs.Status;
-          if (modal && typeof modal.moveToStep === 'function') {
-            modal.moveToStep('At Kitchen');
-          }
-          else {
-            console.error('Status component not ready or method missing');
-          }
-        });
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('At Kitchen');
+            }
+            else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        } else {
+          console.log('Credit card to kitchen event not for this user');
+        }
       })
     },
     listenForOrderApprove() {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
-        this.showStatus = true;
-        this.resultMessage = 'Order approved by cashier.';
-        localStorage.setItem("order_status_step", "Cashier Approve");
-        localStorage.setItem("order_status_message", this.resultMessage);
+        const userId = sessionStorage.getItem('id');
+        if (event.userId == userId) {
+          this.showStatus = true;
+          this.resultMessage = 'Order approved by cashier.';
+          localStorage.setItem("order_status_step", "Cashier Approve");
+          localStorage.setItem("order_status_message", this.resultMessage);
 
-        this.$nextTick(() => {
-          const modal = this.$refs.Status;
-          if (modal && typeof modal.moveToStep === 'function') {
-            modal.moveToStep('Cashier Approve');
-          } else {
-            console.error('Status component not ready or method missing');
-          }
-        });
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('Cashier Approve');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        } else {
+          console.log('Order approved by cashier but not for this user');
+        }
       });
     },
     listenForKitchenStatus() {
       echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
-        this.showStatus = true;
-        this.resultMessage = "Order sent to kitchen.";
-        localStorage.setItem("order_status_step", "At Kitchen");
-        localStorage.setItem("order_status_message", this.resultMessage);
+        const userId = sessionStorage.getItem("id");
+        if (event.userId == userId) {
+          this.showStatus = true;
+          this.resultMessage = "Order sent to kitchen.";
+          localStorage.setItem("order_status_step", "At Kitchen");
+          localStorage.setItem("order_status_message", this.resultMessage);
 
-        this.$nextTick(() => {
-          const modal = this.$refs.Status;
-          if (modal && typeof modal.moveToStep === 'function') {
-            modal.moveToStep('At Kitchen');
-          } else {
-            console.error('Status component not ready or method missing');
-          }
-        });
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('At Kitchen');
+            } else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        } else {
+          console.log("Order not sent to kitchen for this user");
+        }
+
       });
     },
     listenForCallRobot() {
@@ -459,7 +601,10 @@ export default {
         const currentUserId = sessionStorage.getItem("id");
 
         // Handle robot status steps
-        if (event.robot?.status === 'accepted') {
+        if (event.robot?.status === 'accepted' &&
+          eventUserId &&
+          currentUserId &&
+          String(eventUserId) === String(currentUserId)) {
           console.log("Robot status is 'accept' — move to Cooking step");
           this.showStatus = true;
           this.resultMessage = "Robot accepted the order.";
@@ -473,7 +618,10 @@ export default {
               console.error('Status component not ready or method missing');
             }
           });
-        } else if (event.robot?.status === 'preparing') {
+        } else if (event.robot?.status === 'preparing' &&
+          eventUserId &&
+          currentUserId &&
+          String(eventUserId) === String(currentUserId)) {
           console.log("Robot status is 'preparing' — move to Preparing step");
           this.showStatus = true;
           this.resultMessage = "Order is being prepared.";
@@ -487,7 +635,10 @@ export default {
               console.error('Status component not ready or method missing');
             }
           });
-        } else if (event.robot?.status === 'completed') {
+        } else if (event.robot?.status === 'completed' &&
+          eventUserId &&
+          currentUserId &&
+          String(eventUserId) === String(currentUserId)) {
           console.log("Robot status is 'complete' — move to Ready step");
           this.showStatus = true;
           this.resultMessage = "Order is ready.";
@@ -528,115 +679,23 @@ export default {
       });
     },
 
-    //special Menu
-    async fetchSpecialMenus() {
-      try {
-        const response = await api.get("/special-menus", {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
-          },
-        });
-        this.specialMenus = response.data.data;
-      } catch (error) {
-        console.error("Error fetching special menus:", error);
-      }
-    },
-    async fetchMenus() {
-      try {
-        const response = await api.get("/categories", {
-          headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
-          },
-        });
-        this.categories = response.data.data;
-      } catch (error) {
-        console.error("Error fetching special menus:", error);
-      }
-    },
-    async fetchIdOrder() {
-      try {
-        const token = sessionStorage.getItem("auth_token");
-        const response = await api.get("/getitem", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
-        this.OrderId = response.data.id;
-        console.log(this.OrderId);
-      } catch (error) {
-        console.log("Error fetch OrderID: ", error);
-      }
-    },
-    async fetchFood() {
-      try {
-        const token = sessionStorage.getItem("auth_token");
-        if (!token) {
-          alert("No token found. Please log in again");
-          return;
+    listenAddItem() {
+      const userId = sessionStorage.getItem('id');
+      echo.channel('ordersItem').listen('OrderCreated', (event) => {
+        if (event.userId === userId) {
+          this.orders[this.activeOrderIndex].items = event.items;
         }
-
-        const response = await api.get(`/products`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
-        this.menuItems = response.data.data;
-        console.log(this.menuItems);
-      } catch (error) {
-        console.error("Error fetch food: ", error);
-      } finally {
-        this.isLoading = false;
-      }
-
+      });
     },
-    async logout() {
-      try {
-        const token = sessionStorage.getItem("auth_token");
-        if (!token) {
-          alert("No token found. Please log in.");
-          return;
+
+    listenForPaidOrder() {
+      const userId = sessionStorage.getItem('id');
+      echo.channel(`order-status`).listen('PaidOrder', (event) => {
+        if (event.userId == userId) {
+          sessionStorage.setItem('order_paid', 'true');
+          this.orderPaid = true;
         }
-        await api.post(
-          "/logout", {},
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        sessionStorage.clear();
-        localStorage.clear();
-        localStorage.setItem('isLoggedIn', 'false');
-        localStorage.removeItem('isLoggedIn');
-        this.router.push("/");
-        alert("Logged out successfully!");
-      } catch (error) {
-        console.error("Logout failed:", error.response?.data || error.message);
-        alert("Failed to logout. Please try again.");
-      }
-    },
-    loadUserData() {
-      const storedName = sessionStorage.getItem('name');
-      const storedRole = sessionStorage.getItem('role');
-
-      this.userData = {
-        name: storedName,
-        role: storedRole,
-      };
-
-      if (!this.userData.name) {
-        console.log('No valid data found in localStorage');
-      }
-    },
-    changeCategory(category) {
-      if (!category) {
-        // Show all items
-        this.activeCategory = null;
-        this.filteredItems = this.allItems;
-      } else {
-        this.activeCategory = category;
-        this.filteredItems = this.allItems.filter(item => item.category_id === category.id);
-      }
+      });
     },
     filterMenuItems() {
       if (!this.activeCategory) {
@@ -646,101 +705,49 @@ export default {
         item => Number(item.id_category) === Number(this.activeCategory.id)
       );
     },
-    updateOrderOnServer() {
-      const userId = sessionStorage.getItem('id');
-      const groupKey = sessionStorage.getItem('group_key');
+  },
 
-      api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
+  mounted() {
+    const savedItems = sessionStorage.getItem('selectedItems');
+    if (savedItems) {
+      this.selectedItems = JSON.parse(savedItems);
+    }
 
-      const response = api.post('/order/add-items', {
-        user_id: userId,
-        group_key: groupKey,
-        items: this.selectedItems.map(i => ({
-          id: i.id,
-          image: i.image,
-          name: i.name,
-          quantity: i.quantity,
-          selectedSize: i.selectedSize,
-          price: i.price
-        }))
-      })
-        .then(res => {
-          console.log("Synced with backend:", res.data);
-        })
-        .catch(err => {
-          console.error("Failed to sync order:", err);
-        });
-    },
-    addToOrder(item) {
-      const existingItem = this.selectedItems.find(i => i.id === item.id);
+    if (!sessionStorage.getItem('auth_token')) {
+      this.$router.push('/');
+    }
 
-      if (existingItem) {
-        existingItem.quantity += 1;
-      } else {
-        const newItem = {
-          ...item,
-          quantity: 1,
-          selectedSize: item.size || 'default'
-        };
-        this.selectedItems.push(newItem);
-      }
-      this.updateOrderOnServer();
-      this.updateTotals();
-      this.calculateTotals();
-    },
-    updateTotals() {
-      this.subtotal = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      this.total = this.subtotal;
-    },
-    onDataUrlChange(dataUrl) {
-      this.dataUrl = dataUrl
-    },
-    closeModal() {
-      this.showPaymentCash = false;
-      this.showPaymentCard = false;
-      this.showPaymentScan = false;
-      this.showStatus = false;
-    },
-    chooseMethod(method) {
-      alert(`You selected: ${method}`);
-      this.showPaymentCash = false;
-      this.showPaymentCard = false;
-      this.showPaymentScan = false;
-      this.showStatus = false;
-    },
-    removeFromOrder(index) {
-      this.selectedItems.splice(index, 1);
-      this.calculateTotals();
-      this.updateOrderOnServer();
-    },
-    increaseQuantity(index) {
-      this.selectedItems[index].quantity += 1;
-      this.updateOrderOnServer();
-      this.calculateTotals();
-    },
-    decreaseQuantity(index) {
-      if (this.selectedItems[index].quantity > 1) {
-        this.selectedItems[index].quantity -= 1;
-      } else {
-        this.removeFromOrder(index);
-      }
-      this.updateOrderOnServer();
-      this.calculateTotals();
-    },
-    selectSize(item, size, index) {
-      item.selectedSize = size;
-      item.selectedSizeIndex = index;
-    },
-    calculateTotals() {
-      this.subtotal = this.selectedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-      this.total = this.subtotal;
-    },
-    formatCurrency(value) {
-      return `$${value.toFixed(2)}`;
-    },
+    const savedStep = localStorage.getItem("order_status_step");
+    const savedMessage = localStorage.getItem("order_status_message");
+
+    if (savedStep && savedMessage) {
+      this.showStatus = true;
+      this.resultMessage = savedMessage;
+    }
+
+    window.addEventListener('storage', this.syncOrderPaid);
+
+    this.fetchSpecialMenus();
+    this.fetchMenus();
+    this.fetchFood();
+    this.loadUserData();
+    this.fetchIdOrder();
+    this.getDraftOrder();
+
+    this.listenForCallRobot();
+    this.listenAddItem();
+    this.listenForOrderApprove();
+    this.listenForKitchenStatus();
+    this.listenCreditForStatus();
+    this.listenForPaidOrder();
+  },
+
+  beforeUnmount() {
+    // Cleanup if necessary
   },
 };
 </script>
+
 
 <style scoped>
 @import "font-awesome/css/font-awesome.min.css";

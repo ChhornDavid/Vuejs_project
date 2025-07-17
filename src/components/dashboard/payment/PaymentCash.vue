@@ -94,6 +94,7 @@
 
 <script>
 import api from '../../../axios/Axios';
+import { echo } from '../../../services/echo';
 
 export default {
     name: "PaymentCash",
@@ -162,7 +163,7 @@ export default {
                     user_id: userId,
                     amount: this.total,
                     payment_type: "cash",
-                    session_key: sessionStorage.getItem("session_key"),
+                    paid: "paid",
                     group_key: sessionStorage.getItem("group_key"),
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
@@ -181,8 +182,7 @@ export default {
 
                 if (response.status === 201) {
                     this.resultMessage = "Order successfully placed! Awaiting cashier confirmation.";
-                    sessionStorage.setItem('order_paid', 'true');
-                    setTimeout(() => this.closeModal(), 2500);
+                    this.closeModal();
                 }
             } catch (error) {
                 console.error("Payment error:", error);
