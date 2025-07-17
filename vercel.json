@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/vuejs_project/(.*)", "destination": "/vuejs_project/index.html" }
+  ]
+}
