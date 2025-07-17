@@ -70,7 +70,7 @@ const login = async () => {
       alert('You are already logged in in another tab.')
 
       // Check role from localStorage (persistent across tabs)
-      const role = localStorage.getItem('role') || sessionStorage.getItem('role')
+      const role = localStorage.getItem('role') || localStorage.getItem('role')
 
       const redirectPath = role === 'admin' ? '/admin' :
         role === 'cooker' ? '/kitchen' : '/dashboard'
@@ -86,10 +86,10 @@ const login = async () => {
     const { access_token, role, name, id } = response.data
 
     if (access_token) {
-      sessionStorage.setItem('auth_token', access_token)
-      sessionStorage.setItem('name', name)
-      sessionStorage.setItem('role', role)
-      sessionStorage.setItem('id', id)
+      localStorage.setItem('auth_token', access_token)
+      localStorage.setItem('name', name)
+      localStorage.setItem('role', role)
+      localStorage.setItem('id', id)
 
       // Also save role and isLoggedIn in localStorage for cross-tab detection
       localStorage.setItem('isLoggedIn', 'true')

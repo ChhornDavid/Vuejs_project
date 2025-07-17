@@ -278,7 +278,7 @@ export default {
 
   data() {
     return {
-      orderPaid: this.orderPaid = sessionStorage.getItem('order_paid') === 'true',
+      orderPaid: this.orderPaid = localStorage.getItem('order_paid') === 'true',
       orderAdded: false,
       userData: null,
       categories: [],
@@ -333,7 +333,7 @@ export default {
 
   methods: {
     syncOrderPaid() {
-      this.orderPaid = sessionStorage.getItem('order_paid') === 'true';
+      this.orderPaid = localStorage.getItem('order_paid') === 'true';
     },
     switchLang(lang) {
       this.$i18n.locale = lang;
@@ -402,8 +402,8 @@ export default {
     },
 
     async updateOrderOnServer() {
-      const userId = sessionStorage.getItem('id');
-      const groupKey = sessionStorage.getItem('group_key');
+      const userId = localStorage.getItem('id');
+      const groupKey = localStorage.getItem('group_key');
 
       try {
         api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
@@ -427,7 +427,7 @@ export default {
 
     async logout() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           alert("No token found. Please log in.");
           return;
@@ -437,7 +437,7 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        sessionStorage.clear();
+        localStorage.clear();
         localStorage.clear();
         this.$router.push("/");
       } catch (error) {
@@ -449,7 +449,7 @@ export default {
     async fetchSpecialMenus() {
       try {
         const response = await api.get("/special-menus", {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` },
         });
         this.specialMenus = response.data.data;
       } catch (error) {
@@ -460,7 +460,7 @@ export default {
     async fetchMenus() {
       try {
         const response = await api.get("/categories", {
-          headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` },
         });
         this.categories = response.data.data;
       } catch (error) {
@@ -471,7 +471,7 @@ export default {
     async fetchFood() {
       try {
         this.isLoading = true;
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           alert("No token found. Please log in again");
           return;
@@ -490,7 +490,7 @@ export default {
 
     async fetchIdOrder() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         const response = await api.get("/getitem", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -502,15 +502,15 @@ export default {
 
     loadUserData() {
       this.userData = {
-        name: sessionStorage.getItem('name'),
-        role: sessionStorage.getItem('role'),
-        tableNumber: sessionStorage.getItem('tableNumber')
+        name: localStorage.getItem('name'),
+        role: localStorage.getItem('role'),
+        tableNumber: localStorage.getItem('tableNumber')
       };
     },
 
     async getDraftOrder() {
-      const userId = sessionStorage.getItem('id');
-      const token = sessionStorage.getItem('auth_token');
+      const userId = localStorage.getItem('id');
+      const token = localStorage.getItem('auth_token');
 
       try {
         const res = await api.get(`/order/draft/${userId}`, {
@@ -527,7 +527,7 @@ export default {
 
     listenCreditForStatus() {
       echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
-        const userId = sessionStorage.getItem('id');
+        const userId = localStorage.getItem('id');
         if (event.userId == userId) {
           this.showStatus = true;
           this.resultMessage = 'Food is at kitchen.';
@@ -550,7 +550,7 @@ export default {
     },
     listenForOrderApprove() {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
-        const userId = sessionStorage.getItem('id');
+        const userId = localStorage.getItem('id');
         if (event.userId == userId) {
           this.showStatus = true;
           this.resultMessage = 'Order approved by cashier.';
@@ -572,7 +572,7 @@ export default {
     },
     listenForKitchenStatus() {
       echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
-        const userId = sessionStorage.getItem("id");
+        const userId = localStorage.getItem("id");
         if (event.userId == userId) {
           this.showStatus = true;
           this.resultMessage = "Order sent to kitchen.";
@@ -598,7 +598,7 @@ export default {
         console.log("Event received:", event.robot);
 
         const eventUserId = event.robot?.user_id;
-        const currentUserId = sessionStorage.getItem("id");
+        const currentUserId = localStorage.getItem("id");
 
         // Handle robot status steps
         if (event.robot?.status === 'accepted' &&
@@ -667,8 +667,8 @@ export default {
           }
           localStorage.removeItem("order_status_step");
           localStorage.removeItem("order_status_message");
-          sessionStorage.removeItem('selectedItems');
-          sessionStorage.removeItem('order_paid');
+          localStorage.removeItem('selectedItems');
+          localStorage.removeItem('order_paid');
 
           setTimeout(() => {
             window.location.reload();
@@ -680,7 +680,7 @@ export default {
     },
 
     listenAddItem() {
-      const userId = sessionStorage.getItem('id');
+      const userId = localStorage.getItem('id');
       echo.channel('ordersItem').listen('OrderCreated', (event) => {
         if (event.userId === userId) {
           this.orders[this.activeOrderIndex].items = event.items;
@@ -689,10 +689,10 @@ export default {
     },
 
     listenForPaidOrder() {
-      const userId = sessionStorage.getItem('id');
+      const userId = localStorage.getItem('id');
       echo.channel(`order-status`).listen('PaidOrder', (event) => {
         if (event.userId == userId) {
-          sessionStorage.setItem('order_paid', 'true');
+          localStorage.setItem('order_paid', 'true');
           this.orderPaid = true;
         }
       });

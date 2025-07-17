@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 function getAccessToken() {
-  return sessionStorage.getItem('auth_token');
+  return localStorage.getItem('auth_token');
 }
 
 let isRefreshing = false;
@@ -32,7 +32,7 @@ async function refreshAccessToken() {
       throw new Error('No access token received during refresh');
     }
 
-    sessionStorage.setItem('auth_token', access_token);
+    localStorage.setItem('auth_token', access_token);
     return access_token;
   } catch (error) {
     console.error('Refresh token failed:', error);
