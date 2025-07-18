@@ -280,7 +280,7 @@ export default {
 
         async logout() {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 if (!token) {
                     alert("No token found. Please log in.");
                     return;
@@ -305,8 +305,8 @@ export default {
             }
         },
         loadUserData() {
-            const storedName = sessionStorage.getItem('name');
-            const storedRole = sessionStorage.getItem('role');
+            const storedName = localStorage.getItem('name');
+            const storedRole = localStorage.getItem('role');
 
             this.userData = {
                 name: storedName,

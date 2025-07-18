@@ -286,7 +286,7 @@ const routes = [
 
 // Create Router
 const router = createRouter({
-    history: createWebHistory('/vuejs_project/'),
+    history: createWebHistory('/'),
     routes: routes
 })
 

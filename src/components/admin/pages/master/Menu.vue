@@ -475,7 +475,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         const response = await api.get("/categories", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -517,7 +517,7 @@ export default {
     },
     async handleCreateCategory() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           throw new Error("No authentication token found");
         }
@@ -543,7 +543,7 @@ export default {
     },
     async handleUpdateCategory() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           throw new Error("No authentication token found");
         }
@@ -577,7 +577,7 @@ export default {
     },
     async handleDeleteCategory(categoryId) {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           throw new Error("No authentication token found");
         }

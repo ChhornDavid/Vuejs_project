@@ -131,7 +131,7 @@ export default {
     },
     computed: {
         isPaidAlready() {
-            return sessionStorage.getItem('order_paid') === 'true';
+            return localStorage.getItem('order_paid') === 'true';
         }
     },
     methods: {
@@ -143,28 +143,28 @@ export default {
             this.$emit("close-modal");
         },
         generateOrderSessionKey() {
-            if (!sessionStorage.getItem('order_session_key')) {
+            if (!localStorage.getItem('order_session_key')) {
                 const uniqueKey = `sess_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-                sessionStorage.setItem('session_key', uniqueKey);
+                localStorage.setItem('session_key', uniqueKey);
             }
         },
         generateGroupKey() {
-            const userId = sessionStorage.getItem('id');
-            if (!sessionStorage.getItem('group_key') && userId) {
+            const userId = localStorage.getItem('id');
+            if (!localStorage.getItem('group_key') && userId) {
                 const groupKey = `group_${userId}`;
-                sessionStorage.setItem('group_key', groupKey);
+                localStorage.setItem('group_key', groupKey);
             }
         },
         async handlePayment() {
             this.processing = true;
             try {
-                const userId = sessionStorage.getItem("id");
+                const userId = localStorage.getItem("id");
                 const orderPayload = {
                     user_id: userId,
                     amount: this.total,
                     payment_type: "cash",
                     paid: "paid",
-                    group_key: sessionStorage.getItem("group_key"),
+                    group_key: localStorage.getItem("group_key"),
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,
@@ -173,7 +173,7 @@ export default {
                         size: item.selectedSize
                     }))
                 };
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.post("/pending-orders", orderPayload, {
                     headers: {
                         Authorization: `Bearer ${token}`,

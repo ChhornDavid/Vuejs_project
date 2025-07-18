@@ -135,7 +135,7 @@ export default {
     },
     computed: {
         isPaidAlready() {
-            return sessionStorage.getItem('order_paid') === 'true';
+            return localStorage.getItem('order_paid') === 'true';
         }
     },
     beforeUnmount() {
@@ -168,7 +168,7 @@ export default {
                     })),
                     currency: 'usd',
                 }, {
-                    headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` }
+                    headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
                 });
 
                 this.paymentUrl = response.data.payment_url;
@@ -198,7 +198,7 @@ export default {
             this.pollingInterval = setInterval(async () => {
                 try {
                     const response = await api.get(`/payment/status/${this.paymentId}`, {
-                        headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` }
+                        headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
                     });
 
                     if (response.data.paymentStatus === 'success') {
@@ -216,7 +216,7 @@ export default {
         async handleScanOrder() {
             try {
                 const orderPayload = {
-                    user_id: parseInt(sessionStorage.getItem("id"), 10),
+                    user_id: parseInt(localStorage.getItem("id"), 10),
                     amount: this.total,
                     payment_type: "scan",
                     items: this.selectedItems.map(item => ({
@@ -229,7 +229,7 @@ export default {
                 };
 
                 await api.post("/orders", orderPayload, {
-                    headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` }
+                    headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
                 });
 
             } catch (error) {

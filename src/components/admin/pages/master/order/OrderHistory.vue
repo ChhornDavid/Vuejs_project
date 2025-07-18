@@ -199,7 +199,7 @@ export default {
             this.loading = true;
             this.error = null;
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.get("/orders", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -246,7 +246,7 @@ export default {
             this.loading = true;
             this.error = null;
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.get(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,

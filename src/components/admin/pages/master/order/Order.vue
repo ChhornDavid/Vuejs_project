@@ -160,7 +160,7 @@ export default {
 
         async fetchPendingOrders() {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const { data } = await api.get("/admin/pending-orders", {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -186,7 +186,7 @@ export default {
             try {
                 const endpoint = action === 'approve' ? `approve/${id}` : `decline/${id}`;
                 await api.post(`/admin/${endpoint}`, {}, {
-                    headers: { Authorization: `Bearer ${sessionStorage.getItem("auth_token")}` }
+                    headers: { Authorization: `Bearer ${localStorage.getItem("auth_token")}` }
                 });
                 this.pendingOrders = this.pendingOrders.filter(order => order.id !== id);
             } catch (error) {

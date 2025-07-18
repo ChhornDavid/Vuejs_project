@@ -315,7 +315,7 @@ export default {
     },
     async handleCreateMenu() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         await api.post("/addspecial-menus", this.activeMenu, {
           headers: { Authorization: `Bearer ${token}` }
         });

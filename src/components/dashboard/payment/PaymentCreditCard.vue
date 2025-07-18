@@ -117,7 +117,7 @@ const stripeStyle = {
     },
     computed: {
         isPaidAlready() {
-            return sessionStorage.getItem('order_paid') === 'true';
+            return localStorage.getItem('order_paid') === 'true';
         }
     },
 };
@@ -141,7 +141,7 @@ export default {
     },
     computed: {
         isPaidAlready() {
-            return sessionStorage.getItem('order_paid') === 'true';
+            return localStorage.getItem('order_paid') === 'true';
         }
     },
     watch: {
@@ -227,8 +227,8 @@ export default {
         },
         async handleOrder() {
             try {
-                const userId = sessionStorage.getItem("id");
-                const token = sessionStorage.getItem("auth_token");
+                const userId = localStorage.getItem("id");
+                const token = localStorage.getItem("auth_token");
                 
                 const orderPayload = {
                     user_id: parseInt(userId, 10),

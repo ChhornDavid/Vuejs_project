@@ -230,7 +230,7 @@ export default {
     },
     async fetchKitchenOrders() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         const response = await api.get("/kitchen/orders", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -241,7 +241,7 @@ export default {
     },
     async updateStatus(id, newStatus) {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         const response = await api.put(
           `/kitchen/orders/${id}/status`,
           { status: newStatus },
@@ -286,7 +286,7 @@ export default {
     },
     async logout() {
       try {
-        const token = sessionStorage.getItem("auth_token");
+        const token = localStorage.getItem("auth_token");
         if (!token) {
           alert("No token found. Please log in.");
           return;
@@ -299,7 +299,7 @@ export default {
             },
           }
         );
-        sessionStorage.clear();
+        localStorage.clear();
         localStorage.clear();
         localStorage.setItem('isLoggedIn', 'false');
         localStorage.removeItem('isLoggedIn');

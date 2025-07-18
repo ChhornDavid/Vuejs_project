@@ -575,7 +575,7 @@ export default {
             this.loading = true;
             this.error = null;
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.get("/products", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -592,7 +592,7 @@ export default {
         },
         async fetchSpecialMenus() {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.get("/special-menus", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -606,7 +606,7 @@ export default {
         },
         async fetchCategories() {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.get("/categories", {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -702,7 +702,7 @@ export default {
                     formData.append("image", this.activeFood.image);
                 }
                 
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.post("/addproducts", formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -736,7 +736,7 @@ export default {
                     formData.append("image", this.activeFood.image);
                 }
                 
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.post(
                     `/updateproducts/${this.activeFood.id}`,
                     formData,
@@ -759,7 +759,7 @@ export default {
         },
         async handleDeleteFood(foodId) {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 await api.delete(`/deleteproduct/${foodId}`, {
                     headers: { 
                         Authorization: `Bearer ${token}`,
@@ -777,7 +777,7 @@ export default {
         },
         async toggleAvailability(food) {
             try {
-                const token = sessionStorage.getItem("auth_token");
+                const token = localStorage.getItem("auth_token");
                 const response = await api.post(
                     `/updateproducts/${food.id}`,
                     {

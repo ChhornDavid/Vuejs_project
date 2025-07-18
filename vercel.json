@@ -1,5 +1,6 @@
 {
+  "build": { "output": "dist" },
   "rewrites": [
-    { "source": "/vuejs_project/(.*)", "destination": "/vuejs_project/index.html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
