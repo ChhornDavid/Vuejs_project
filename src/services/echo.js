@@ -6,7 +6,7 @@ window.Pusher = Pusher;
 export const echo = new Echo({
     broadcaster: 'pusher',
     key: 'local',
-    wsHost: window.location.hostname,
+    wsHost: 'http://172.19.202.96:6001',
     wsPort: 6001,
     forceTLS: false,
     disableStats: true,
