@@ -1,20 +1,18 @@
-# Use an official Node.js runtime as the base image
-FROM node:16
+FROM node:18
 
-# Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if they exist)
+# Copy package files and install deps
 COPY package*.json ./
+RUN npm install --legacy-peer-deps
 
-# Install dependencies
-RUN npm install
 
-# Copy the rest of the files
+# Copy the rest of the source code
 COPY . .
 
-# Expose port 3000 (default for Vue CLI)
-EXPOSE 3000
+# Expose Vite dev server port
+EXPOSE 5173
 
-# Run the app in development mode
+# Start the dev server
 CMD ["npm", "run", "dev"]
