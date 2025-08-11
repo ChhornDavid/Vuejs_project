@@ -1,18 +1,17 @@
-FROM node:18
+FROM node:18-alpine as build-stage
 
-# Set working directory
 WORKDIR /app
 
-# Copy package files and install deps
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 
-
-# Copy the rest of the source code
 COPY . .
+RUN npm run build
 
-# Expose Vite dev server port
-EXPOSE 5173
+FROM nginx:stable-alpine
 
-# Start the dev server
-CMD ["npm", "run", "dev"]
+COPY --from=build-stage /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

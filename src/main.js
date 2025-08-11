@@ -41,7 +41,7 @@ const messages = {
         language: "Language",
         khmer: "Khmer",
         english: "English",
-        ordering:"Ordering",
+        ordering: "Ordering",
         tablenumber: "TableNumer",
         cash: "Cash",
         card: "Card",
@@ -50,60 +50,60 @@ const messages = {
         kh: "khmer",
         en: "English",
         paid_here: "Paid here",
-        add_category:"Add Category",
-        category_management:"Category Management",
-        total_category:"total_category",
-        show:"Show:",
-        id:"ID",
-        name:"Name",
-        image:"Image",
-        actions:"Actions",
-        category_name:"Catrgory Name",
-        no_categories_found:'No categories found',
-        search_categories:"Search categories",
-        menu_management:"Menu Management",
-        add_menu:"Add menu",
+        add_category: "Add Category",
+        category_management: "Category Management",
+        total_category: "total_category",
+        show: "Show:",
+        id: "ID",
+        name: "Name",
+        image: "Image",
+        actions: "Actions",
+        category_name: "Catrgory Name",
+        no_categories_found: 'No categories found',
+        search_categories: "Search categories",
+        menu_management: "Menu Management",
+        add_menu: "Add menu",
         dashboard: 'Dashboard',
-        orders:"Order",
-        special_menu:"Special Menu",
-        menu_category:"Menu Category",
-        menu:"Menu",
-        user:"User",
-        food:"Food",
-        user_management:"User Management",
-        add_user:"Add user",
-        role:"Role",
-        status:"Status",
-        active:"Active",
-        invoice:"Invoice",
-        order_history:"Order history",
-        current_order:"Current Orders",
-        special_menu_management:"Special Menu Management",
-        add_new_menu:"Add New Menu",
-        search_menu:"Search Menu",
-        menu_name:"Menu Name",
-        total_items:"Total Items",
-        available_item:"Available Items",
-        categries:"Categories",
-        search_item:"Search Items",
-        items:"Items",
-        category:"Category",
-        rating:"Rating",
-        all_categories:"All Categories",
-        all_status:"All Status",
-        available:"Available",
-        unavailable:"Unvailable",
-        pending_order:"Pending Orders",
-        no_pending_order:"No Pending Order",
-        pending:"Pending",
-        size:"Size",
-        qty:"Qty",
-        price:"Price",
-        accept:"Accept",
-        decline:"Decline",
-        cancel:"Cancel",
-        confirm:"Confirm",
-        admin:"Admin"
+        orders: "Order",
+        special_menu: "Special Menu",
+        menu_category: "Menu Category",
+        menu: "Menu",
+        user: "User",
+        food: "Food",
+        user_management: "User Management",
+        add_user: "Add user",
+        role: "Role",
+        status: "Status",
+        active: "Active",
+        invoice: "Invoice",
+        order_history: "Order history",
+        current_order: "Current Orders",
+        special_menu_management: "Special Menu Management",
+        add_new_menu: "Add New Menu",
+        search_menu: "Search Menu",
+        menu_name: "Menu Name",
+        total_items: "Total Items",
+        available_item: "Available Items",
+        categries: "Categories",
+        search_item: "Search Items",
+        items: "Items",
+        category: "Category",
+        rating: "Rating",
+        all_categories: "All Categories",
+        all_status: "All Status",
+        available: "Available",
+        unavailable: "Unvailable",
+        pending_order: "Pending Orders",
+        no_pending_order: "No Pending Order",
+        pending: "Pending",
+        size: "Size",
+        qty: "Qty",
+        price: "Price",
+        accept: "Accept",
+        decline: "Decline",
+        cancel: "Cancel",
+        confirm: "Confirm",
+        admin: "Admin"
     },
     kh: {
         restaurant: "ភោជនីយដ្ឋាន",
@@ -129,68 +129,68 @@ const messages = {
         kh: "ភាសាខ្មែរ",
         en: "ភាសាអង់គ្លេស",
         paid_here: "បង់នៅទីនេះ",
-        add_category:"បន្ថែមប្រភេទម៉ឺនុយថ្មី",
-        category_management:"ការគ្រប់គ្រងប្រភេទនៃម៉ឺនុយ",
-        total_category:"ម៉ឺនុយសរុប",
-        show:"បង្ហាញៈ",
-        id:"លេខ",
-        name:"ឈ្មោះ",
-        image:"រូបភាព",
-        actions:"មុខងារ",
-        category_name:"ឈ្មោះ ម៉ឺនុយ",
-        no_categories_found:'រកមិនឃើញម៉ឺនុយទេ',
-        search_categories:"ស្វែងរកប្រភេទម៉ឺនុយ",
-        menu_management:"ការគ្រប់គ្រងម៉ឺនុយ",
-        add_menu:"បន្ថែមម៉ឺនុយថ្មី",
+        add_category: "បន្ថែមប្រភេទម៉ឺនុយថ្មី",
+        category_management: "ការគ្រប់គ្រងប្រភេទនៃម៉ឺនុយ",
+        total_category: "ម៉ឺនុយសរុប",
+        show: "បង្ហាញៈ",
+        id: "លេខ",
+        name: "ឈ្មោះ",
+        image: "រូបភាព",
+        actions: "មុខងារ",
+        category_name: "ឈ្មោះ ម៉ឺនុយ",
+        no_categories_found: 'រកមិនឃើញម៉ឺនុយទេ',
+        search_categories: "ស្វែងរកប្រភេទម៉ឺនុយ",
+        menu_management: "ការគ្រប់គ្រងម៉ឺនុយ",
+        add_menu: "បន្ថែមម៉ឺនុយថ្មី",
         dashboard: 'ផ្ទាំងគ្រប់គ្រង',
-        orders:"ការកម្មង់",
-        special_menu:"ម៉ឺនុយពិសេស",
-        menu_category:"ប្រភេទនៃម៉ឺនុយ",
-        menu:"ម៉ឺនុយ",
-        user:"អ្នកប្រើប្រាស់",
-        food:"អាហារ",
-        user_management:"ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
-        add_user:"បញ្ចូលអ្នកប្រើប្រាស់ថ្មី",
-        role:"តួនាទី",
-        status:"ស្ថានភាព",
-        active:"សកម្មភាព",
-        invoice:"វិក្កយបត្រ",
-        order_history:"ប្រវត្តិនៃការកម្មង់",
-        current_order:"ការកម្មង់បច្ចុប្បន្ន",
-        special_menu_management:"ការគ្រប់គ្រងម៉ឺនុយពិសេស",
-        add_new_menu:"បន្ថែមម៉ឺនុយថ្មី",
-        search_menu:"ស្វែងរកម៉ឺនុយ",
-        menu_name:"ឈ្មោះម៉ឺនុយ",
-        total_items:"ម៉ឺនុយសរុប",
-        available_item:"ម៉ឺនុយដែលមាន",
-        categries:"ប្រភេទនៃម៉ឺនុយ",
-        search_item:"ស្វែងរកម៉ឺនុយ",
-        items:"អាហារ",
-        category:"ប្រភេទ",
-        price:"តម្លៃ",
-        rating:"ការវាយតម្លៃ",
-        all_categories:"ប្រភេទទាំងអស់",
-        all_status:"ស្ថានភាពទាំងអស់",
-        available:"មាន",
-        unavailable:"មិនមាន",
-        pending_order:"ការកម្មង់ស្ថិតក្នងការរងចាំ",
-        no_pending_order:"គ្មានការរង់ចាំការកម្មង់",
-        pending:"រងចាំ",
-        qty:"ចំនួន",
-        accept:"ទទួល",
-        decline:"បដិសេធ",
-        cancel:"លុបចោល",
-        confirm:"បញ្ជាក់",
-        admin:"អ្នកគ្រប់គ្រង"
+        orders: "ការកម្មង់",
+        special_menu: "ម៉ឺនុយពិសេស",
+        menu_category: "ប្រភេទនៃម៉ឺនុយ",
+        menu: "ម៉ឺនុយ",
+        user: "អ្នកប្រើប្រាស់",
+        food: "អាហារ",
+        user_management: "ការគ្រប់គ្រងអ្នកប្រើប្រាស់",
+        add_user: "បញ្ចូលអ្នកប្រើប្រាស់ថ្មី",
+        role: "តួនាទី",
+        status: "ស្ថានភាព",
+        active: "សកម្មភាព",
+        invoice: "វិក្កយបត្រ",
+        order_history: "ប្រវត្តិនៃការកម្មង់",
+        current_order: "ការកម្មង់បច្ចុប្បន្ន",
+        special_menu_management: "ការគ្រប់គ្រងម៉ឺនុយពិសេស",
+        add_new_menu: "បន្ថែមម៉ឺនុយថ្មី",
+        search_menu: "ស្វែងរកម៉ឺនុយ",
+        menu_name: "ឈ្មោះម៉ឺនុយ",
+        total_items: "ម៉ឺនុយសរុប",
+        available_item: "ម៉ឺនុយដែលមាន",
+        categries: "ប្រភេទនៃម៉ឺនុយ",
+        search_item: "ស្វែងរកម៉ឺនុយ",
+        items: "អាហារ",
+        category: "ប្រភេទ",
+        price: "តម្លៃ",
+        rating: "ការវាយតម្លៃ",
+        all_categories: "ប្រភេទទាំងអស់",
+        all_status: "ស្ថានភាពទាំងអស់",
+        available: "មាន",
+        unavailable: "មិនមាន",
+        pending_order: "ការកម្មង់ស្ថិតក្នងការរងចាំ",
+        no_pending_order: "គ្មានការរង់ចាំការកម្មង់",
+        pending: "រងចាំ",
+        qty: "ចំនួន",
+        accept: "ទទួល",
+        decline: "បដិសេធ",
+        cancel: "លុបចោល",
+        confirm: "បញ្ជាក់",
+        admin: "អ្នកគ្រប់គ្រង"
 
     }
 }
 
 
 const i18n = createI18n({
-  locale: 'en',
-  fallbackLocale: 'en',
-  messages
+    locale: 'en',
+    fallbackLocale: 'en',
+    messages
 })
 // Define Routes
 const routes = [
@@ -303,25 +303,24 @@ export const preventRouteNavigation = () => {
     allowNavigation = false;
 };
 
-router.beforeEach((to, _from, next) => {
+router.beforeEach((to, from, next) => {
   const role = sessionStorage.getItem('role') || localStorage.getItem('role');
   const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
 
-  // If trying to access Login and already logged in, redirect to role-based route
-  if (to.name === 'Login' && isLoggedIn && role) {
-    const redirectPath =
-      role === 'admin' ? '/admin' :
-      role === 'cooker' ? '/kitchen' :
-      '/dashboard';
-
-    return next(redirectPath); // ✅ auto redirect
+  // Save attempted route before login
+  if (!isLoggedIn && to.meta.requiresAuth) {
+    sessionStorage.setItem('redirectAfterLogin', to.fullPath);
   }
 
-  // Protect auth routes
+  // Redirect away from login page if already logged in
+  if (to.path === '/' && isLoggedIn && role) {
+    return next(false); // Stay where you are if refreshing, no forced redirect
+  }
+
+  // Auth protection
   if (to.meta.requiresAuth) {
-    if (!role) {
-      return next('/');
-    } else if (to.meta.roles && !to.meta.roles.includes(role)) {
+    if (!role) return next('/');
+    if (to.meta.roles && !to.meta.roles.includes(role)) {
       return next('/unauthorized');
     }
   }

@@ -14,3 +14,5 @@ export const echo = new Echo({
     self: true,
     enabledTransports: ['ws']
 });
+//172.19.202.96
+// wsHost: window.location.hostname,

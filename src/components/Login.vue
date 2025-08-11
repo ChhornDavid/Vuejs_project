@@ -56,57 +56,49 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import api from '../axios/Axios'
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import api from '../axios/Axios';
 
-const email = ref('')
-const password = ref('')
-const router = useRouter()
+const email = ref('');
+const password = ref('');
+const router = useRouter();
 
 const login = async () => {
   try {
-    if (localStorage.getItem('isLoggedIn') === 'true') {
-      alert('You are already logged in in another tab.')
-
-      // Check role from localStorage (persistent across tabs)
-      const role = localStorage.getItem('role') || localStorage.getItem('role')
-
-      const redirectPath = role === 'admin' ? '/admin' :
-        role === 'cooker' ? '/kitchen' : '/dashboard'
-      router.push(redirectPath)
-      return
-    }
-
     const response = await api.post('/login', {
       email: email.value,
       password: password.value,
-    }, { withCredentials: true })
+    }, { withCredentials: true });
 
-    const { access_token, role, name, id } = response.data
+    const { access_token, role, name, id } = response.data;
 
     if (access_token) {
-      localStorage.setItem('auth_token', access_token)
-      localStorage.setItem('name', name)
-      localStorage.setItem('role', role)
-      localStorage.setItem('id', id)
+      localStorage.setItem('auth_token', access_token);
+      localStorage.setItem('name', name);
+      localStorage.setItem('role', role);
+      localStorage.setItem('id', id);
+      localStorage.setItem('isLoggedIn', 'true');
 
-      // Also save role and isLoggedIn in localStorage for cross-tab detection
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('role', role)
-
-      const redirectPath = role === 'admin' ? '/admin' :
-        role === 'cooker' ? '/kitchen' : '/dashboard'
-      router.push(redirectPath)
+      const savedRedirect = sessionStorage.getItem('redirectAfterLogin');
+      if (savedRedirect) {
+        sessionStorage.removeItem('redirectAfterLogin');
+        router.push(savedRedirect);
+      } else {
+        const redirectPath = role === 'admin' ? '/admin/home' :
+          role === 'cooker' ? '/kitchen' : '/dashboard';
+        router.push(redirectPath);
+      }
     } else {
-      alert('Authentication failed: No token received')
+      alert('Authentication failed: No token received');
     }
   } catch (error) {
-    console.error('Login error:', error)
-    alert(error.response?.data?.message || 'Login failed. Please check your credentials.')
+    console.error('Login error:', error);
+    alert(error.response?.data?.message || 'Login failed. Please check your credentials.');
   }
-}
+};
 </script>
+
 
 
 <style scoped>
