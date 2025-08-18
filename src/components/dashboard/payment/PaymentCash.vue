@@ -173,6 +173,7 @@ export default {
                         size: item.selectedSize
                     }))
                 };
+                console.log("cash order", orderPayload);
                 const token = localStorage.getItem("auth_token");
                 const response = await api.post("/pending-orders", orderPayload, {
                     headers: {

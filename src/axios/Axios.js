@@ -1,33 +1,36 @@
 import axios from 'axios';
-//'http://172.19.202.96:8000/api'
-//'http://localhost:8000/api'
+
+// API Base URLs
+// 'http://172.19.202.96:8000/api'
+// 'http://localhost:8000/api'
+
 const api = axios.create({
   baseURL: 'http://172.19.202.96:8000/api',
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true, // This sends cookies with requests
+  withCredentials: true,
 });
 
-// Token management
-function getAccessToken() {
-  return localStorage.getItem('auth_token');
-}
+// Access token management
+let accessToken = localStorage.getItem('auth_token');
 
 function setAccessToken(token) {
+  accessToken = token;
   localStorage.setItem('auth_token', token);
 }
 
 function clearAuth() {
+  accessToken = null;
   localStorage.removeItem('auth_token');
-  localStorage.setItem('isLoggedIn', 'false');
   sessionStorage.clear();
+  window.location.href = '/login';
 }
 
-// Refresh token queue system
+// Refresh queue
 let isRefreshing = false;
 let refreshSubscribers = [];
 
-function subscribeTokenRefresh(callback) {
-  refreshSubscribers.push(callback);
+function subscribeTokenRefresh(cb) {
+  refreshSubscribers.push(cb);
 }
 
 function onRefreshed(token) {
@@ -37,29 +40,23 @@ function onRefreshed(token) {
 
 async function refreshAccessToken() {
   try {
-    // withCredentials: true will automatically send the HttpOnly refresh token cookie
-    const response = await api.post('/refresh'); // Changed to POST as it's more appropriate
-    
+    const response = await api.post('/refresh');
     const { access_token } = response.data;
-    
-    if (!access_token) {
-      throw new Error('No access token received');
-    }
-    
+
+    if (!access_token) throw new Error('No access token received');
+
     setAccessToken(access_token);
     return access_token;
   } catch (error) {
     clearAuth();
-    window.location.href = '/login'; // Redirect to login page
-    throw error; // Re-throw to prevent subsequent requests from proceeding
+    throw error;
   }
 }
 
 // Request interceptor
 api.interceptors.request.use(config => {
-  const token = getAccessToken();
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
@@ -69,41 +66,35 @@ api.interceptors.response.use(
   response => response,
   async error => {
     const originalRequest = error.config;
-    
-    // Only handle 401 errors and avoid retry loops
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       if (isRefreshing) {
-        // Queue the request
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
           subscribeTokenRefresh(token => {
             originalRequest.headers.Authorization = `Bearer ${token}`;
             resolve(api(originalRequest));
           });
         });
       }
-      
+
       isRefreshing = true;
-      
       try {
         const newToken = await refreshAccessToken();
         onRefreshed(newToken);
         originalRequest.headers.Authorization = `Bearer ${newToken}`;
         return api(originalRequest);
       } catch (refreshError) {
-        // Clear auth and redirect if refresh fails
-        clearAuth();
-        window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
-    
-    // For non-401 errors or already retried requests
+
     return Promise.reject(error);
   }
 );
 
 export default api;
+

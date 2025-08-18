@@ -420,6 +420,7 @@ export default {
             price: i.price
           }))
         });
+        status: false
       } catch (err) {
         console.error("Failed to sync order:", err);
       }
@@ -645,6 +646,8 @@ export default {
           this.resultMessage = "Order is ready.";
           localStorage.setItem("order_status_step", "Ready");
           localStorage.setItem("order_status_message", this.resultMessage);
+          const userId = localStorage.getItem('id');
+          const groupKey = localStorage.getItem('group_key');
           this.$nextTick(() => {
             const modal = this.$refs.Status;
             if (modal && typeof modal.moveToStep === 'function') {
@@ -653,9 +656,23 @@ export default {
               console.error('Status component not ready or method missing');
             }
           });
+          api.post('/order/add-items', {
+            user_id: userId,
+            group_key: groupKey,
+            items: this.activeOrder.items.map(i => ({
+              id: i.id,
+              image: i.image,
+              name: i.name,
+              quantity: i.quantity,
+              selectedSize: i.selectedSize,
+              price: i.price
+            })),
+            status: true
+          }).catch(err => {
+            console.error("Failed to update order:", err);
+          });
         }
 
-        // Handle final completion and reload
         if (
           event.robot?.status === 'completed' &&
           eventUserId &&
