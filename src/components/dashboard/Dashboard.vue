@@ -125,7 +125,7 @@
     <aside class="w-1/3 bg-white border-l border-gray-200 p-6 flex flex-col">
       <div class="mb-6">
         <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold text-gray-800">{{ $t('ordering') }} {{ OrderId }}</h2>
+          <h2 class="text-xl font-semibold text-gray-800">{{ $t('ordering') }} {{ orderId }}</h2>
           <button @click="logout" class="p-2 rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
             :title="$t('logout')">
             {{ $t('logout') }}
@@ -300,6 +300,7 @@ export default {
           id: 1,
           name: 'Order1',
           items: [],
+          orderPaid: false,
         },
       ],
       orderCounter: 2,
@@ -351,6 +352,7 @@ export default {
         id: this.orderCounter,
         name: `Order${this.orderCounter}`,
         items: [],
+        orderPaid: false,
       });
       this.orderAdded = true;
       this.activeOrderIndex = this.orders.length - 1;

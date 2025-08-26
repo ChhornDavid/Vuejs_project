@@ -4,7 +4,7 @@
     <div class="bg-white shadow-sm rounded-lg p-6 mb-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl font-bold text-gray-800">{{$t('user_management')}}</h1>
+          <h1 class="text-2xl font-bold text-gray-800">{{ $t('user_management') }}</h1>
           <p class="text-gray-600 mt-1">Manage your platform users and permissions</p>
         </div>
         <button @click="showAddModal"
@@ -32,11 +32,11 @@
         <table class="w-full">
           <thead class="bg-gray-50">
             <tr>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{$t('user')}}</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('user') }}</th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('role') }}</th>
               <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('status') }}</th>
-              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{$t('active')}}</th>
-              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{$t('actions')}}</th>
+              <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('active') }}</th>
+              <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ $t('actions') }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -161,9 +161,9 @@
               <label class="block text-sm font-medium text-gray-700 mb-1">User Role</label>
               <select v-model="editUser.type"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="user">Standard User</option>
-                <option value="admin">Administrator</option>
-                <option value="cooker">Cooker</option>
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+                <option value="cooker">cooker</option>
               </select>
             </div>
 
@@ -296,8 +296,8 @@ export default {
       modalType: null,
       modalTitle: "",
       currentUser: null,
-      newUser: { name: "", type: "user", email: "", password: "" },
-      editUser: { id: null, name: "", type: "user", email: "", password: "" },
+      newUser: { name: "", type: "", email: "", password: "" },
+      editUser: { id: null, name: "", type: "", email: "", password: "" },
       currentPage: 1,
       usersPerPage: 10,
     };
@@ -411,9 +411,18 @@ export default {
 
     async handleCreateUser() {
       try {
-        const response = await api.post("/addusers", this.newUser, {
+        const formData = new FormData();
+        formData.append("name", this.editUser.name);
+        formData.append("email", this.editUser.email);
+        formData.append("password", this.editUser.password);
+        formData.append("type", this.editUser.type);
+
+        console.log([...formData.entries()]);
+
+        const response = await api.post("/addusers",formData, {
+        }, {
           headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
         });
 
@@ -425,7 +434,6 @@ export default {
         this.$toast.error(error.response?.data?.message || "Failed to create user");
       }
     },
-
     async handleUpdateUser() {
       try {
         const response = await api.put(
