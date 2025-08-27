@@ -419,7 +419,7 @@ export default {
 
         console.log([...formData.entries()]);
 
-        const response = await api.post("/addusers",formData, {
+        const response = await api.post("/addusers", formData, {
         }, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
@@ -436,20 +436,32 @@ export default {
     },
     async handleUpdateUser() {
       try {
+        const token = localStorage.getItem("auth_token");
+        const formData = new FormData();
+        formData.append("id", this.editUser.id);
+        formData.append("name", this.editUser.name);
+        formData.append("email", this.editUser.email);
+        formData.append("type", this.editUser.type);
+        formData.append("password", this.editUser.password || "");
+        formData.append("verified", this.editUser.verified ? 1 : 0);
+
+        console.log([...formData.entries()]);
         const response = await api.put(
           `/updateusers/${this.editUser.id}`,
-          this.editUser,
+          formData,
           {
             headers: {
-              Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+              Authorization: `Bearer ${token}`,
             },
           }
         );
 
         const index = this.users.findIndex(u => u.id === this.editUser.id);
         if (index !== -1) {
-          this.$set(this.users, index, response.data.data);
+          // ✅ Vue 3 reactivity friendly way
+          this.users[index] = response.data.data;
         }
+
         this.closeModal();
         this.$toast.success("User updated successfully");
       } catch (error) {
@@ -457,7 +469,7 @@ export default {
         this.$toast.error(error.response?.data?.message || "Failed to update user");
       }
     },
-
+    
     async handleDeleteUser(userId) {
       try {
         await api.delete(`/deleteusers/${userId}`, {
