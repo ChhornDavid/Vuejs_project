@@ -112,6 +112,8 @@
 <script>
 import api from '../../../../../axios/Axios';
 import { echo } from '../../../../../services/echo';
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 export default {
   name: "OrderList",
@@ -206,9 +208,9 @@ export default {
         });
         // Remove approved order from the list
         this.pendingOrders = this.pendingOrders.filter(o => o.id !== id);
-        this.$toast.success('Order approved successfully');
+        toast.success("Order approved successfully", { position: toast.POSITION.TOP_RIGHT });
       } catch (error) {
-        this.handleApiError(error, "Failed to approve order");
+        console.log(error);
       } finally {
         this.processingOrder = false;
         this.orderIdToProcess = null;
@@ -228,35 +230,35 @@ export default {
         });
         // Remove canceled order from the list
         this.pendingOrders = this.pendingOrders.filter(o => o.id !== id);
-        this.$toast.success('Order canceled successfully');
+        toast.success("Order canceled successfully", { position: toast.POSITION.TOP_RIGHT });
       } catch (error) {
-        this.handleApiError(error, "Failed to cancel order");
+        console.log(error);
       } finally {
         this.processingOrder = false;
         this.orderIdToProcess = null;
       }
     },
 
-    handleApiError(error, defaultMessage) {
-      console.error("API Error:", error);
+    // handleApiError(error, defaultMessage) {
+    //   console.error("API Error:", error);
 
-      let errorMessage = defaultMessage;
-      if (error.response) {
-        if (error.response.data.errors) {
-          errorMessage = Object.values(error.response.data.errors).join(' ');
-        } else if (error.response.data.message) {
-          errorMessage = error.response.data.message;
-        }
+    //   let errorMessage = defaultMessage;
+    //   if (error.response) {
+    //     if (error.response.data.errors) {
+    //       errorMessage = Object.values(error.response.data.errors).join(' ');
+    //     } else if (error.response.data.message) {
+    //       errorMessage = error.response.data.message;
+    //     }
 
-        if (error.response.status === 401) {
-          this.$router.push('/login');
-          return;
-        }
-      }
+    //     if (error.response.status === 401) {
+    //       this.$router.push('/login');
+    //       return;
+    //     }
+    //   }
 
-      this.error = errorMessage;
-      this.$toast.error(errorMessage);
-    }
+    //   this.error = errorMessage;
+    //   this.$toast.error(errorMessage);
+    // }
   }
 }
 </script>

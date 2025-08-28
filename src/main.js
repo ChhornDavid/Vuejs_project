@@ -13,7 +13,6 @@ import Home from './components/admin/pages/master/Home.vue'
 import User from './components/admin/pages/master/user/User.vue'
 import Menu from './components/admin/pages/master/Menu.vue'
 import Food from './components/admin/pages/master/Food.vue'
-import SpecialMenu from './components/admin/pages/master/SpecialMenu.vue'
 import Unauthorized from './components/Authorized/Unauthorized.vue'
 import NotFound from './components/Authorized/NotFound.vue'
 import OrderHistory from './components/admin/pages/master/order/OrderHistory.vue'
@@ -21,7 +20,6 @@ import Order from './components/admin/pages/master/order/Order.vue'
 
 // Font Awesome CSS
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import Invoice from './components/admin/pages/master/order/Invoice.vue'
 import Kithchen from './components/kitchen/Kithchen.vue'
 import Test from './components/Test.vue'
 
@@ -315,12 +313,6 @@ const routes = [
                 meta: { requiresAuth: true, roles: ['admin'] },
             },
             {
-                path: 'specialmenu',
-                component: SpecialMenu,
-                name: 'SpecialMenu',
-                meta: { requiresAuth: true, roles: ['admin'] },
-            },
-            {
                 path: 'user',
                 component: User,
                 name: 'User',
@@ -349,12 +341,6 @@ const routes = [
                 component: OrderHistory,
                 name: 'OrderHistory',
                 meta: { requiresAuth: true, roles: ['admin'] },
-            },
-            {
-                path: 'invoice',
-                component: Invoice,
-                name: 'Invoice',
-                meta: { requiresAuth: true, role: ['admin'] },
             }
         ]
     },

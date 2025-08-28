@@ -60,13 +60,6 @@
                                         {{$t('order_history')}}
                                     </router-link>
                                 </li>
-                                <li>
-                                    <router-link to="/admin/invoice"
-                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
-                                        active-class="text-emerald-600 font-medium">
-                                        {{$t('invoice')}}
-                                    </router-link>
-                                </li>
                             </ul>
                         </transition>
                     </li>
@@ -87,13 +80,6 @@
                         <transition name="slide">
                             <ul v-if="productsDropdownOpen && showSide"
                                 class="ml-2 mt-1 space-y-1 pl-8 border-l-2 border-emerald-100">
-                                <li>
-                                    <router-link to="/admin/specialmenu"
-                                        class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"
-                                        active-class="text-emerald-600 font-medium">
-                                        {{ $t('special_menu') }}
-                                    </router-link>
-                                </li>
                                 <li>
                                     <router-link to="/admin/food"
                                         class="block py-2 text-lg text-gray-500 hover:text-emerald-600 transition-colors"

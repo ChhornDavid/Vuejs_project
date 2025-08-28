@@ -165,7 +165,7 @@ export default {
     methods: {
         async initializeStripe() {
             if (!this.stripe) {
-                this.stripe = await loadStripe("pk_test_51Pi4i22N83kttsNCYZG4bxJ3NQlMxCNDtBBaAJsDO81Uzo23s7doQ9NzSUlTObFx9doP0C6N52VmcfqwXSK6tBQ000xRKbD3Iu");
+                this.stripe = await loadStripe("pk_test_51S0eUIRvk9Nr5UK0ZQ1qC3kuYph0UwGU71yhIOAL28U3YVDYEhyHjaz6HI0gC2kuab1LbqXjAmlxeIicSBtqj1DN00SOknX9K1");
             }
             
             const elements = this.stripe.elements();
