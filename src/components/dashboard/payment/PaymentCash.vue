@@ -164,7 +164,6 @@ export default {
                     amount: this.total,
                     payment_type: "cash",
                     paid: "paid",
-                    group_key: localStorage.getItem("group_key"),
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,

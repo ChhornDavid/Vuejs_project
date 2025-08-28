@@ -458,7 +458,6 @@ export default {
 
         const index = this.users.findIndex(u => u.id === this.editUser.id);
         if (index !== -1) {
-          // ✅ Vue 3 reactivity friendly way
           this.users[index] = response.data.data;
         }
 
@@ -469,7 +468,7 @@ export default {
         this.$toast.error(error.response?.data?.message || "Failed to update user");
       }
     },
-    
+
     async handleDeleteUser(userId) {
       try {
         await api.delete(`/deleteusers/${userId}`, {
