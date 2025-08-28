@@ -172,8 +172,8 @@
           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p class="text-sm text-gray-700">
-                Showing <span class="font-medium">{{ startIndex + 1 }}</span> to <span class="font-medium">{{ endIndex
-                }}</span> of <span class="font-medium">{{ filteredCategories.length }}</span> results
+                {{ $t('showing') }} <span class="font-medium">{{ startIndex + 1 }}</span> {{$t('to')}} <span class="font-medium">{{ endIndex
+                }}</span> {{ $t('of') }} <span class="font-medium">{{ filteredCategories.length }}</span> {{$t('results')}}
               </p>
             </div>
             <div>
@@ -219,14 +219,14 @@
           <template v-if="modalType === 'add'">
             <form @submit.prevent="handleCreateCategory" class="space-y-6">
               <div>
-                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">{{ $t('category_name') }}</label>
                 <input type="text" id="name" v-model="newCategory.name"
                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                   placeholder="Enter category name" required>
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category Image</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('category_image') }}</label>
                 <div class="mt-1 flex items-center">
                   <label for="image-upload" class="cursor-pointer">
                     <div
@@ -236,7 +236,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      <p class="mt-2 text-sm text-gray-600">Click to upload an image</p>
+                      <p class="mt-2 text-sm text-gray-600">{{ $t('click_to_upload_an_image') }}</p>
                       <p class="text-xs text-gray-500">PNG, JPG up to 2MB</p>
                     </div>
                     <input id="image-upload" type="file" @change="handleImageUpload" class="sr-only" accept="image/*">
@@ -255,12 +255,12 @@
 
               <div class="flex justify-end space-x-3 pt-4">
                 <button @click="closeModal" type="button"
-                  class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  Cancel
+                  class="px-4 py-2 bg-red-600 rounded-lg text-sm font-medium text-white hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  {{ $t('cancel') }}
                 </button>
                 <button type="submit"
                   class="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  Add Category
+                  {{$t('add_category')}}
                 </button>
               </div>
             </form>
@@ -287,12 +287,12 @@
               <div class="border-t border-gray-200 pt-4">
                 <dl class="space-y-4">
                   <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Created At</dt>
+                    <dt class="text-sm font-medium text-gray-500">{{$t('created_at')}}</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{
                       formatDate(currentCategory.created_at) || 'N/A' }}</dd>
                   </div>
                   <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">Updated At</dt>
+                    <dt class="text-sm font-medium text-gray-500">{{ $t('updated_at') }}</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{
                       formatDate(currentCategory.updated_at) || 'N/A' }}</dd>
                   </div>
@@ -302,7 +302,7 @@
               <div class="flex justify-end pt-4">
                 <button @click="closeModal"
                   class="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  Close
+                  {{$t('')}}
                 </button>
               </div>
             </div>

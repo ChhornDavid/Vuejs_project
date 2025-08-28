@@ -207,12 +207,12 @@
                     <div class="border-t border-gray-200 px-6 py-4">
                         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div class="text-sm text-gray-700">
-                                Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filteredFoods.length }} items
+                                {{ $t('showing') }} {{ startIndex + 1 }} {{ $t('to') }} {{ endIndex }} {{ $t('of') }} {{ filteredFoods.length }} items
                                 <select v-model="foodsPerPage" class="ml-2 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                    <option value="5">5 per page</option>
-                                    <option value="10">10 per page</option>
-                                    <option value="20">20 per page</option>
-                                    <option value="50">50 per page</option>
+                                    <option value="5">{{ $t('five_per_page') }}</option>
+                                    <option value="10">{{ $t('ten_per_page') }}</option>
+                                    <option value="20">{{ $t('twenty_per_page') }}</option>
+                                    <option value="50">{{ $t('fifty_per_page') }}</option>
                                 </select>
                             </div>
                             <div class="flex items-center gap-1">
@@ -271,7 +271,7 @@
                                 <h3 class="text-sm font-medium text-gray-500 mb-2">Category Information</h3>
                                 <dl class="space-y-2">
                                     <div class="flex justify-between">
-                                        <dt class="text-sm text-gray-500">Category</dt>
+                                        <dt class="text-sm text-gray-500">{{ $t('category') }}</dt>
                                         <dd class="text-sm text-gray-900">{{ getCategoryName(currentFood.id_category) }}</dd>
                                     </div>
                                     <div class="flex justify-between">
@@ -282,14 +282,14 @@
                             </div>
                             
                             <div class="bg-gray-50 p-4 rounded-lg">
-                                <h3 class="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                                <h3 class="text-sm font-medium text-gray-500 mb-2">{{ $t('status') }}</h3>
                                 <dl class="space-y-2">
                                     <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500">Availability</dt>
                                         <dd class="text-sm text-gray-900">{{ currentFood.available ? 'Available' : 'Unavailable' }}</dd>
                                     </div>
                                     <div class="flex justify-between">
-                                        <dt class="text-sm text-gray-500">Created At</dt>
+                                        <dt class="text-sm text-gray-500"></dt>
                                         <dd class="text-sm text-gray-900">{{ formatDate(currentFood.created_at) }}</dd>
                                     </div>
                                 </dl>
@@ -306,16 +306,16 @@
                         </div>
                         <h3 class="mt-3 text-lg font-medium text-gray-900">Delete menu item</h3>
                         <div class="mt-2 text-sm text-gray-500">
-                            Are you sure you want to delete "{{ currentFood.name }}"? This action cannot be undone.
+                            {{ $t('are_you_sure') }} "{{ currentFood.name }}"? This action cannot be undone.
                         </div>
                         <div class="mt-6 flex justify-center space-x-4">
                             <button @click="closeModal" type="button"
                                 class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                                Cancel
+                                {{ $t('cancel') }}
                             </button>
                             <button @click="handleDeleteFood(currentFood.id)" type="button"
                                 class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                                Delete
+                                {{ $t('delete') }}
                             </button>
                         </div>
                     </div>
@@ -328,7 +328,7 @@
                         <div class="grid grid-cols-1 gap-6">
                             <!-- Image Upload -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Food Image</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('food_image') }}</label>
                                 <div class="mt-1 flex flex-col items-start">
                                     <div class="relative group mb-4">
                                         <img :src="activeFood.imagePreview || '/placeholder-food.jpg'"
@@ -343,7 +343,7 @@
                                         accept="image/*">
                                     <button type="button" @click="$refs.imageInput.click()"
                                         class="px-3 py-1 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                                        Upload Image
+                                        {{ $t('upload_image') }}
                                     </button>
                                     <p class="mt-1 text-xs text-gray-500">JPG, PNG up to 2MB</p>
                                 </div>
@@ -352,13 +352,13 @@
                             <!-- Basic Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Item Name *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('item_name') }} *</label>
                                     <input type="text" v-model="activeFood.name" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('price') }} *</label>
                                     <div class="relative">
                                         <span class="absolute left-3 top-2.5 text-gray-400">$</span>
                                         <input type="number" v-model="activeFood.price" required step="0.01" min="0"
@@ -370,10 +370,10 @@
                             <!-- Category Selection -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('category') }} *</label>
                                     <select v-model="activeFood.id_category" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="">Select Category</option>
+                                        <option value="">{{ $t('select_category') }}</option>
                                         <option v-for="category in categories" :key="category.id" :value="category.id">
                                             {{ category.name }}
                                         </option>
@@ -381,10 +381,10 @@
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Special Menu</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('special_menu') }}</label>
                                     <select v-model="activeFood.id_specialmenu"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="">Select Special Menu</option>
+                                        <option value="">{{ $t('select_special_menu') }}</option>
                                         <option v-for="special in specialMenus" :key="special.id" :value="special.id">
                                             {{ special.name }}
                                         </option>
@@ -395,17 +395,17 @@
                             <!-- Details -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Size</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('size') }}</label>
                                     <select v-model="activeFood.size"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="Small">Small</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="Large">Large</option>
+                                        <option value="Small">{{ $t('small') }}</option>
+                                        <option value="Medium">{{ $t('medium') }}</option>
+                                        <option value="Large">{{ $t('large') }}</option>
                                     </select>
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Rating</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('rating') }}</label>
                                     <div class="flex items-center space-x-2">
                                         <input type="number" v-model="activeFood.rating" min="0" max="5" step="0.1"
                                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -416,7 +416,7 @@
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('description') }}</label>
                                 <textarea v-model="activeFood.description" rows="4"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                             </div>
@@ -436,11 +436,11 @@
                         <div class="flex justify-end space-x-4 border-t pt-6">
                             <button type="button" @click="closeModal"
                                 class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-md transition-colors">
-                                Cancel
+                                {{ $t('cancel') }}
                             </button>
                             <button type="submit"
                                 class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition-colors">
-                                {{ modalType === 'add' ? 'Create Item' : 'Save Changes' }}
+                                {{ $t (modalType === 'add' ? 'create_item' : 'save_changes' )}}
                             </button>
                         </div>
                     </form>

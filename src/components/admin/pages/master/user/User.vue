@@ -91,9 +91,9 @@
       <div class="border-t border-gray-200 px-6 py-4">
         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
           <p class="text-sm text-gray-600">
-            Showing <span class="font-medium">{{ startIndex + 1 }}</span> to
-            <span class="font-medium">{{ endIndex }}</span> of
-            <span class="font-medium">{{ users.length }}</span> results
+            {{$t('showing')}} <span class="font-medium">{{ startIndex + 1 }}</span> {{$t('to')}}
+            <span class="font-medium">{{ endIndex }}</span> {{ $t('of') }}
+            <span class="font-medium">{{ users.length }}</span> {{$t('results')}}
           </p>
 
           <div class="flex items-center gap-1">
@@ -142,50 +142,50 @@
           <div class="grid grid-cols-1 gap-6">
             <!-- Name Input -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('full_name') }}</label>
               <input type="text" v-model="editUser.name" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="John Doe">
+                placeholder="Full Name">
             </div>
 
             <!-- Email Input -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('email') }}</label>
               <input type="email" v-model="editUser.email" required
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="john@example.com">
+                placeholder="name@gmail.com">
             </div>
 
             <!-- Role Select -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">User Role</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{$t('user_role')}}</label>
               <select v-model="editUser.type"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="user">Standard User</option>
-                <option value="admin">Administrator</option>
-                <option value="cooker">Cooker</option>
+                <option value="user">{{ $t('user') }}</option>
+                <option value="admin">{{ $t('admin') }}</option>
+                <option value="cooker">{{ $t('cooker') }}</option>
               </select>
             </div>
 
             <!-- Password Input -->
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">
-                {{ modalType === 'add' ? 'Create Password' : 'Change Password' }}
+                {{ $t (modalType === 'add' ? 'create_password' : 'change_password') }}
               </label>
               <input type="password" v-model="editUser.password" :required="modalType === 'add'"
                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                :placeholder="modalType === 'add' ? 'Enter password' : 'Leave blank to keep current'">
+                :placeholder="modalType === 'add' ? $t('enter_password') : 'Leave blank to keep current'">
             </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <button type="button" @click="closeModal"
               class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-colors">
-              Cancel
+              {{ $t('cancel') }}
             </button>
             <button type="submit"
               class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
-              {{ modalType === 'add' ? 'Create User' : 'Save Changes' }}
+              {{ $t (modalType === 'add' ? 'create_user' : 'save_changes') }}
             </button>
           </div>
         </form>
@@ -206,7 +206,7 @@
 
           <dl class="grid grid-cols-2 gap-4 text-sm">
             <div class="border-t border-gray-200 pt-4">
-              <dt class="font-medium text-gray-500">Account Status</dt>
+              <dt class="font-medium text-gray-500">{{ $t('account_status') }}</dt>
               <dd class="mt-1 text-gray-900">
                 <span class="inline-flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full"
@@ -218,7 +218,7 @@
             </div>
 
             <div class="border-t border-gray-200 pt-4">
-              <dt class="font-medium text-gray-500">User Role</dt>
+              <dt class="font-medium text-gray-500">{{ $t('user_role') }}</dt>
               <dd class="mt-1">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
                   :class="roleBadgeClass(currentUser.type)">
@@ -228,12 +228,12 @@
             </div>
 
             <div class="border-t border-gray-200 pt-4">
-              <dt class="font-medium text-gray-500">Account Created</dt>
+              <dt class="font-medium text-gray-500">{{ $t('account_created') }}</dt>
               <dd class="mt-1 text-gray-900">{{ formatDate(currentUser.created_at) }}</dd>
             </div>
 
             <div class="border-t border-gray-200 pt-4">
-              <dt class="font-medium text-gray-500">Email Verification</dt>
+              <dt class="font-medium text-gray-500">{{ $t('email_verification') }}</dt>
               <dd class="mt-1 text-gray-900">
                 {{ currentUser.email_verified_at ? formatDate(currentUser.email_verified_at) : 'Pending' }}
               </dd>
@@ -243,7 +243,7 @@
           <div class="border-t border-gray-200 pt-6">
             <button @click="closeModal"
               class="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition-colors">
-              Close Details
+              {{ $t('close') }}
             </button>
           </div>
         </div>
@@ -256,22 +256,22 @@
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
               <i class="fas fa-exclamation-triangle text-red-600 text-2xl"></i>
             </div>
-            <h3 class="text-lg font-medium text-gray-900 mb-2">Confirm User Deletion</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">{{ $t('confirm_user_deletion') }}</h3>
             <p class="text-gray-600">
-              Are you sure you want to permanently remove
+              {{ $t ('are_you_sure')}}
               <span class="font-semibold text-gray-900">{{ currentUser.name }}</span>
-              from the system? This action cannot be undone.
+              {{ $t ('from_the_system') }} 
             </p>
           </div>
 
           <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
             <button @click="closeModal"
               class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium rounded-lg transition-colors">
-              Cancel
+              {{$t('cancel')}}
             </button>
             <button @click="handleDeleteUser(currentUser.id)"
               class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors">
-              Delete User
+              {{ $t('delete_user') }}
             </button>
           </div>
         </div>
@@ -413,7 +413,7 @@ export default {
       try {
         const response = await api.post("/addusers", this.newUser, {
           headers: {
-            Authorization: `Bearer ${sessionStorage.getItem("auth_token")}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
         });
 
