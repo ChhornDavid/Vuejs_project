@@ -498,7 +498,6 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
         this.orderId = response.data.id;
-        console.log("ID", response);
       } catch (error) {
         console.log("Error fetching order ID: ", error);
       }

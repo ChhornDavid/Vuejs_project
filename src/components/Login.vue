@@ -102,6 +102,7 @@ const login = async () => {
 
 
 <style scoped>
+
 @keyframes bounce-slow {
 
   0%,
@@ -126,4 +127,5 @@ input::-webkit-input-placeholder {
   font-family: 'Font Awesome 5 Free', sans-serif;
   font-weight: 900;
 }
+
 </style>

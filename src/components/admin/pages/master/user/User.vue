@@ -287,6 +287,7 @@
 import Modal from "./Modal.vue";
 import api from "../../../../../axios/Axios";
 import { echo } from "../../../../../services/echo";
+import { toast } from 'vue3-toastify';
 
 export default {
   components: { Modal },
@@ -420,7 +421,7 @@ export default {
         formData.append("password", this.editUser.password);
         formData.append("type", this.editUser.type);
 
-        console.log([...formData.entries()]);
+        // console.log([...formData.entries()]);
 
         const response = await api.post("/addusers", formData, {
         }, {
@@ -432,10 +433,10 @@ export default {
 
         this.users.unshift(response.data.data);
         this.closeModal();
-        this.$toast.success("User created successfully");
+        toast.success("User created successfully", { position: toast.POSITION.TOP_RIGHT });
       } catch (error) {
         console.error("Create user error:", error);
-        this.$toast.error(error.response?.data?.message || "Failed to create user");
+        toast.error(error.response?.data?.message || "Failed to create user");
       }
     },
     async handleUpdateUser() {
@@ -449,7 +450,7 @@ export default {
         formData.append("password", this.editUser.password || "");
         formData.append("verified", this.editUser.verified ? 1 : 0);
 
-        console.log([...formData.entries()]);
+        // console.log([...formData.entries()]);
         const response = await api.put(
           `/updateusers/${this.editUser.id}`,
           formData,
@@ -466,10 +467,10 @@ export default {
         }
 
         this.closeModal();
-        this.$toast.success("User updated successfully");
+        toast.success("User updated successfully", { position: toast.POSITION.TOP_RIGHT });
       } catch (error) {
         console.error("Update user error:", error);
-        this.$toast.error(error.response?.data?.message || "Failed to update user");
+        toast.error(error.response?.data?.message || "Failed to update user");
       }
     },
 
@@ -483,10 +484,10 @@ export default {
 
         this.users = this.users.filter(user => user.id !== userId);
         this.closeModal();
-        this.$toast.success("User deleted successfully");
+        toast.success("User deleted successfully", { position: toast.POSITION.TOP_RIGHT });
       } catch (error) {
         console.error("Delete user error:", error);
-        this.$toast.error(error.response?.data?.message || "Failed to delete user");
+        toast.error(error.response?.data?.message || "Failed to delete user");
       }
     },
 

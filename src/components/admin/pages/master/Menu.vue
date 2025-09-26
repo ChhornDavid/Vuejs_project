@@ -8,14 +8,14 @@
           <p class="text-gray-600 mt-1">Manage your product categories efficiently</p>
         </div>
         <div class="flex items-center space-x-4">
-        <button @click="showAddModal"
-          class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all duration-200">
-          <!-- <img src="/images/plus.png" alt="" class="w-6 h-4 rounded-sm "/> -->
-           <i class="fas fa-plus mr-2"></i>
-          {{ $t('add_category') }}
-        </button>
+          <button @click="showAddModal"
+            class="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg shadow-md transition-all duration-200">
+            <!-- <img src="/images/plus.png" alt="" class="w-6 h-4 rounded-sm "/> -->
+            <i class="fas fa-plus mr-2"></i>
+            {{ $t('add_category') }}
+          </button>
+        </div>
       </div>
-    </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -99,13 +99,17 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th scope="col" class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
-                  {{$t('id')}}</th>
-                <th scope="col" class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
+                <th scope="col"
+                  class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
+                  {{ $t('id') }}</th>
+                <th scope="col"
+                  class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
                   {{ $t('name') }}</th>
-                <th scope="col" class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
-                  {{$t('image')}}</th>
-                <th scope="col" class="px-6 py-3 text-right text-lg font-semibold text-black-500 uppercase tracking-wider">
+                <th scope="col"
+                  class="px-6 py-3 text-left text-lg font-semibold text-black-500 uppercase tracking-wider">
+                  {{ $t('image') }}</th>
+                <th scope="col"
+                  class="px-6 py-3 text-right text-lg font-semibold text-black-500 uppercase tracking-wider">
                   {{ $t('actions') }}</th>
               </tr>
             </thead>
@@ -172,8 +176,10 @@
           <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
               <p class="text-sm text-gray-700">
-                {{ $t('showing') }} <span class="font-medium">{{ startIndex + 1 }}</span> {{$t('to')}} <span class="font-medium">{{ endIndex
-                }}</span> {{ $t('of') }} <span class="font-medium">{{ filteredCategories.length }}</span> {{$t('results')}}
+                {{ $t('showing') }} <span class="font-medium">{{ startIndex + 1 }}</span> {{ $t('to') }} <span
+                  class="font-medium">{{ endIndex
+                  }}</span> {{ $t('of') }} <span class="font-medium">{{ filteredCategories.length }}</span>
+                {{ $t('results') }}
               </p>
             </div>
             <div>
@@ -260,7 +266,7 @@
                 </button>
                 <button type="submit"
                   class="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  {{$t('add_category')}}
+                  {{ $t('add_category') }}
                 </button>
               </div>
             </form>
@@ -287,7 +293,7 @@
               <div class="border-t border-gray-200 pt-4">
                 <dl class="space-y-4">
                   <div class="sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="text-sm font-medium text-gray-500">{{$t('created_at')}}</dt>
+                    <dt class="text-sm font-medium text-gray-500">{{ $t('created_at') }}</dt>
                     <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">{{
                       formatDate(currentCategory.created_at) || 'N/A' }}</dd>
                   </div>
@@ -302,7 +308,7 @@
               <div class="flex justify-end pt-4">
                 <button @click="closeModal"
                   class="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  {{$t('close')}}
+                  {{$t('')}}
                 </button>
               </div>
             </div>
@@ -310,6 +316,7 @@
 
           <template v-else-if="modalType === 'edit'">
             <form @submit.prevent="handleUpdateCategory" enctype="multipart/form-data" class="space-y-6">
+              <!-- Category Name -->
               <div>
                 <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">Category Name</label>
                 <input type="text" id="edit-name" v-model="editCategory.name"
@@ -317,13 +324,13 @@
                   placeholder="Enter category name" required>
               </div>
 
+              <!-- Category Image -->
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Category Image</label>
                 <div class="flex items-center gap-4">
                   <div class="flex-shrink-0 h-16 w-16 rounded-full overflow-hidden border-2 border-gray-200">
-                    <img v-if="editCategory.image"
-                      :src="typeof editCategory.image === 'string' ? editCategory.image : URL.createObjectURL(editCategory.image)"
-                      alt="Current" class="h-full w-full object-cover">
+                    <img v-if="editImagePreview" :src="editImagePreview" alt="Current"
+                      class="h-full w-full object-cover">
                     <div v-else class="h-full w-full bg-gray-100 flex items-center justify-center text-gray-400">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
@@ -341,10 +348,11 @@
                       accept="image/*">
                   </label>
                 </div>
+
+                <!-- Show file name + reset button if a new image is selected -->
                 <div v-if="editCategory.image && typeof editCategory.image !== 'string'" class="mt-2 flex items-center">
                   <span class="text-sm text-gray-600">{{ editCategory.image.name }}</span>
-                  <button @click="editCategory.image = currentCategory.image" type="button"
-                    class="ml-2 text-red-500 hover:text-red-700">
+                  <button @click="resetEditImage" type="button" class="ml-2 text-red-500 hover:text-red-700">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                       stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -353,6 +361,7 @@
                 </div>
               </div>
 
+              <!-- Footer -->
               <div class="flex justify-end space-x-3 pt-4">
                 <button @click="closeModal" type="button"
                   class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
@@ -428,6 +437,13 @@ export default {
     };
   },
   computed: {
+    editImagePreview() {
+      if (!this.editCategory.image) return null;
+      if (typeof this.editCategory.image === "string") {
+        return this.editCategory.image;
+      }
+      return URL.createObjectURL(this.editCategory.image);
+    },
     filteredCategories() {
       if (!this.searchQuery) {
         return this.categories;
@@ -468,7 +484,7 @@ export default {
   },
   methods: {
     switchLang(lang) {
-    this.$i18n.locale = lang
+      this.$i18n.locale = lang
     },
 
     async fetchCategories() {
@@ -549,25 +565,27 @@ export default {
         }
 
         const formData = new FormData();
+        formData.append("id", this.editCategory.id);
+        
         formData.append("name", this.editCategory.name);
 
-        if (this.editCategory.image instanceof File) {
+        if (this.editCategory.image) {
           formData.append("image", this.editCategory.image);
         }
+        formData.append("_PUT", "Method")
 
-        formData.append("_method", "PUT");
-        console.log("Updating category with formData:", formData);
-
+        //console.log(...formData.entries());
         const response = await api.post(
           `/updatecategories/${this.editCategory.id}`,
           formData,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
+              "Content-Type": "multipart/form-data"
             },
           }
         );
+        //console.log("Category", response.data)
         toast.success("Menu item update successfully", { position: toast.POSITION.TOP_RIGHT });
         this.closeModal();
         this.fetchCategories();

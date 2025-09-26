@@ -140,7 +140,7 @@
                         <div v-if="currentOrder?.items?.length" class="border rounded-lg divide-y divide-gray-200">
                             <div v-for="item in currentOrder.items" :key="item.id" class="p-4 flex items-center justify-between">
                                 <div>
-                                    <p class="font-medium text-gray-900">Product #{{ item.product_id }}</p>
+                                    <p class="font-medium text-gray-900">{{ item.product_name }}</p>
                                     <p class="text-sm text-gray-500">{{ item.size }}</p>
                                 </div>
                                 <div class="text-right">
