@@ -71,13 +71,16 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <div class="flex justify-end items-center gap-3">
-                  <button @click="showViewModal(user)" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                  <button @click="showViewModal(user)" 
+                   class="text-blue-600 hover:text-indigo-600 transition-colors">
                     <i class="fas fa-eye"></i>
                   </button>
-                  <button @click="showEditModal(user)" class="text-gray-500 hover:text-indigo-600 transition-colors">
+                  <button @click="showEditModal(user)" 
+                  class="text-yellow-500  hover:text-indigo-600 transition-colors">
                     <i class="fas fa-pen"></i>
                   </button>
-                  <button @click="showDeleteModal(user)" class="text-gray-500 hover:text-red-600 transition-colors">
+                  <button @click="showDeleteModal(user)" 
+                  class="text-red-600 hover:text-red-600 transition-colors">
                     <i class="fas fa-trash"></i>
                   </button>
                 </div>
