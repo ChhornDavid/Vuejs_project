@@ -31,7 +31,7 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">User</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Table</th>
                             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Amount</th>
                             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Payment</th>
                             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
@@ -41,7 +41,7 @@
                     <tbody class="divide-y divide-gray-100">
                         <tr v-for="order in paginatedOrders" :key="order.id" class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 text-sm text-gray-900 font-medium">#{{ order.id }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-600">User {{ order.user_id }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-600">Table {{ order.user_id }}</td>
                             <td class="px-6 py-4 text-sm text-gray-900 font-medium">
                                 ${{ Number(order.amount).toFixed(2) }}
                             </td>

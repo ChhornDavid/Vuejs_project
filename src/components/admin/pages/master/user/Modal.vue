@@ -3,7 +3,7 @@
         <div class="bg-white w-[700px] rounded-lg shadow-lg p-6">
             <header class="flex justify-between items-center border-b pb-2">
                 <h2 class="text-lg font-semibold">{{ title }}</h2>
-                <!-- <button @click="close" class="text-gray-500 hover:text-gray-200">&times;</button> -->
+                <button @click="close" class="text-gray-500 hover:text-gray-200">&times;</button>
             </header>
             <main class="py-4">
                 <slot></slot>

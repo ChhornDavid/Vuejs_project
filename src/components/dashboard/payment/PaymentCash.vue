@@ -63,7 +63,7 @@
                             </ul>
                         </div>
 
-                        <button @click="handlePayment" :disabled="isPaidAlready || processing"
+                        <button @click="handlePayment" :disabled="processing"
                             class="w-full py-3.5 px-6 flex items-center justify-center gap-2 text-lg font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                             <svg v-if="processing" class="animate-spin h-5 w-5 text-white"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -125,7 +125,6 @@ export default {
         },
     },
     mounted() {
-        this.generateGroupKey();
         this.generateOrderSessionKey();
         this.calculateTotal();
     },
@@ -148,21 +147,20 @@ export default {
                 localStorage.setItem('session_key', uniqueKey);
             }
         },
-        generateGroupKey() {
-            const userId = localStorage.getItem('id');
-            if (!localStorage.getItem('group_key') && userId) {
-                const groupKey = `group_${userId}`;
-                localStorage.setItem('group_key', groupKey);
-            }
-        },
+
         async handlePayment() {
             this.processing = true;
             try {
+                // Get order name from localStorage
+                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders')) || [];
+                const activeIndex = parseInt(localStorage.getItem('dashboard_activeOrderIndex')) || 0;
+                const orderName = storedOrders?.[activeIndex]?.name || 'UnknownOrder';
                 const userId = localStorage.getItem("id");
                 const orderPayload = {
                     user_id: userId,
                     amount: this.total,
                     payment_type: "cash",
+                    order_number: orderName,
                     paid: "paid",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,

@@ -57,7 +57,7 @@
                                 <h3 class="text-lg font-semibold text-gray-900">Scan to Pay</h3>
                             </div>
 
-                            <button @click="generatePaymentLink" :disabled="isPaidAlready || loading"
+                            <button @click="generatePaymentLink" :disabled="loading"
                                 class="w-full py-3 px-6 flex items-center justify-center gap-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg v-if="loading" class="animate-spin h-5 w-5 text-white"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -234,10 +234,13 @@ export default {
         },
         async handleScanOrder() {
             try {
+                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders'));
+                const orderName = storedOrders?.[0]?.name || 'UnknownOrder';
                 const orderPayload = {
                     user_id: parseInt(localStorage.getItem("id"), 10),
                     amount: this.total,
                     payment_type: "scan",
+                    order_number: orderName,
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,

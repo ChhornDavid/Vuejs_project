@@ -5,7 +5,7 @@
             <!-- Header Section -->
             <div class="sm:flex sm:items-center sm:justify-between mb-8">
                 <div class="mb-4 sm:mb-0">
-                    <h1 class="text-3xl font-bold text-gray-900">{{$t('menu_management')}}</h1>
+                    <h1 class="text-3xl font-bold text-gray-900">{{ $t('menu_management') }}</h1>
                     <!-- <p class="mt-1 text-sm text-gray-500">Manage your restaurant's menu items and special offers</p> -->
                 </div>
                 <button @click="showAddModal"
@@ -20,7 +20,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">{{$t('total_items') }}</p>
+                            <p class="text-gray-500 text-sm font-medium">{{ $t('total_items') }}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ foods.length }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-blue-50 text-blue-600">
@@ -28,11 +28,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">{{$t('available_item')}}</p>
+                            <p class="text-gray-500 text-sm font-medium">{{ $t('available_item') }}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ availableItemsCount }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-green-50 text-green-600">
@@ -40,11 +40,11 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-gray-500 text-sm font-medium">{{$t('categries')}}</p>
+                            <p class="text-gray-500 text-sm font-medium">{{ $t('categries') }}</p>
                             <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ categories.length }}</h3>
                         </div>
                         <div class="p-3 rounded-full bg-purple-50 text-purple-600">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div>
@@ -74,24 +74,23 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-search text-gray-400"></i>
                         </div>
-                        <input 
-                            type="text" 
-                            v-model="searchQuery"
-                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
-                            :placeholder="$t('search_item')"
-                        >
+                        <input type="text" v-model="searchQuery"
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            :placeholder="$t('search_item')">
                     </div>
                     <div class="flex items-center gap-2">
-                        <select v-model="categoryFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">{{$t('all_categories')}}</option>
+                        <select v-model="categoryFilter"
+                            class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">{{ $t('all_categories') }}</option>
                             <option v-for="category in categories" :key="category.id" :value="category.id">
                                 {{ category.name }}
                             </option>
                         </select>
-                        <select v-model="statusFilter" class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <option value="">{{$t('all_status')}}</option>
+                        <select v-model="statusFilter"
+                            class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="">{{ $t('all_status') }}</option>
                             <option value="true">{{ $t('available') }}</option>
-                            <option value="false">{{$t('unavailable')}}</option>
+                            <option value="false">{{ $t('unavailable') }}</option>
                         </select>
                     </div>
                 </div>
@@ -112,26 +111,35 @@
                         <table class="w-full min-w-max">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('name')">
-                                        {{$t('items')}}
-                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'name'}"></i>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        @click="sortBy('name')">
+                                        {{ $t('items') }}
+                                        <i class="fas fa-sort ml-1"
+                                            :class="{ 'text-indigo-600': sortField === 'name' }"></i>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        {{$t('category')}}
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ $t('category') }}
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('price')">
-                                        {{$t('price')}}
-                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'price'}"></i>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        @click="sortBy('prices')">
+                                        {{ $t('price') }}
+                                        <i class="fas fa-sort ml-1"
+                                            :class="{ 'text-indigo-600': sortField === 'prices' }"></i>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" @click="sortBy('rating')">
-                                        {{$t('rating') }}
-                                        <i class="fas fa-sort ml-1" :class="{'text-indigo-600': sortField === 'rating'}"></i>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                                        @click="sortBy('rating')">
+                                        {{ $t('rating') }}
+                                        <i class="fas fa-sort ml-1"
+                                            :class="{ 'text-indigo-600': sortField === 'rating' }"></i>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        {{$t('status')}}
+                                    <th
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ $t('status') }}
                                     </th>
-                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        {{$t('actions')}}
+                                    <th
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        {{ $t('actions') }}
                                     </th>
                                 </tr>
                             </thead>
@@ -146,7 +154,8 @@
                                             </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">{{ food.name }}</div>
-                                                <div class="text-sm text-gray-500 line-clamp-2 max-w-xs">{{ food.description }}</div>
+                                                <div class="text-sm text-gray-500 line-clamp-2 max-w-xs">{{
+                                                    food.description }}</div>
                                             </div>
                                         </div>
                                     </td>
@@ -158,9 +167,12 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                                            ${{ food.price }}
-                                        </span>
+                                        <div class="flex space-x-2">
+                                            <span v-for="price in food.prices" :key="price.size"
+                                                class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                                                {{ price.size }} - ${{ price.price }}
+                                            </span>
+                                        </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
@@ -170,8 +182,11 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <label class="relative inline-flex items-center cursor-pointer">
-                                            <input type="checkbox" :checked="food.available" @change="toggleAvailability(food)" class="sr-only peer">
-                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            <input type="checkbox" :checked="food.available"
+                                                @change="toggleAvailability(food)" class="sr-only peer">
+                                            <div
+                                                class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                            </div>
                                         </label>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right">
@@ -207,8 +222,10 @@
                     <div class="border-t border-gray-200 px-6 py-4">
                         <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
                             <div class="text-sm text-gray-700">
-                                {{ $t('showing') }} {{ startIndex + 1 }} {{ $t('to') }} {{ endIndex }} {{ $t('of') }} {{ filteredFoods.length }} items
-                                <select v-model="foodsPerPage" class="ml-2 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                {{ $t('showing') }} {{ startIndex + 1 }} {{ $t('to') }} {{ endIndex }} {{ $t('of') }} {{
+                                    filteredFoods.length }} items
+                                <select v-model="foodsPerPage"
+                                    class="ml-2 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="5">{{ $t('five_per_page') }}</option>
                                     <option value="10">{{ $t('ten_per_page') }}</option>
                                     <option value="20">{{ $t('twenty_per_page') }}</option>
@@ -251,18 +268,36 @@
                             <div class="flex-1 w-full md:w-2/3">
                                 <h2 class="text-xl font-semibold text-gray-900">{{ currentFood.name }}</h2>
                                 <div class="mt-2 flex items-center space-x-4">
-                                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm">
-                                        ${{ currentFood.price }}
+                                    <span class="px-3 py-1 text-indigo-800 rounded-full text-sm">
+                                        <div class="overflow-x-auto mt-3">
+                                            <table class="min-w-full border border-gray-200 rounded-lg">
+                                                <thead class="bg-gray-100">
+                                                    <tr>
+                                                        <th
+                                                            class="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                                                            Size</th>
+                                                        <th
+                                                            class="px-4 py-2 text-left text-sm font-semibold text-gray-700">
+                                                            Price</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="price in currentFood.prices" :key="price.size"
+                                                        class="border-t">
+                                                        <td class="px-4 py-2 text-sm text-gray-800 capitalize">
+                                                            {{ price.size }}
+                                                        </td>
+                                                        <td class="px-4 py-2 text-sm text-green-700 font-medium">
+                                                            ${{ price.price }}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </span>
-                                    <span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm">
-                                        {{ currentFood.size }}
-                                    </span>
-                                    <div class="flex items-center">
-                                        <span class="text-yellow-400 mr-1">{{ currentFood.rating }}</span>
-                                        <i class="fas fa-star text-yellow-400"></i>
-                                    </div>
                                 </div>
-                                <div class="mt-4 text-gray-700 whitespace-pre-line">{{ currentFood.description }}</div>
+                                <div class="text-gray-700 text-lg font-bold">Description:</div>
+                                <div class="mt-2 text-gray-700 whitespace-pre-line"> {{ currentFood.description }}</div>
                             </div>
                         </div>
 
@@ -272,21 +307,24 @@
                                 <dl class="space-y-2">
                                     <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500">{{ $t('category') }}</dt>
-                                        <dd class="text-sm text-gray-900">{{ getCategoryName(currentFood.id_category) }}</dd>
+                                        <dd class="text-sm text-gray-900">{{ getCategoryName(currentFood.id_category) }}
+                                        </dd>
                                     </div>
                                     <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500">Special Menu</dt>
-                                        <dd class="text-sm text-gray-900">{{ getSpecialMenuName(currentFood.id_specialmenu) || 'None' }}</dd>
+                                        <dd class="text-sm text-gray-900">{{
+                                            getSpecialMenuName(currentFood.id_specialmenu) || 'None' }}</dd>
                                     </div>
                                 </dl>
                             </div>
-                            
+
                             <div class="bg-gray-50 p-4 rounded-lg">
                                 <h3 class="text-sm font-medium text-gray-500 mb-2">{{ $t('status') }}</h3>
                                 <dl class="space-y-2">
                                     <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500">Availability</dt>
-                                        <dd class="text-sm text-gray-900">{{ currentFood.available ? 'Available' : 'Unavailable' }}</dd>
+                                        <dd class="text-sm text-gray-900">{{ currentFood.available ? 'Available' :
+                                            'Unavailable' }}</dd>
                                     </div>
                                     <div class="flex justify-between">
                                         <dt class="text-sm text-gray-500"></dt>
@@ -328,7 +366,8 @@
                         <div class="grid grid-cols-1 gap-6">
                             <!-- Image Upload -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('food_image') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('food_image')
+                                }}</label>
                                 <div class="mt-1 flex flex-col items-start">
                                     <div class="relative group mb-4">
                                         <img :src="activeFood.imagePreview || '/placeholder-food.jpg'"
@@ -352,25 +391,15 @@
                             <!-- Basic Info -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('item_name') }} *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('item_name') }}
+                                        *</label>
                                     <input type="text" v-model="activeFood.name" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                 </div>
 
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('price') }} *</label>
-                                    <div class="relative">
-                                        <span class="absolute left-3 top-2.5 text-gray-400">$</span>
-                                        <input type="number" v-model="activeFood.price" required step="0.01" min="0"
-                                            class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Category Selection -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('category') }} *</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('category') }}
+                                        *</label>
                                     <select v-model="activeFood.id_category" required
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                                         <option value="">{{ $t('select_category') }}</option>
@@ -379,8 +408,11 @@
                                         </option>
                                     </select>
                                 </div>
+                            </div>
 
-                                <div>
+                            <!-- Category Selection -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('special_menu') }}</label>
                                     <select v-model="activeFood.id_specialmenu"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -389,45 +421,47 @@
                                             {{ special.name }}
                                         </option>
                                     </select>
-                                </div>
-                            </div>
-
-                            <!-- Details -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('size') }}</label>
-                                    <select v-model="activeFood.size"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <option value="Small">{{ $t('small') }}</option>
-                                        <option value="Medium">{{ $t('medium') }}</option>
-                                        <option value="Large">{{ $t('large') }}</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('rating') }}</label>
-                                    <div class="flex items-center space-x-2">
-                                        <input type="number" v-model="activeFood.rating" min="0" max="5" step="0.1"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                                        <span class="text-gray-500 text-sm">/5</span>
+                                </div> -->
+                                <!-- Details -->
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                                {{ $t('size') }}
+                                            </label>
+                                            <div class="flex justify-between space-x-5">
+                                                <div v-for="(priceObj, index) in activeFood.prices" :key="index">
+                                                    <label class="block text-sm font-medium text-gray-700">
+                                                        {{ $t(priceObj.size) }}
+                                                    </label>
+                                                    <input type="number" step="0.01" v-model="priceObj.price"
+                                                        :placeholder="`Enter price for ${priceObj.size}`"
+                                                        class="w-[200px] px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Description -->
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('description') }}</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('description')
+                                }}</label>
                                 <textarea v-model="activeFood.description" rows="4"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                             </div>
-                            
+
                             <!-- Availability -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Availability</label>
                                 <label class="inline-flex items-center cursor-pointer">
                                     <input type="checkbox" v-model="activeFood.available" class="sr-only peer">
-                                    <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                                    <span class="ml-3 text-sm font-medium text-gray-700">{{ activeFood.available ? 'Available' : 'Unavailable' }}</span>
+                                    <div
+                                        class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600">
+                                    </div>
+                                    <span class="ml-3 text-sm font-medium text-gray-700">{{ activeFood.available ?
+                                        'Available' : 'Unavailable' }}</span>
                                 </label>
                             </div>
                         </div>
@@ -440,7 +474,7 @@
                             </button>
                             <button type="submit"
                                 class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-md transition-colors">
-                                {{ $t (modalType === 'add' ? 'create_item' : 'save_changes' )}}
+                                {{ $t(modalType === 'add' ? 'create_item' : 'save_changes') }}
                             </button>
                         </div>
                     </form>
@@ -475,11 +509,13 @@ export default {
                 id_specialmenu: "",
                 name: "",
                 description: "",
-                rating: null,
-                price: null,
+                prices: [
+                    { size: "small", price: null },
+                    { size: "medium", price: null },
+                    { size: "large", price: null }
+                ],
                 image: null,
                 imagePreview: null,
-                size: "Medium",
                 available: true
             },
             currentPage: 1,
@@ -498,33 +534,33 @@ export default {
         },
         filteredFoods() {
             let filtered = this.foods;
-            
+
             // Apply search filter
             if (this.searchQuery) {
                 const query = this.searchQuery.toLowerCase();
-                filtered = filtered.filter(food => 
+                filtered = filtered.filter(food =>
                     food.name.toLowerCase().includes(query) ||
                     food.description.toLowerCase().includes(query) ||
                     this.getCategoryName(food.id_category).toLowerCase().includes(query)
                 );
             }
-            
+
             // Apply category filter
             if (this.categoryFilter) {
                 filtered = filtered.filter(food => food.id_category == this.categoryFilter);
             }
-            
+
             // Apply status filter
             if (this.statusFilter !== "") {
                 filtered = filtered.filter(food => food.available === (this.statusFilter === "true"));
             }
-            
+
             // Apply sorting
             if (this.sortField) {
                 filtered = filtered.sort((a, b) => {
                     let valA = a[this.sortField];
                     let valB = b[this.sortField];
-                    
+
                     // Handle special cases for sorting
                     if (this.sortField === 'id_category') {
                         valA = this.getCategoryName(a.id_category);
@@ -533,13 +569,13 @@ export default {
                         valA = this.getSpecialMenuName(a.id_specialmenu);
                         valB = this.getSpecialMenuName(b.id_specialmenu);
                     }
-                    
+
                     if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
                     if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
                     return 0;
                 });
             }
-            
+
             return filtered;
         },
         totalPages() {
@@ -558,15 +594,15 @@ export default {
             const pages = [];
             let startPage = Math.max(1, this.currentPage - Math.floor(this.maxVisiblePages / 2));
             let endPage = Math.min(this.totalPages, startPage + this.maxVisiblePages - 1);
-            
+
             if (endPage - startPage + 1 < this.maxVisiblePages) {
                 startPage = Math.max(1, endPage - this.maxVisiblePages + 1);
             }
-            
+
             for (let i = startPage; i <= endPage; i++) {
                 pages.push(i);
             }
-            
+
             return pages;
         }
     },
@@ -582,6 +618,7 @@ export default {
                     },
                 });
                 this.foods = response.data.data;
+                console.log(response.data);
             } catch (err) {
                 console.error("Fetch error:", err);
                 this.error = "Error fetching menu items!";
@@ -628,11 +665,13 @@ export default {
                 id_specialmenu: "",
                 name: "",
                 description: "",
-                rating: null,
-                price: null,
+                prices: [
+                    { size: "small", price: null },
+                    { size: "medium", price: null },
+                    { size: "large", price: null }
+                ],
                 image: null,
                 imagePreview: null,
-                size: "Medium",
                 available: true
             };
             this.currentFood = null;
@@ -647,11 +686,9 @@ export default {
                 id_specialmenu: food.id_specialmenu,
                 name: food.name,
                 description: food.description,
-                rating: food.rating,
-                price: food.price,
+                prices: food.prices,
                 image: null,
                 imagePreview: food.image,
-                size: food.size || "Medium",
                 available: food.available
             };
             this.currentFood = { ...food };
@@ -674,7 +711,7 @@ export default {
                 toast.warning("Image size should be less than 2MB", { position: toast.POSITION.TOP_RIGHT });
                 return;
             }
-            
+
             if (file && file.type.startsWith('image/')) {
                 this.activeFood.image = file;
                 const reader = new FileReader();
@@ -691,17 +728,18 @@ export default {
                 const formData = new FormData();
                 formData.append("name", this.activeFood.name);
                 formData.append("description", this.activeFood.description);
-                formData.append("rating", this.activeFood.rating);
-                formData.append("price", this.activeFood.price);
-                formData.append("size", this.activeFood.size);
+                this.activeFood.prices.forEach((price, index) => {
+                    formData.append(`prices[${index}][size]`, price.size);
+                    formData.append(`prices[${index}][price]`, price.price);
+                });
                 formData.append("id_category", this.activeFood.id_category);
                 formData.append("id_specialmenu", this.activeFood.id_specialmenu || "");
                 formData.append("available", this.activeFood.available);
-                
+
                 if (this.activeFood.image) {
                     formData.append("image", this.activeFood.image);
                 }
-                
+
                 const token = localStorage.getItem("auth_token");
                 const response = await api.post("/addproducts", formData, {
                     headers: {
@@ -709,7 +747,7 @@ export default {
                         "Content-Type": "multipart/form-data"
                     },
                 });
-                
+
                 toast.success("Food item created successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
@@ -724,18 +762,21 @@ export default {
                 const formData = new FormData();
                 formData.append("name", this.activeFood.name);
                 formData.append("description", this.activeFood.description);
-                formData.append("rating", this.activeFood.rating);
-                formData.append("price", this.activeFood.price);
-                formData.append("size", this.activeFood.size);
+                this.activeFood.prices.forEach((price, index) => {
+                    formData.append(`prices[${index}][size]`, price.size);
+                    formData.append(`prices[${index}][price]`, price.price);
+                });
                 formData.append("id_category", this.activeFood.id_category);
                 formData.append("id_specialmenu", this.activeFood.id_specialmenu || "");
                 formData.append("available", this.activeFood.available);
+
+                console.log(...formData.entries());
                 formData.append("_method", "PUT");
-                
+
                 if (this.activeFood.image) {
                     formData.append("image", this.activeFood.image);
                 }
-                
+
                 const token = localStorage.getItem("auth_token");
                 const response = await api.post(
                     `/updateproducts/${this.activeFood.id}`,
@@ -747,7 +788,7 @@ export default {
                         },
                     }
                 );
-                
+
                 toast.success("Food item updated successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.closeModal();
                 this.fetchFoods();
@@ -761,12 +802,12 @@ export default {
             try {
                 const token = localStorage.getItem("auth_token");
                 await api.delete(`/deleteproduct/${foodId}`, {
-                    headers: { 
+                    headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json"
                     }
                 });
-                
+
                 toast.success("Food item deleted successfully", { position: toast.POSITION.TOP_RIGHT });
                 this.fetchFoods();
                 this.closeModal();
@@ -791,10 +832,10 @@ export default {
                         }
                     }
                 );
-                
+
                 food.available = !food.available;
-                toast.success(`Item marked as ${food.available ? 'available' : 'unavailable'}`, { 
-                    position: toast.POSITION.TOP_RIGHT 
+                toast.success(`Item marked as ${food.available ? 'available' : 'unavailable'}`, {
+                    position: toast.POSITION.TOP_RIGHT
                 });
             } catch (error) {
                 console.error('Error toggling availability:', error);
@@ -851,9 +892,9 @@ export default {
         },
         formatDate(dateString) {
             if (!dateString) return 'N/A';
-            const options = { 
-                year: 'numeric', 
-                month: 'short', 
+            const options = {
+                year: 'numeric',
+                month: 'short',
                 day: 'numeric',
                 hour: '2-digit',
                 minute: '2-digit'

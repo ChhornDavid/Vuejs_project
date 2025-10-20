@@ -42,11 +42,11 @@
           <div class="chart-legend">
             <div class="legend-item">
               <span class="indicator bg-blue-500"></span>
-              <span>Revenue</span>
+              <span>Last Month</span>
             </div>
             <div class="legend-item">
               <span class="indicator bg-purple-500"></span>
-              <span>Expenses</span>
+              <span>Current Month</span>
             </div>
           </div>
         </div>
@@ -71,8 +71,7 @@
           <div class="progress-circle">
             <svg viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
-              <circle cx="50" cy="50" r="45" class="progress-bar" 
-                :stroke-dashoffset="283 * (1 - 0.65)"></circle>
+              <circle cx="50" cy="50" r="45" class="progress-bar" :stroke-dashoffset="283 * (1 - 0.65)"></circle>
             </svg>
             <div class="progress-text">
               <span class="percentage">65%</span>
@@ -110,124 +109,160 @@
 <script>
 import { ref, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
+import api from '../../../../axios/Axios';
 
 export default {
   name: 'DashboardHome',
-  setup() {
-    const revenueChart = ref(null);
-    const miniChart = ref(null);
-    const selectedPeriod = ref('30days');
 
-    const metrics = ref([
-      {
-        title: "Total Revenue",
-        value: "$124,568",
-        change: "+12.5%",
-        trend: "up",
-        icon: "fas fa-dollar-sign",
-        bgColor: "bg-blue-500"
-      },
-      {
-        title: "Total Expenses",
-        value: "$78,245",
-        change: "+8.2%",
-        trend: "down",
-        icon: "fas fa-receipt",
-        bgColor: "bg-purple-500"
-      },
-      {
-        title: "Profit Margin",
-        value: "32.6%",
-        change: "+3.1%",
-        trend: "up",
-        icon: "fas fa-percent",
-        bgColor: "bg-green-500"
-      },
-      {
-        title: "Customers",
-        value: "1,245",
-        change: "+18.7%",
-        trend: "up",
-        icon: "fas fa-users",
-        bgColor: "bg-orange-500"
-      }
-    ]);
-
-    const transactions = ref([
-      { id: 1, customer: "Acme Corp", date: "2025-08-15", amount: "$12,450", status: "completed" },
-      { id: 2, customer: "Globex Inc", date: "2025-08-14", amount: "$8,750", status: "completed" },
-      { id: 3, customer: "Stark Ind", date: "2025-08-14", amount: "$24,300", status: "pending" },
-      { id: 4, customer: "Wayne Ent", date: "2025-08-13", amount: "$5,200", status: "completed" }
-    ]);
-
-    onMounted(() => {
-      // Main Revenue Chart
-      new Chart(revenueChart.value.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-          datasets: [
-            {
-              label: 'Revenue',
-              data: [65000, 59000, 80000, 81000, 56000, 55000, 70755, 85000],
-              borderColor: '#3B82F6',
-              backgroundColor: 'rgba(59, 130, 246, 0.05)',
-              borderWidth: 2,
-              tension: 0.4,
-              fill: true
-            },
-            {
-              label: 'Expenses',
-              data: [48000, 45000, 52000, 49000, 42000, 38000, 41133, 45000],
-              borderColor: '#8B5CF6',
-              backgroundColor: 'rgba(139, 92, 246, 0.05)',
-              borderWidth: 2,
-              tension: 0.4,
-              fill: true
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false } },
-            y: { beginAtZero: false }
-          }
-        }
-      });
-
-      // Mini Chart
-      new Chart(miniChart.value.getContext('2d'), {
-        type: 'bar',
-        data: {
-          labels: ['Q1', 'Q2', 'Q3', 'Q4'],
-          datasets: [{
-            data: [45000, 52000, 48000, 61000],
-            backgroundColor: '#6366f1',
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { grid: { display: false } },
-            y: { display: false }
-          }
-        }
-      });
-    });
-
+  data() {
     return {
-      metrics,
-      transactions,
-      selectedPeriod,
-      revenueChart,
-      miniChart
+      revenueChart: null,
+      miniChart: null,
+      selectedPeriod: '30days',
+      metrics: [
+        { title: "Total Revenue", value: "$0", change: "+0%", trend: "up", icon: "fas fa-dollar-sign", bgColor: "bg-blue-500" },
+        { title: "Total LastMonth", value: "$0", icon: "fas fa-receipt", bgColor: "bg-purple-500" },
+        { title: "Current Month", value: "32.6%", change: "+3.1%", trend: "up", icon: "fas fa-percent", bgColor: "bg-green-500" },
+        { title: "Customers", value: "1,245", change: "+18.7%", trend: "up", icon: "fas fa-users", bgColor: "bg-orange-500" }
+      ],
+      transactions: []
     };
+  },
+
+  methods: {
+    async Transactions() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/currentpayment`, {
+          headers: {
+            Authorization: `${token}`,
+          },
+        });
+
+        if (response.data.success) {
+          this.transactions = response.data.data.map((item, index) => ({
+            id: index + 1,
+            customer: item.owner,
+            date: item.date,
+            amount: item.price,
+            status: "completed",
+            type: item.type,
+          }));
+        }
+
+        //console.log("transactions", this.transactions);
+      } catch (error) {
+        console.log("Error fetching transactions:", error);
+      }
+    },
+    async totalRevenue() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/totalRevenue`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.data.success && response.data.data) {
+          const total = response.data.data;
+          this.metrics[0].title = total.title || "Total Revenue";
+          this.metrics[0].value = total.value || "$0";
+          this.metrics[0].change = total.change || "+0%";
+          this.metrics[0].trend = total.trend || "up";
+        }
+
+      } catch (error) {
+        console.error("Error fetching total revenue:", error);
+      }
+    },
+
+    async totalLastMonth() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/totalLastMonth`, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
+        //console.log("total lastmonth", response.data);
+        if (response.data.success && response.data.data) {
+          const LastMonth = response.data.data;
+          this.metrics[1].title = LastMonth.title || "Total LastMonth";
+          this.metrics[1].value = LastMonth.value || "$0"
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async thisMonth() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/thisMonth`, {
+          headers: {
+            Authorization: `${token}`
+          }
+        });
+        if (response.data.success && response.data.data) {
+          const thisMonth = response.data.data;
+          this.metrics[2].title = thisMonth.title || "Current Month";
+          this.metrics[2].value = thisMonth.value || "$0";
+          this.metrics[2].change = thisMonth.change || "+0%";
+          this.metrics[2].trend = thisMonth.trend || "up";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async customers() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/customers`, {
+          headers: {
+            Authorization: `${token}`,
+          }
+        });
+        //console.log("customer", response.data);
+        if (response.data.success && response.data.data) {
+          const customers = response.data.data;
+          this.metrics[3].value = customers.value || "$0";
+          this.metrics[3].title = customers.title || "Customer";
+          this.metrics[3].change = customers.change || "+0";
+          this.metrics[3].trend = customers.trend || "up";
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    initChart(canvasRef, data, options, type = 'line') {
+      if (!canvasRef) return;
+      new Chart(canvasRef.getContext('2d'), { type, data, options });
+    }
+  },
+
+  mounted() {
+    this.totalRevenue();
+    this.totalLastMonth();
+    this.thisMonth();
+    this.customers();
+    this.Transactions();
+    // Revenue Chart
+    const revenueData = {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+      datasets: [
+        { label: 'Last Month', data: [65000, 59000, 80000, 81000, 56000, 55000, 70755, 85000], borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.05)', tension: 0.4, fill: true },
+        { label: 'Current Month', data: [48000, 45000, 52000, 49000, 42000, 38000, 41133, 45000], borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.05)', tension: 0.4, fill: true }
+      ]
+    };
+    const revenueOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: false } } };
+
+    this.initChart(this.$refs.revenueChart, revenueData, revenueOptions, 'line');
+
+    // Mini Chart
+    const miniData = { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ data: [45000, 52000, 48000, 61000], backgroundColor: '#6366f1', borderRadius: 4 }] };
+    const miniOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { display: false } } };
+
+    this.initChart(this.$refs.miniChart, miniData, miniOptions, 'bar');
   }
 };
 </script>
@@ -317,11 +352,15 @@ export default {
   @apply grid grid-cols-1 lg:grid-cols-3 gap-4;
 }
 
-.mini-chart-card, .progress-card, .transactions-card {
+.mini-chart-card,
+.progress-card,
+.transactions-card {
   @apply bg-white rounded-lg shadow p-4;
 }
 
-.mini-chart-card h3, .progress-card h3, .transactions-card h3 {
+.mini-chart-card h3,
+.progress-card h3,
+.transactions-card h3 {
   @apply text-lg font-semibold mb-4;
 }
 

@@ -61,6 +61,7 @@
                   {{ normalizeStatus(order.status) }}
                 </span>
                 <span class="text-sm text-gray-500">{{ orderTimestamp(order) }}</span>
+                <span class="text-sm text-gray-500">{{ (order.order_number) }}</span>
               </div>
             </div>
 

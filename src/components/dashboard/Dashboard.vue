@@ -90,11 +90,19 @@
                 <div class="mt-4">
                   <p class="text-lg font-medium text-gray-500 mb-1">{{ $t('size') }}</p>
                   <div class="flex space-x-2">
-                    <button
-                      class="text-xs font-medium px-3 py-1 rounded-full border border-emerald-500 text-emerald-600 bg-white hover:bg-emerald-500 hover:text-white transition-colors">
-                      {{ item.size }}
+                    <button v-for="price in item.prices" :key="price.size" @click="changeSize(item, price.size)" :class="[
+                      'text-xs font-medium px-3 py-1 rounded-full border transition-colors',
+                      item.selectedSize === price.size
+                        ? 'bg-emerald-500 text-white border-emerald-500'
+                        : 'bg-white text-emerald-600 border-emerald-500 hover:bg-emerald-500 hover:text-white'
+                    ]">
+                      {{ price.size }}
                     </button>
                   </div>
+
+                  <!-- <p class="mt-2 text-sm text-gray-600">
+                    {{ $t('price') }}: <strong>${{ item.price }}</strong>
+                  </p> -->
                 </div>
 
                 <div class="mt-auto pt-4 flex justify-between items-center">
@@ -103,13 +111,17 @@
                     <span class="text-xs text-red-500 line-through block">
                       {{ item.discount }}
                     </span>
-                    <span class="text-lg font-bold text-gray-800">
-                      ${{ item.price }}
+
+                    <!-- Show price for that size -->
+                    <span class="flex justify-between text-lg font-bold text-gray-800">
+                      <div class="font-bold space-x-2">
+                        {{ $t('price') }}: ${{item.prices.find(p => p.size === item.selectedSize)?.price}}
+                      </div>
                     </span>
                   </div>
 
-                  <button @click="addToOrder(item)" :disabled="orderPaid"
-                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center">
+                  <button @click="addToOrder(item)" :disabled="activeOrder.orderPaid"
+                    class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center disabled:opacity-50 disabled:cursor-not-allowed">
                     <i class="fas fa-plus mr-2 text-xs"></i>
                     {{ $t('addToOrder') }}
                   </button>
@@ -146,7 +158,7 @@
       <div class="flex-1 overflow-hidden flex flex-col">
         <!-- Add New Order Button -->
         <div class="p-2 border border-gray-300 bg-emerald-500 rounded-lg w-fit hover:shadow-md transition">
-          <button @click="addNewOrder" :disabled="!orderPaid || orderAdded"
+          <button @click="addNewOrder" :disabled="orders.some(order => !order.orderPaid)"
             class="text-sm font-medium text-white hover:text-blue-600 text-left disabled:opacity-50 disabled:cursor-not-allowed">
             Add New
           </button>
@@ -163,21 +175,21 @@
         </div>
 
         <!-- Display Items in Selected Order -->
-        <h3 v-if="orders[activeOrderIndex]" class="text-sm font-medium text-gray-500 mt-3 mb-3">
-          {{ orders[activeOrderIndex].name }} ({{ orders[activeOrderIndex].items.length }})
+        <h3 v-if="activeOrder" class="text-sm font-medium text-gray-500 mt-3 mb-3">
+          {{ activeOrder.name }} ({{ activeOrder.items.length }})
         </h3>
 
         <div class="border border-gray-200 rounded-lg overflow-hidden">
-          <div class="flex-1 overflow-y-auto max-h-[calc(100vh-300px)]">
+          <div class="flex-1 overflow-y-auto max-h-[calc(40vh-30px)]">
             <div class="space-y-4 p-2">
-              <div v-for="(item, index) in orders[activeOrderIndex].items" :key="index"
+              <div v-for="(item, index) in activeOrder.items" :key="index"
                 class="flex items-start p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                 <img :src="item.image" class="w-12 h-12 rounded-lg object-cover mr-3" />
                 <div class="flex-1">
                   <div class="flex justify-between">
                     <h4 class="font-medium text-gray-800">{{ item.name }}</h4>
-                    <button @click="removeFromOrder(index)" :disabled="orderPaid"
-                      class="text-gray-400 hover:text-red-500 transition-colors">
+                    <button @click="removeFromOrder(index)" :disabled="activeOrder.orderPaid"
+                      class="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <i class="fas fa-times"></i>
                     </button>
                   </div>
@@ -186,18 +198,18 @@
                   </p>
                   <div class="flex justify-between items-center mt-2">
                     <div class="flex items-center border border-gray-200 rounded-lg">
-                      <button @click="decreaseQuantity(index)" :disabled="orderPaid"
-                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">-</button>
+                      <button @click="decreaseQuantity(index)" :disabled="activeOrder.orderPaid"
+                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">-</button>
                       <span class="px-3 text-sm font-medium">{{ item.quantity }}</span>
-                      <button @click="increaseQuantity(index)" :disabled="orderPaid"
-                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors">+</button>
+                      <button @click="increaseQuantity(index)" :disabled="activeOrder.orderPaid"
+                        class="px-2 py-1 text-gray-500 hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">+</button>
                     </div>
                     <span class="font-medium text-gray-800">${{ (item.price * item.quantity).toFixed(2) }}</span>
                   </div>
                 </div>
               </div>
 
-              <div v-if="orders[activeOrderIndex].items.length === 0" class="text-center py-8 text-gray-400">
+              <div v-if="activeOrder.items.length === 0" class="text-center py-8 text-gray-400">
                 <i class="fas fa-shopping-basket text-3xl mb-2"></i>
                 <p>{{ $t('yourOrderEmpty') }}</p>
                 <p class="text-sm mt-1">{{ $t('addItemsFromMenu') }}</p>
@@ -226,18 +238,18 @@
 
           <!-- Payment Options -->
           <div class="grid grid-cols-3 gap-3">
-            <button @click="showPaymentCash = true"
-              class="flex flex-col items-center justify-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+            <button @click="showPaymentCash = true" :disabled="activeOrder.orderPaid"
+              class="flex flex-col items-center justify-center p-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-money-bill-wave text-blue-500 mb-1"></i>
               <span class="text-xs font-medium">{{ $t('cash') }}</span>
             </button>
-            <button @click="showPaymentCard = true"
-              class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+            <button @click="showPaymentCard = true" :disabled="activeOrder.orderPaid"
+              class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-credit-card text-purple-500 mb-1"></i>
               <span class="text-xs font-medium">{{ $t('card') }}</span>
             </button>
-            <button @click="showPaymentScan = true"
-              class="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+            <button @click="showPaymentScan = true" :disabled="activeOrder.orderPaid"
+              class="flex flex-col items-center justify-center p-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-qrcode text-green-500 mb-1"></i>
               <span class="text-xs font-medium">{{ $t("e_pay") }}</span>
             </button>
@@ -278,8 +290,8 @@ export default {
 
   data() {
     return {
-      orderPaid: this.orderPaid = localStorage.getItem('order_paid') === 'true',
-      orderAdded: false,
+      selectedSize: "",
+      sizes: ["small", "medium", "large"],
       userData: null,
       categories: [],
       menuItems: [],
@@ -295,19 +307,12 @@ export default {
       isLoading: false,
       hasNotifications: false,
       activeOrderIndex: 0,
-      orders: [
-        {
-          id: 1,
-          name: 'Order1',
-          items: [],
-          orderPaid: false,
-        },
-      ],
-      orderCounter: 2,
+      orders: [],
+      orderCounter: 1,
     };
   },
   beforeDestroy() {
-    window.removeEventListener('storage', this.syncOrderPaid);
+    // Cleanup if necessary
   },
   computed: {
     activeOrder() {
@@ -321,7 +326,7 @@ export default {
       return this.menuItems.filter(item => Number(item.id_category) === Number(this.activeCategory.id));
     },
     subtotal() {
-      return this.orders[this.activeOrderIndex].items.reduce(
+      return this.activeOrder.items.reduce(
         (sum, item) => sum + item.price * item.quantity, 0);
     },
     taxAmount() {
@@ -332,9 +337,30 @@ export default {
     }
   },
 
+
   methods: {
-    syncOrderPaid() {
-      this.orderPaid = localStorage.getItem('order_paid') === 'true';
+    saveOrders() {
+      localStorage.setItem('dashboard_orders', JSON.stringify(this.orders));
+      localStorage.setItem('dashboard_activeOrderIndex', this.activeOrderIndex);
+      localStorage.setItem('dashboard_orderCounter', this.orderCounter);
+      localStorage.setItem('OrderId', 'Order' + this.activeOrder.id);
+    },
+    loadOrders() {
+      this.orders = [
+        {
+          id: 1,
+          name: 'Order1',
+          items: [],
+          orderPaid: false,
+        },
+      ];
+      this.orderCounter = 2;
+    },
+    handlePaymentSuccess() {
+      this.activeOrder.orderPaid = true;
+      this.saveOrders();
+      this.updateOrderOnServer(true);
+      this.addNewOrder();
     },
     switchLang(lang) {
       this.$i18n.locale = lang;
@@ -348,53 +374,91 @@ export default {
     },
 
     addNewOrder() {
-      this.orders.push({
+      if (this.orders.some(order => !order.orderPaid)) return;
+
+      const newOrder = {
         id: this.orderCounter,
         name: `Order${this.orderCounter}`,
         items: [],
         orderPaid: false,
-      });
-      this.orderAdded = true;
+      };
+
+      this.orders.push(newOrder);
       this.activeOrderIndex = this.orders.length - 1;
       this.orderCounter++;
+      this.saveOrders();
+
+      const userId = localStorage.getItem('id');
+      api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
+
+      api.post('/order/add-items', {
+        user_id: userId,
+        order_number: newOrder.name,
+        items: [],
+        status: false,
+        order_paid: false
+      })
+        .then(() => console.log('✅ Order created and broadcasted'))
+        .catch(err => {
+          console.error('❌ Error broadcasting order:', err.response?.data || err);
+        });
+    },
+
+    enableOrder(orderId) {
+      this.orders = this.orders.map(order =>
+        order.id === orderId ? { ...order, orderPaid: false } : order
+      );
     },
 
     switchOrder(index) {
       this.activeOrderIndex = index;
+      this.saveOrders();
     },
 
     changeCategory(category) {
       this.activeCategory = category;
     },
 
-    addToOrder(item) {
-      const currentOrder = this.orders[this.activeOrderIndex];
-      const existingItem = currentOrder.items.find(i => i.id === item.id);
+    changeSize(item, size) {
+      item.selectedSize = size;
+      const sizeObj = item.prices.find(p => p.size === size);
+      if (sizeObj) {
+        item.price = sizeObj.price;
+      }
+      this.updateOrderOnServer();
+    },
 
-      if (existingItem) {
+    addToOrder(item) {
+      const existingItem = this.activeOrder.items.find(i => i.id === item.id);
+
+      const selectedSize = item.selectedSize || 'small';
+      const selectedPrice = item.prices?.find(p => p.size === selectedSize)?.price || item.price;
+
+      if (existingItem && existingItem.selectedSize === selectedSize) {
         existingItem.quantity += 1;
       } else {
-        currentOrder.items.push({
+        this.activeOrder.items.push({
           ...item,
           quantity: 1,
-          selectedSize: item.size || 'default'
+          selectedSize: selectedSize,
+          price: selectedPrice
         });
       }
       this.updateOrderOnServer();
     },
 
     removeFromOrder(index) {
-      this.orders[this.activeOrderIndex].items.splice(index, 1);
+      this.activeOrder.items.splice(index, 1);
       this.updateOrderOnServer();
     },
 
     increaseQuantity(index) {
-      this.orders[this.activeOrderIndex].items[index].quantity += 1;
+      this.activeOrder.items[index].quantity += 1;
       this.updateOrderOnServer();
     },
 
     decreaseQuantity(index) {
-      const items = this.orders[this.activeOrderIndex].items;
+      const items = this.activeOrder.items;
       if (items[index].quantity > 1) {
         items[index].quantity -= 1;
       } else {
@@ -403,28 +467,47 @@ export default {
       this.updateOrderOnServer();
     },
 
-    async updateOrderOnServer() {
+    async updateOrderOnServer(forceSync = false) {
       const userId = localStorage.getItem('id');
-      const groupKey = localStorage.getItem('group_key');
+      const token = localStorage.getItem('auth_token');
+      const orderNumber = String(this.activeOrder.name);
 
       try {
+        // ✅ Always fetch fresh local data
+        const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders')) || [];
+        const currentOrder = storedOrders.find(o => o.name === this.activeOrder.name);
+
+        // ✅ If not found in storage, sync from Vue activeOrder
+        const isPaid = currentOrder ? currentOrder.orderPaid : this.activeOrder.orderPaid;
+
+        // ✅ Skip unnecessary syncs unless forced or order has items
+        if (!forceSync && (!this.activeOrder.items || this.activeOrder.items.length === 0)) {
+          console.log("⏸️ No items to sync for", orderNumber);
+          return;
+        }
+
         api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
 
         await api.post('/order/add-items', {
           user_id: userId,
-          group_key: groupKey,
+          order_number: orderNumber,
           items: this.activeOrder.items.map(i => ({
             id: i.id,
             image: i.image,
             name: i.name,
             quantity: i.quantity,
             selectedSize: i.selectedSize,
-            price: i.price
-          }))
+            price: i.price,
+          })),
+          status: false,
+          order_paid: isPaid,  // ✅ synced from localStorage
+        }, {
+          headers: { Authorization: `${token}` },
         });
-        status: false
+
+        console.log(`✅ Synced ${orderNumber} to server (order_paid = ${isPaid})`);
       } catch (err) {
-        console.error("Failed to sync order:", err);
+        console.error("❌ Failed to sync order:", err);
       }
     },
 
@@ -440,8 +523,18 @@ export default {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        localStorage.clear();
-        localStorage.clear();
+        // Clear only auth-related items, keep orders for persistence
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("id");
+        localStorage.removeItem("name");
+        localStorage.removeItem("role");
+        localStorage.removeItem("tableNumber");
+        localStorage.removeItem("order_status_step");
+        localStorage.removeItem("order_status_message");
+        localStorage.removeItem("selectedItems");
+        localStorage.removeItem("order_paid");
+        // Do not clear dashboard_orders and related items to persist unpaid orders
+
         this.$router.push("/");
       } catch (error) {
         console.error("Logout failed:", error);
@@ -483,7 +576,14 @@ export default {
         const response = await api.get(`/products`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        this.menuItems = response.data.data;
+        this.menuItems = response.data.data.map(item => {
+          const smallPrice = item.prices.find(p => p.size.toLowerCase() === 'small');
+          return {
+            ...item,
+            selectedSize: 'small',
+            price: smallPrice ? smallPrice.price : item.prices[0]?.price || 0
+          };
+        });
       } catch (error) {
         console.error("Error fetching food: ", error);
       } finally {
@@ -520,12 +620,100 @@ export default {
           headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (res.data.items && res.data.items.length > 0) {
-          this.orders[0].items = res.data.items;
+        const data = res.data;
+
+        if (data.orders && data.orders.length > 0) {
+          console.log("✅ Found draft orders:", data.orders);
+
+          data.orders.forEach(orderData => {
+            let existingOrder = this.orders.find(o => o.name === orderData.order_number);
+
+            if (!existingOrder) {
+              // Add new order to local state
+              existingOrder = {
+                id: this.orderCounter,
+                name: orderData.order_number,
+                items: orderData.items || [],
+                orderPaid: orderData.order_paid || false,
+              };
+              this.orders.push(existingOrder);
+              this.orderCounter++;
+            } else {
+              // Update existing order
+              existingOrder.items = orderData.items || [];
+              // Only update orderPaid if not already paid locally (to persist paid status across refreshes)
+              if (!existingOrder.orderPaid) {
+                existingOrder.orderPaid = orderData.order_paid || false;
+              }
+            }
+          });
+
+          // Set the first one as active by default
+          this.activeOrder = this.orders[this.orders.length - 1];
+          this.saveOrders();
+        } else {
+          console.log("ℹ️ No unfinished draft orders found for user.");
         }
+
       } catch (err) {
-        console.error('Failed to load draft order:', err);
+        console.error('❌ Failed to load draft orders:', err);
       }
+    },
+
+    listenOrders() {
+      const userId = localStorage.getItem('id');
+      echo.channel('add-order')
+        .listen('AddNewOrder', (e) => {
+          if (String(e.userId) === String(userId)) {
+            const exists = this.orders.find(o => o.name === e.order.order_number);
+            if (!exists) {
+              this.orders.push({
+                id: this.orderCounter,
+                name: e.order.order_number,
+                items: e.order.items || [],
+                orderPaid: e.order.status || false,
+              });
+              this.orderCounter++;
+              this.saveOrders();
+              console.log('🆕 Received shared order:', e.order.order_number);
+            }
+          }
+        })
+        .listen('OrderCreated', (e) => {
+          if (String(e.userId) === String(userId)) {
+            const currentOrder = this.orders.find(o => o.name === e.orderNumber);
+            if (currentOrder) {
+              currentOrder.items = e.items;
+              this.saveOrders();
+              console.log('🔄 Items updated in shared order:', e.orderNumber);
+            }
+          }
+        });
+    },
+
+    listenDecline() {
+      echo.channel("order-decline").listen("DeclineApprove", (event) => {
+        const userId = localStorage.getItem("id");
+
+        if (event.userId == userId) {
+          this.activeOrder.orderPaid = false;
+          this.saveOrders();
+          this.showStatus = true;
+          this.resultMessage = 'Table is Free';
+          localStorage.setItem("order_status_step", "Free");
+          localStorage.setItem("order_status_message", this.resultMessage);
+
+          this.$nextTick(() => {
+            const modal = this.$refs.Status;
+            if (modal && typeof modal.moveToStep === 'function') {
+              modal.moveToStep('Free');
+            }
+            else {
+              console.error('Status component not ready or method missing');
+            }
+          });
+        }
+      });
     },
 
     listenCreditForStatus() {
@@ -648,7 +836,6 @@ export default {
           localStorage.setItem("order_status_step", "Ready");
           localStorage.setItem("order_status_message", this.resultMessage);
           const userId = localStorage.getItem('id');
-          const groupKey = localStorage.getItem('group_key');
           this.$nextTick(() => {
             const modal = this.$refs.Status;
             if (modal && typeof modal.moveToStep === 'function') {
@@ -657,9 +844,10 @@ export default {
               console.error('Status component not ready or method missing');
             }
           });
+          const isPaid = true;
           api.post('/order/add-items', {
-            user_id: userId,
-            group_key: groupKey,
+            user_id: currentUserId,
+            order_number: this.activeOrder.name,
             items: this.activeOrder.items.map(i => ({
               id: i.id,
               image: i.image,
@@ -668,41 +856,40 @@ export default {
               selectedSize: i.selectedSize,
               price: i.price
             })),
-            status: true
-          }).catch(err => {
-            console.error("Failed to update order:", err);
-          });
-        }
-
-        if (
-          event.robot?.status === 'completed' &&
-          eventUserId &&
-          currentUserId &&
-          String(eventUserId) === String(currentUserId)
-        ) {
-          console.log("Status is completed and user matches — reloading page...");
-          if (this.selectedItems && typeof this.selectedItems.removeItem === 'function') {
-            this.selectedItems.removeItem();
-          }
+            status: true,
+            order_paid: isPaid
+          })
           localStorage.removeItem("order_status_step");
           localStorage.removeItem("order_status_message");
           localStorage.removeItem('selectedItems');
           localStorage.removeItem('order_paid');
 
+          localStorage.removeItem('dashboard_orders');
+          localStorage.removeItem('dashboard_activeOrderIndex');
+          localStorage.removeItem('dashboard_orderCounter');
+          localStorage.removeItem('dashboard_orderAdded');
+
           setTimeout(() => {
             window.location.reload();
           }, 10000);
-        } else if (event.robot?.status === 'completed') {
-          console.log("Status is completed, but user does not match. Not reloading.");
         }
       });
     },
 
     listenAddItem() {
       const userId = localStorage.getItem('id');
+
       echo.channel('ordersItem').listen('OrderCreated', (event) => {
-        if (event.userId === userId) {
-          this.orders[this.activeOrderIndex].items = event.items;
+        console.log('📡 Received broadcast:', event);
+
+        const targetOrder = this.orders.find(o => o.name === event.orderNumber);
+
+        if (targetOrder && String(event.userId) === String(userId)) {
+          targetOrder.items = event.items;
+          this.saveOrders();
+          console.log(`🔁 Updated shared order: ${event.orderNumber}`);
+        } else {
+          console.log(`⚠️ Event ignored or not matching order: ${event.orderNumber}`);
         }
       });
     },
@@ -711,8 +898,9 @@ export default {
       const userId = localStorage.getItem('id');
       echo.channel(`order-status`).listen('PaidOrder', (event) => {
         if (event.userId == userId) {
-          localStorage.setItem('order_paid', 'true');
-          this.orderPaid = true;
+          this.activeOrder.orderPaid = true;
+          this.saveOrders();
+          this.updateOrderOnServer(true);
         }
       });
     },
@@ -736,15 +924,26 @@ export default {
       this.$router.push('/');
     }
 
+    // ✅ Only keep one copy of this section
     const savedStep = localStorage.getItem("order_status_step");
     const savedMessage = localStorage.getItem("order_status_message");
 
     if (savedStep && savedMessage) {
       this.showStatus = true;
       this.resultMessage = savedMessage;
+
+      this.$nextTick(() => {
+        const modal = this.$refs.Status;
+        if (modal && typeof modal.moveToStep === 'function') {
+          modal.moveToStep(savedStep);
+        } else {
+          console.error('Status modal not ready or missing method');
+        }
+      });
     }
 
-    window.addEventListener('storage', this.syncOrderPaid);
+    this.listenOrders();
+    this.loadOrders();
 
     this.fetchSpecialMenus();
     this.fetchMenus();
@@ -759,6 +958,7 @@ export default {
     this.listenForKitchenStatus();
     this.listenCreditForStatus();
     this.listenForPaidOrder();
+    this.listenDecline();
   },
 
   beforeUnmount() {
@@ -766,7 +966,6 @@ export default {
   },
 };
 </script>
-
 
 <style scoped>
 @import "font-awesome/css/font-awesome.min.css";

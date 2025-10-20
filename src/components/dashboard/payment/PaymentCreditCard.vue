@@ -74,7 +74,7 @@
                             <!-- Submit Button -->
                             <button
                                 class="w-full py-3.5 px-6 flex items-center justify-center gap-2 text-lg font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                type="submit" :disabled="isPaidAlready || loading">
+                                type="submit" :disabled="loading">
                                 <svg v-if="loading" class="animate-spin h-5 w-5 text-white"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
@@ -178,7 +178,7 @@ export default {
     methods: {
         async initializeStripe() {
             if (!this.stripe) {
-                this.stripe = await loadStripe("pk_test_51S0eUIRvk9Nr5UK0ZQ1qC3kuYph0UwGU71yhIOAL28U3YVDYEhyHjaz6HI0gC2kuab1LbqXjAmlxeIicSBtqj1DN00SOknX9K1");
+                this.stripe = await loadStripe("pk_test_51Pi4i22N83kttsNCYZG4bxJ3NQlMxCNDtBBaAJsDO81Uzo23s7doQ9NzSUlTObFx9doP0C6N52VmcfqwXSK6tBQ000xRKbD3Iu");
             }
 
             const elements = this.stripe.elements();
@@ -244,11 +244,14 @@ export default {
             try {
                 const userId = localStorage.getItem("id");
                 const token = localStorage.getItem("auth_token");
+                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders'));
+                const orderName = storedOrders?.[0]?.name || 'UnknownOrder';
 
                 const orderPayload = {
                     user_id: parseInt(userId, 10),
                     amount: this.total,
                     payment_type: "credit_card",
+                    order_number: orderName,
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,

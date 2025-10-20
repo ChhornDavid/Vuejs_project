@@ -49,6 +49,7 @@
           <div>
             <h3 class="text-lg font-semibold text-gray-900">Table #{{ order.user_id }}</h3>
             <p class="text-sm text-gray-500">Order ID: {{ order.id }}</p>
+            <p class="text-sm text-gray-500">Order Number: {{ order.order_number }}</p>
             <p class="text-sm text-gray-500">{{ formatDate(order.created_at) }}</p>
           </div>
           <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"> {{ $t('pending') }} </span>
@@ -222,7 +223,7 @@ export default {
       this.orderIdToProcess = id;
       try {
         const token = localStorage.getItem("auth_token");
-        await api.post(`admin/cancel/${id}`, {}, {
+        await api.post(`admin/decline/${id}`, {}, {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
