@@ -480,7 +480,6 @@ export default {
         // ✅ If not found in storage, sync from Vue activeOrder
         const isPaid = currentOrder ? currentOrder.orderPaid : this.activeOrder.orderPaid;
 
-        // ✅ Skip unnecessary syncs unless forced or order has items
         if (!forceSync && (!this.activeOrder.items || this.activeOrder.items.length === 0)) {
           console.log("⏸️ No items to sync for", orderNumber);
           return;
