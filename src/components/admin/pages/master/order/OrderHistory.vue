@@ -30,12 +30,12 @@
                 <table class="w-full">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Order ID</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Table</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Amount</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Payment</th>
-                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">Date</th>
-                            <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">Actions</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('order_ID') }}</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('table') }}</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('amount') }}</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('payment') }}</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-700">{{ $t('date') }}</th>
+                            <th class="px-6 py-4 text-right text-sm font-semibold text-gray-700">{{ $t('actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">

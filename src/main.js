@@ -144,6 +144,12 @@ const messages = {
         create_item:"Create Item",
         category_image:"Category Image",
         click_to_upload_an_image:"Click to upload an image",
+        order_ID:"Order ID",
+        table:"Table",
+        amount:"Amount",
+        date:"Date",
+        payment:"Payment",
+        add_new:"Add New ",
         
     },
     kh: {
@@ -265,6 +271,12 @@ const messages = {
         create_item:"បង្កើត",
         category_image:"រូបភាព",
         click_to_upload_an_image:"ចុចដើម្បីបញ្ចូលរូបភាព",
+        order_ID:"លេខសម្គាល់ការកម្មង់",
+        table:"លេខតុ",
+        amount:"ចំនួនទឹកប្រាក់",
+        date:"កាលបរិច្ឆេទ",
+        payment:"ការទូទាត់",
+        add_new:"បន្ថែមថ្មី ",
         
 
     }
