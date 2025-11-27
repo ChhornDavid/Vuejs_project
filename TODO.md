@@ -1,9 +1,6 @@
-# TODO: Prevent Adding New Order When Any Order is Unpaid
+# TODO: Modify getDraftOrder to handle status from draft orders
 
-- [x] Modify the "Add New" button disabled condition to check if any order is unpaid
-- [x] Update the addNewOrder method to prevent adding if any order is unpaid
-- [x] Test the order management functionality
-- [x] Fix order_paid not sent to database on payment success
-- [x] Ensure "Add New" button remains disabled on logout and login if unpaid orders exist
-- [x] Persist orderPaid status in localStorage to survive page refreshes
-- [x] Send order_paid: true to database when order is completed
+- [ ] Add a helper function to map process_status to step and message
+- [ ] Update getDraftOrder method to set status for new and existing orders based on draft data
+- [ ] After loading drafts, show the status modal for the active order
+- [ ] Test the changes to ensure status is correctly set and modal appears

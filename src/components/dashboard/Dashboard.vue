@@ -29,7 +29,9 @@
               <i class="fas fa-bell text-gray-600"></i>
               <span v-if="hasNotifications" class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <Status ref="Status" :show-status="showStatus" :result-message="resultMessage" @close-modal="toggleModal" />
+            <Status ref="Status" :show-status="showStatus" :result-message="resultMessage"
+              :current-step="activeOrder.status.step" :orders="orders" :active-order-index="activeOrderIndex"
+              @close-modal="toggleModal" @switch-order="switchOrder" />
           </div>
           <div class="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
             <img v-if="userData?.avatar" :src="userData.avatar" class="w-full h-full object-cover">
@@ -309,6 +311,8 @@ export default {
       activeOrderIndex: 0,
       orders: [],
       orderCounter: 1,
+      showStatus: false,
+      resultMessage: '',
     };
   },
   beforeDestroy() {
@@ -316,7 +320,14 @@ export default {
   },
   computed: {
     activeOrder() {
-      return this.orders[this.activeOrderIndex] || { items: [] };
+      const order = this.orders[this.activeOrderIndex] || { items: [] };
+      if (!order.status) {
+        order.status = { step: 0, message: 'Free' };
+      }
+      return order;
+    },
+    hasNotifications() {
+      return this.orders.length > 1;
     },
     selectedItems() {
       return this.activeOrder.items;
@@ -352,6 +363,10 @@ export default {
           name: 'Order1',
           items: [],
           orderPaid: false,
+          status: {
+            step: 0,
+            message: 'Free'
+          }
         },
       ];
       this.orderCounter = 2;
@@ -381,6 +396,10 @@ export default {
         name: `Order${this.orderCounter}`,
         items: [],
         orderPaid: false,
+        status: {
+          step: 0,
+          message: 'Free'
+        }
       };
 
       this.orders.push(newOrder);
@@ -392,7 +411,7 @@ export default {
       api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
 
       api.post('/order/add-items', {
-        user_id: userId,
+        user_id: parseInt(userId),
         order_number: newOrder.name,
         items: [],
         status: false,
@@ -488,7 +507,7 @@ export default {
         api.defaults.headers.common['X-Socket-Id'] = echo.socketId();
 
         await api.post('/order/add-items', {
-          user_id: userId,
+          user_id: parseInt(userId),
           order_number: orderNumber,
           items: this.activeOrder.items.map(i => ({
             id: i.id,
@@ -499,7 +518,7 @@ export default {
             price: i.price,
           })),
           status: false,
-          order_paid: isPaid,  // ✅ synced from localStorage
+          order_paid: isPaid,
         }, {
           headers: { Authorization: `${token}` },
         });
@@ -610,6 +629,18 @@ export default {
       };
     },
 
+    getStatusFromProcessStatus(processStatus) {
+      const statusMap = {
+        'Free': { step: 0, message: 'Free' },
+        'Cashier Approve': { step: 1, message: 'Order approved by cashier.' },
+        'At Kitchen': { step: 2, message: 'Order sent to kitchen.' },
+        'Cooking': { step: 3, message: 'Robot accepted the order.' },
+        'Preparing': { step: 4, message: 'Order is being prepared.' },
+        'Ready': { step: 5, message: 'Order is ready.' }
+      };
+      return statusMap[processStatus] || { step: 0, message: 'Free' };
+    },
+
     async getDraftOrder() {
       const userId = localStorage.getItem('id');
       const token = localStorage.getItem('auth_token');
@@ -629,11 +660,13 @@ export default {
 
             if (!existingOrder) {
               // Add new order to local state
+              const status = this.getStatusFromProcessStatus(orderData.process_status);
               existingOrder = {
                 id: this.orderCounter,
                 name: orderData.order_number,
                 items: orderData.items || [],
                 orderPaid: orderData.order_paid || false,
+                status: status
               };
               this.orders.push(existingOrder);
               this.orderCounter++;
@@ -644,12 +677,18 @@ export default {
               if (!existingOrder.orderPaid) {
                 existingOrder.orderPaid = orderData.order_paid || false;
               }
+              // Update status from draft
+              existingOrder.status = this.getStatusFromProcessStatus(orderData.process_status);
             }
           });
 
-          // Set the first one as active by default
+          // Set the last loaded order as active
           this.activeOrder = this.orders[this.orders.length - 1];
           this.saveOrders();
+
+          // Show status modal for the active order
+          this.showStatus = true;
+          this.resultMessage = this.activeOrder.status.message;
         } else {
           console.log("ℹ️ No unfinished draft orders found for user.");
         }
@@ -671,6 +710,10 @@ export default {
                 name: e.order.order_number,
                 items: e.order.items || [],
                 orderPaid: e.order.status || false,
+                status: {
+                  step: 0,
+                  message: 'Free'
+                }
               });
               this.orderCounter++;
               this.saveOrders();
@@ -696,21 +739,11 @@ export default {
 
         if (event.userId == userId) {
           this.activeOrder.orderPaid = false;
+          this.activeOrder.status.step = 0;
+          this.activeOrder.status.message = 'Table is Free';
           this.saveOrders();
           this.showStatus = true;
           this.resultMessage = 'Table is Free';
-          localStorage.setItem("order_status_step", "Free");
-          localStorage.setItem("order_status_message", this.resultMessage);
-
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('Free');
-            }
-            else {
-              console.error('Status component not ready or method missing');
-            }
-          });
         }
       });
     },
@@ -719,20 +752,11 @@ export default {
       echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
         const userId = localStorage.getItem('id');
         if (event.userId == userId) {
+          this.activeOrder.status.step = 2;
+          this.activeOrder.status.message = 'Food is at kitchen.';
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = 'Food is at kitchen.';
-          localStorage.setItem("order_status_step", "At Kitchen");
-          localStorage.setItem("order_status_message", this.resultMessage);
-
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('At Kitchen');
-            }
-            else {
-              console.error('Status component not ready or method missing');
-            }
-          });
         } else {
           console.log('Credit card to kitchen event not for this user');
         }
@@ -742,19 +766,11 @@ export default {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
         const userId = localStorage.getItem('id');
         if (event.userId == userId) {
+          this.activeOrder.status.step = 1;
+          this.activeOrder.status.message = 'Order approved by cashier.';
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = 'Order approved by cashier.';
-          localStorage.setItem("order_status_step", "Cashier Approve");
-          localStorage.setItem("order_status_message", this.resultMessage);
-
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('Cashier Approve');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
         } else {
           console.log('Order approved by cashier but not for this user');
         }
@@ -764,19 +780,11 @@ export default {
       echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
         const userId = localStorage.getItem("id");
         if (event.userId == userId) {
+          this.activeOrder.status.step = 2;
+          this.activeOrder.status.message = "Order sent to kitchen.";
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = "Order sent to kitchen.";
-          localStorage.setItem("order_status_step", "At Kitchen");
-          localStorage.setItem("order_status_message", this.resultMessage);
-
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('At Kitchen');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
         } else {
           console.log("Order not sent to kitchen for this user");
         }
@@ -796,54 +804,40 @@ export default {
           currentUserId &&
           String(eventUserId) === String(currentUserId)) {
           console.log("Robot status is 'accept' — move to Cooking step");
+          this.activeOrder.status.step = 3;
+          this.activeOrder.status.message = "Robot accepted the order.";
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = "Robot accepted the order.";
-          localStorage.setItem("order_status_step", "Cooking");
-          localStorage.setItem("order_status_message", this.resultMessage);
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('Cooking');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
         } else if (event.robot?.status === 'preparing' &&
           eventUserId &&
           currentUserId &&
           String(eventUserId) === String(currentUserId)) {
           console.log("Robot status is 'preparing' — move to Preparing step");
+          this.activeOrder.status.step = 4;
+          this.activeOrder.status.message = "Order is being prepared.";
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = "Order is being prepared.";
-          localStorage.setItem("order_status_step", "Preparing");
-          localStorage.setItem("order_status_message", this.resultMessage);
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('Preparing');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
-        } else if (event.robot?.status === 'completed' &&
+        } else if (
+          event.robot?.status === 'completed' &&
           eventUserId &&
           currentUserId &&
-          String(eventUserId) === String(currentUserId)) {
+          String(eventUserId) === String(currentUserId)
+        ) {
           console.log("Robot status is 'complete' — move to Ready step");
+
+          // Update the active order first
+          this.activeOrder.status.step = 5;
+          this.activeOrder.status.message = "Order is ready.";
+          this.saveOrders();
           this.showStatus = true;
           this.resultMessage = "Order is ready.";
-          localStorage.setItem("order_status_step", "Ready");
-          localStorage.setItem("order_status_message", this.resultMessage);
+
           const userId = localStorage.getItem('id');
-          this.$nextTick(() => {
-            const modal = this.$refs.Status;
-            if (modal && typeof modal.moveToStep === 'function') {
-              modal.moveToStep('Ready');
-            } else {
-              console.error('Status component not ready or method missing');
-            }
-          });
           const isPaid = true;
+
+          // Save items to backend
           api.post('/order/add-items', {
             user_id: currentUserId,
             order_number: this.activeOrder.name,
@@ -857,20 +851,30 @@ export default {
             })),
             status: true,
             order_paid: isPaid
-          })
-          localStorage.removeItem("order_status_step");
-          localStorage.removeItem("order_status_message");
-          localStorage.removeItem('selectedItems');
-          localStorage.removeItem('order_paid');
+          });
 
-          localStorage.removeItem('dashboard_orders');
-          localStorage.removeItem('dashboard_activeOrderIndex');
-          localStorage.removeItem('dashboard_orderCounter');
-          localStorage.removeItem('dashboard_orderAdded');
+          const allCompleted = this.orders.every(o => {
+            return o.status?.step === 5;
+          });
 
-          setTimeout(() => {
-            window.location.reload();
-          }, 10000);
+          if (allCompleted) {
+            console.log("🔥 ALL ORDERS COMPLETED — Clearing localStorage and reloading.");
+
+            // Remove order-related storage
+            localStorage.removeItem("order_status_step");
+            localStorage.removeItem("order_status_message");
+            localStorage.removeItem('selectedItems');
+            localStorage.removeItem('order_paid');
+
+            localStorage.removeItem('dashboard_orders');
+            localStorage.removeItem('dashboard_activeOrderIndex');
+            localStorage.removeItem('dashboard_orderCounter');
+            localStorage.removeItem('dashboard_orderAdded');
+
+            setTimeout(() => {
+              window.location.reload();
+            }, 10000);
+          }
         }
       });
     },
@@ -923,24 +927,6 @@ export default {
       this.$router.push('/');
     }
 
-    // ✅ Only keep one copy of this section
-    const savedStep = localStorage.getItem("order_status_step");
-    const savedMessage = localStorage.getItem("order_status_message");
-
-    if (savedStep && savedMessage) {
-      this.showStatus = true;
-      this.resultMessage = savedMessage;
-
-      this.$nextTick(() => {
-        const modal = this.$refs.Status;
-        if (modal && typeof modal.moveToStep === 'function') {
-          modal.moveToStep(savedStep);
-        } else {
-          console.error('Status modal not ready or missing method');
-        }
-      });
-    }
-
     this.listenOrders();
     this.loadOrders();
 
@@ -958,6 +944,12 @@ export default {
     this.listenCreditForStatus();
     this.listenForPaidOrder();
     this.listenDecline();
+
+    // Load status for active order
+    if (this.activeOrder && this.activeOrder.status) {
+      this.showStatus = true;
+      this.resultMessage = this.activeOrder.status.message;
+    }
   },
 
   beforeUnmount() {

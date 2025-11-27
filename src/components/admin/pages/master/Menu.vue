@@ -308,7 +308,7 @@
               <div class="flex justify-end pt-4">
                 <button @click="closeModal"
                   class="px-4 py-2 bg-blue-600 rounded-lg text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                  {{$t('')}}
+                  {{ $t('') }}
                 </button>
               </div>
             </div>
@@ -566,15 +566,15 @@ export default {
 
         const formData = new FormData();
         formData.append("id", this.editCategory.id);
-        
         formData.append("name", this.editCategory.name);
 
-        if (this.editCategory.image) {
+        // Only if the user uploads a NEW image
+        if (this.editCategory.image instanceof File) {
           formData.append("image", this.editCategory.image);
         }
-        formData.append("_PUT", "Method")
 
         //console.log(...formData.entries());
+
         const response = await api.post(
           `/updatecategories/${this.editCategory.id}`,
           formData,
@@ -585,10 +585,14 @@ export default {
             },
           }
         );
-        //console.log("Category", response.data)
-        toast.success("Menu item update successfully", { position: toast.POSITION.TOP_RIGHT });
+
+        toast.success("Menu item update successfully", {
+          position: toast.POSITION.TOP_RIGHT
+        });
+
         this.closeModal();
         this.fetchCategories();
+
       } catch (error) {
         console.error("Error updating category:", error);
       }

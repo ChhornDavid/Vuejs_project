@@ -162,6 +162,7 @@ export default {
                     payment_type: "cash",
                     order_number: orderName,
                     paid: "paid",
+                    process_status: "Cashier Approve",
                     items: this.selectedItems.map(item => ({
                         product_id: item.id,
                         product_name: item.name,
