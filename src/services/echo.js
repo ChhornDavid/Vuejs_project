@@ -7,7 +7,7 @@ export const echo = new Echo({
     broadcaster: 'pusher',
     key: 'local',
     cluster: 'mt1',
-    wsHost: '172.19.202.96',
+    wsHost: window.location.hostname,
     wsPort: 6001,
     forceTLS: false,
     disableStats: true,

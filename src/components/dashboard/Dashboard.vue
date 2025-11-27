@@ -162,7 +162,7 @@
         <div class="p-2 border border-gray-300 bg-emerald-500 rounded-lg w-fit hover:shadow-md transition">
           <button @click="addNewOrder" :disabled="orders.some(order => !order.orderPaid)"
             class="text-sm font-medium text-white hover:text-blue-600 text-left disabled:opacity-50 disabled:cursor-not-allowed">
-            Add New
+            {{ $t('add_new') }}
           </button>
         </div>
 
