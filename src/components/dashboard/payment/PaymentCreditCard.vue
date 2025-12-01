@@ -114,6 +114,7 @@
 <script>
 import { loadStripe } from '@stripe/stripe-js';
 import api from "../../../axios/Axios";
+import { echo } from '../../../services/echo';
 
 const stripeStyle = {
     base: {
@@ -169,6 +170,13 @@ export default {
         },
     },
     async mounted() {
+        echo.channel("order-paid-sync")
+            .listen("OrderPaid", (e) => {
+                if (e.orderNumber === localStorage.getItem("order_number")) {
+                    this.closeModal();           // Auto close modal
+                    this.$emit("payment-success"); // Update parent
+                }
+            });
         this.calculateTotal();
         await this.$nextTick();
         if (this.showPaymentCard) {

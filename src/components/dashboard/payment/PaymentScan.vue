@@ -124,6 +124,7 @@
 <script>
 import api from "../../../axios/Axios";
 import QRCode from 'qrcode';
+import { echo } from "../../../services/echo";
 
 export default {
     name: "PaymentScan",
@@ -160,6 +161,13 @@ export default {
     },
     mounted() {
         this.calculateTotal();
+        echo.channel("order-paid-sync")
+            .listen("OrderPaid", (e) => {
+                if (e.orderNumber === localStorage.getItem("order_number")) {
+                    this.closeModal();           // Auto close modal
+                    this.$emit("payment-success"); // Update parent
+                }
+            });
     },
     methods: {
         formatPrice(value) {
@@ -175,6 +183,7 @@ export default {
         async generatePaymentLink() {
             this.loading = true;
             this.resultMessage = "";
+
 
             try {
                 const response = await api.post('/payment/create', {

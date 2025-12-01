@@ -371,7 +371,9 @@ export default {
       this.activeOrder.orderPaid = true;
       this.saveOrders();
       this.updateOrderOnServer(true);
-      this.addNewOrder();
+      this.showPaymentCard = false;
+      this.showPaymentScan = false;
+      // this.addNewOrder();
     },
     switchLang(lang) {
       this.$i18n.locale = lang;
@@ -444,12 +446,16 @@ export default {
     },
 
     addToOrder(item) {
-      const existingItem = this.activeOrder.items.find(i => i.id === item.id);
-
       const selectedSize = item.selectedSize || 'small';
-      const selectedPrice = item.prices?.find(p => p.size === selectedSize)?.price || item.price;
+      const selectedPrice =
+        item.prices?.find(p => p.size === selectedSize)?.price || item.price;
 
-      if (existingItem && existingItem.selectedSize === selectedSize) {
+      // FIX: match by ID + SIZE
+      const existingItem = this.activeOrder.items.find(
+        i => i.id === item.id && i.selectedSize === selectedSize
+      );
+
+      if (existingItem) {
         existingItem.quantity += 1;
       } else {
         this.activeOrder.items.push({
@@ -459,6 +465,7 @@ export default {
           price: selectedPrice
         });
       }
+
       this.updateOrderOnServer();
     },
 
@@ -932,6 +939,22 @@ export default {
         }
       });
     },
+    listenForEpay() {
+      const userId = localStorage.getItem('id');
+
+      echo.channel("order-paid-sync")
+        .listen("OrderPaid", (e) => {
+          console.log("Card/Scan Realtime", e);
+
+          if (e.userId == userId) {
+
+            this.activeOrder.orderPaid = true;
+
+            this.saveOrders();
+            this.updateOrderOnServer(true);
+          }
+        });
+    },
     filterMenuItems() {
       if (!this.activeCategory) {
         return this.menuItems;
@@ -969,6 +992,7 @@ export default {
     this.listenCreditForStatus();
     this.listenForPaidOrder();
     this.listenDecline();
+    this.listenForEpay();
 
     // Load status for active order
     if (this.activeOrder && this.activeOrder.status) {

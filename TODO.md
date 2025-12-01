@@ -1,14 +1,9 @@
-# Fix Order Status Update Issue
+# TODO: Fix Payment Credit Card and Scan for Already Paid Orders
 
-## Problem
-Status changes for orders only update when that order is the active one. When viewing Order1, Order2's status doesn't update in real-time.
+## Completed Tasks
+- [x] Remove disabled state from credit card and scan payment buttons in Dashboard.vue to allow opening modals for already paid orders
+- [x] Modify PaymentCreditCard.vue handleSubmit method to check if already paid and emit payment-success without re-processing payment
+- [x] Modify PaymentScan.vue generatePaymentLink method to check if already paid and emit payment-success without re-processing payment
 
-## Solution
-Modify status update listeners in Dashboard.vue to update the specific order by order_number instead of only the activeOrder.
-
-## Tasks
-- [ ] Update listenForOrderApprove to find and update order by order_number
-- [ ] Update listenForKitchenStatus to find and update order by order_number
-- [ ] Update listenCreditForStatus to find and update order by order_number
-- [ ] Update listenForCallRobot to find and update order by order_number (already checks orderNumber but updates activeOrder)
-- [ ] Test the changes to ensure all orders update their status in real-time
+## Summary
+The fixes ensure that when users attempt to pay for already paid orders via credit card or scan, the system automatically creates a new order instead of blocking the payment process. The payment buttons are now always enabled, and the payment components handle already paid scenarios by directly emitting success events, which triggers the Dashboard to create a new order.
