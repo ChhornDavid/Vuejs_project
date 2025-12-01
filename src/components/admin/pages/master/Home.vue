@@ -141,6 +141,16 @@ export default {
     };
   },
 
+  mounted() {
+    this.loadAnnualTarget();
+    this.loadRevenueChart();
+    this.loadMiniChart();
+    this.Transactions();
+    this.totalRevenue();
+    this.totalLastMonth();
+    this.thisMonth();
+  },
+
   methods: {
     async loadAnnualTarget() {
       try {
@@ -223,8 +233,8 @@ export default {
 
     async loadMiniChart() {
       try {
-        const response = await api.get("/last4months");
-
+        const response = await api.get("/last4Months");
+        console.log("Mini chart response:", response.data);
         if (!response.data.success) return;
 
         const chartData = response.data.data;
@@ -283,7 +293,6 @@ export default {
           }));
         }
 
-        //console.log("transactions", this.transactions);
       } catch (error) {
         console.log("Error fetching transactions:", error);
       }
@@ -349,23 +358,8 @@ export default {
         console.log(error);
       }
     },
-
-
-    mounted() {
-      this.totalRevenue();
-      this.totalLastMonth();
-      this.thisMonth();
-      this.customers();
-      this.Transactions();
-
-      this.$nextTick(() => {
-        this.loadRevenueChart();
-        this.loadMiniChart();
-      });
-
-      this.loadAnnualTarget();
-    }
   }
+
 }
 </script>
 
