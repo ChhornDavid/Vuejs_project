@@ -53,17 +53,6 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500 text-sm font-medium">{{ $t('special_menu') }}</p>
-                            <h3 class="text-2xl font-bold text-gray-800 mt-1">{{ specialMenus.length }}</h3>
-                        </div>
-                        <div class="p-3 rounded-full bg-yellow-50 text-yellow-600">
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <!-- Table Section -->
@@ -367,7 +356,7 @@
                             <!-- Image Upload -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('food_image')
-                                }}</label>
+                                    }}</label>
                                 <div class="mt-1 flex flex-col items-start">
                                     <div class="relative group mb-4">
                                         <img :src="activeFood.imagePreview || '/placeholder-food.jpg'"
@@ -447,7 +436,7 @@
                             <!-- Description -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('description')
-                                }}</label>
+                                    }}</label>
                                 <textarea v-model="activeFood.description" rows="4"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
                             </div>

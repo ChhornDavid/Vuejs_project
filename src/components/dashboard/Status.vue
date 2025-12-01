@@ -34,7 +34,7 @@
           <div class="relative">
             <!-- Progress Line - Thicker line -->
             <div class="absolute left-8 top-5 h-2 w-[calc(100%-64px)] bg-gray-200 rounded-full">
-              <div class="h-full bg-emerald-500 rounded-full transition-all duration-500 ease-out"
+              <div class="h-full bg-emerald-500 rounded-full"
                 :style="{ width: `${(currentOrderStatus.step / (steps.length - 1)) * 100}%` }"></div>
             </div>
 
@@ -99,10 +99,9 @@ export default {
   props: {
     showStatus: Boolean,
     resultMessage: String,
-    currentStep: {
-      type: Number,
-      default: 0
-    },
+    showStatus: Boolean,
+    resultMessage: String,
+    currentStep: Number,
     orders: {
       type: Array,
       default: () => []
@@ -134,17 +133,6 @@ export default {
     }
   },
   methods: {
-    moveToStep(label) {
-      const index = this.steps.findIndex(s => s.label === label);
-      if (index !== -1) {
-        this.currentStep = index;
-        this.steps.forEach((s, i) => s.active = i <= index);
-      }
-    },
-    setStep(stepIndex) {
-      this.currentStep = stepIndex;
-      this.steps.forEach((s, i) => (s.active = i <= stepIndex));
-    },
     closeModal() {
       this.$emit('close-modal');
     },

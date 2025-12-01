@@ -107,7 +107,6 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
 import api from '../../../../axios/Axios';
 
@@ -130,6 +129,111 @@ export default {
   },
 
   methods: {
+    async fetchRevenueOverview() {
+      const token = localStorage.getItem("auth_token");
+      try {
+        const response = await api.get(`/revenueoverview`, {
+          headers: { Authorization: `${token}` }
+        });
+
+        if (response.data.success) {
+          return response.data.data;
+        }
+      } catch (error) {
+        console.error("Error fetching revenue overview:", error);
+      }
+      return null;
+    },
+    async loadRevenueChart() {
+      const result = await this.fetchRevenueOverview();
+      if (!result) return;
+
+      const revenueData = {
+        labels: result.labels,
+        datasets: [
+          {
+            label: "Last Month",
+            data: result.lastYear,
+            borderColor: "#3B82F6",
+            backgroundColor: "rgba(59,130,246,0.05)",
+            tension: 0.4,
+            fill: true
+          },
+          {
+            label: "Current Month",
+            data: result.currentYear,
+            borderColor: "#8B5CF6",
+            backgroundColor: "rgba(139,92,246,0.05)",
+            tension: 0.4,
+            fill: true
+          }
+        ]
+      };
+
+      const revenueOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true }
+        }
+      };
+
+      this.initChart(this.$refs.revenueChart, revenueData, revenueOptions, "line");
+    },
+
+    async loadMiniChart() {
+      try {
+        const token = localStorage.getItem("auth_token");
+
+        const response = await api.get("/last4months", {
+          headers: { Authorization: `${token}` }
+        });
+
+        if (!response.data.success) return;
+
+        const chartData = response.data.data;
+
+        const labels = chartData.map(item => item.month);
+        const amounts = chartData.map(item => Number(item.amount));
+
+        const miniData = {
+          labels: labels,
+          datasets: [{
+            data: amounts,
+            backgroundColor: '#6366f1',
+            borderRadius: 4
+          }]
+        };
+
+        const miniOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false } },
+            y: { display: false }
+          }
+        };
+
+        // Destroy previous chart if exists
+        if (this.chartInstances.mini) {
+          this.chartInstances.mini.destroy();
+        }
+
+        // Create new chart
+        this.chartInstances.mini = new Chart(this.$refs.miniChart, {
+          type: "bar",
+          data: miniData,
+          options: miniOptions
+        });
+
+      } catch (error) {
+        console.error("Error loading mini chart:", error);
+      }
+    },
+
     async Transactions() {
       const token = localStorage.getItem("auth_token");
       try {
@@ -236,35 +340,26 @@ export default {
     },
     initChart(canvasRef, data, options, type = 'line') {
       if (!canvasRef) return;
-      new Chart(canvasRef.getContext('2d'), { type, data, options });
+      // Destroy existing chart if it exists
+      if (this.revenueChart && canvasRef === this.$refs.revenueChart) {
+        this.revenueChart.destroy();
+      }
+      if (this.miniChart && canvasRef === this.$refs.miniChart) {
+        this.miniChart.destroy();
+      }
+    },
+
+    mounted() {
+      this.totalRevenue();
+      this.totalLastMonth();
+      this.thisMonth();
+      this.customers();
+      this.Transactions();
+      this.loadRevenueChart();
+      this.loadMiniChart();
     }
-  },
-
-  mounted() {
-    this.totalRevenue();
-    this.totalLastMonth();
-    this.thisMonth();
-    this.customers();
-    this.Transactions();
-    // Revenue Chart
-    const revenueData = {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-      datasets: [
-        { label: 'Last Month', data: [65000, 59000, 80000, 81000, 56000, 55000, 70755, 85000], borderColor: '#3B82F6', backgroundColor: 'rgba(59,130,246,0.05)', tension: 0.4, fill: true },
-        { label: 'Current Month', data: [48000, 45000, 52000, 49000, 42000, 38000, 41133, 45000], borderColor: '#8B5CF6', backgroundColor: 'rgba(139,92,246,0.05)', tension: 0.4, fill: true }
-      ]
-    };
-    const revenueOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: false } } };
-
-    this.initChart(this.$refs.revenueChart, revenueData, revenueOptions, 'line');
-
-    // Mini Chart
-    const miniData = { labels: ['Q1', 'Q2', 'Q3', 'Q4'], datasets: [{ data: [45000, 52000, 48000, 61000], backgroundColor: '#6366f1', borderRadius: 4 }] };
-    const miniOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { display: false } } };
-
-    this.initChart(this.$refs.miniChart, miniData, miniOptions, 'bar');
   }
-};
+}
 </script>
 
 <style scoped>
@@ -440,3 +535,4 @@ export default {
   @apply bg-yellow-100 text-yellow-800;
 }
 </style>
+error monthly performent

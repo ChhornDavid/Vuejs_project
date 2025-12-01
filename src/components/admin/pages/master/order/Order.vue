@@ -33,8 +33,7 @@
         </svg>
         <h3 class="mt-2 text-lg font-medium text-gray-900">{{ $t('no_pending_order') }}</h3>
         <p class="mt-1 text-sm text-gray-500">New orders will appear here as they come in</p>
-        <button @click="fetchPendingOrders"
-          class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+        <button @click="fetchPendingOrders" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
           Refresh
         </button>
       </div>
@@ -221,24 +220,36 @@ export default {
     async cancelOrder(id) {
       this.processingOrder = true;
       this.orderIdToProcess = id;
+
       try {
         const token = localStorage.getItem("auth_token");
-        await api.post(`admin/decline/${id}`, {}, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
+
+        const order = this.pendingOrders.find(o => o.id === id);
+        const orderNumber = order?.order_number ?? this.activeOrder?.order_number;
+
+
+
+        await api.post(`admin/decline/${id}`,
+          { order_number: orderNumber },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
           }
-        });
-        // Remove canceled order from the list
+        );
+
         this.pendingOrders = this.pendingOrders.filter(o => o.id !== id);
-        toast.success("Order canceled successfully", { position: toast.POSITION.TOP_RIGHT });
+        toast.success("Order canceled successfully");
+
       } catch (error) {
-        console.log(error);
+        console.log(error.response?.data || error);
       } finally {
         this.processingOrder = false;
         this.orderIdToProcess = null;
       }
-    },
+    }
+
 
     // handleApiError(error, defaultMessage) {
     //   console.error("API Error:", error);

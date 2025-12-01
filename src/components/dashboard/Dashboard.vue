@@ -737,26 +737,34 @@ export default {
       echo.channel("order-decline").listen("DeclineApprove", (event) => {
         const userId = localStorage.getItem("id");
 
-        if (event.userId == userId) {
+        if (event.userId == userId && event.orderNumber == this.activeOrder.name) {
           this.activeOrder.orderPaid = false;
           this.activeOrder.status.step = 0;
           this.activeOrder.status.message = 'Table is Free';
           this.saveOrders();
+          this.updateOrderOnServer(false); // Sync the decline to server to persist on refresh
           this.showStatus = true;
           this.resultMessage = 'Table is Free';
         }
-      });
+      }
+      )
     },
-
     listenCreditForStatus() {
       echo.channel("Card-Kitchen").listen("CreditCardToKitchen", (event) => {
         const userId = localStorage.getItem('id');
         if (event.userId == userId) {
-          this.activeOrder.status.step = 2;
-          this.activeOrder.status.message = 'Food is at kitchen.';
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = 'Food is at kitchen.';
+          const orderNumber = event.order?.order_number;
+          const targetOrder = this.orders.find(o => o.name === orderNumber);
+          if (targetOrder) {
+            targetOrder.status.step = 2;
+            targetOrder.status.message = 'Food is at kitchen.';
+            this.saveOrders();
+            // Show status modal for the updated order
+            if (targetOrder === this.activeOrder) {
+              this.showStatus = true;
+              this.resultMessage = 'Food is at kitchen.';
+            }
+          }
         } else {
           console.log('Credit card to kitchen event not for this user');
         }
@@ -766,11 +774,18 @@ export default {
       echo.channel("order-status").listen("OrderApprovedCash", (event) => {
         const userId = localStorage.getItem('id');
         if (event.userId == userId) {
-          this.activeOrder.status.step = 1;
-          this.activeOrder.status.message = 'Order approved by cashier.';
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = 'Order approved by cashier.';
+          const orderNumber = event.order?.order_number;
+          const targetOrder = this.orders.find(o => o.name === orderNumber);
+          if (targetOrder) {
+            targetOrder.status.step = 1;
+            targetOrder.status.message = 'Order approved by cashier.';
+            this.saveOrders();
+            // Show status modal for the updated order
+            if (targetOrder === this.activeOrder) {
+              this.showStatus = true;
+              this.resultMessage = 'Order approved by cashier.';
+            }
+          }
         } else {
           console.log('Order approved by cashier but not for this user');
         }
@@ -779,12 +794,19 @@ export default {
     listenForKitchenStatus() {
       echo.channel("kitchen-orders").listen("OrderSentToKitchen", (event) => {
         const userId = localStorage.getItem("id");
+        const orderNumber = event.order?.order_number;
         if (event.userId == userId) {
-          this.activeOrder.status.step = 2;
-          this.activeOrder.status.message = "Order sent to kitchen.";
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = "Order sent to kitchen.";
+          const targetOrder = this.orders.find(o => o.name === orderNumber);
+          if (targetOrder) {
+            targetOrder.status.step = 2;
+            targetOrder.status.message = "Order sent to kitchen.";
+            this.saveOrders();
+            // Show status modal for the updated order
+            if (targetOrder === this.activeOrder) {
+              this.showStatus = true;
+              this.resultMessage = "Order sent to kitchen.";
+            }
+          }
         } else {
           console.log("Order not sent to kitchen for this user");
         }
@@ -796,84 +818,91 @@ export default {
         console.log("Event received:", event.robot);
 
         const eventUserId = event.robot?.user_id;
+        const orderNumber = event.robot?.order_number;
         const currentUserId = localStorage.getItem("id");
 
-        // Handle robot status steps
-        if (event.robot?.status === 'accepted' &&
-          eventUserId &&
-          currentUserId &&
-          String(eventUserId) === String(currentUserId)) {
-          console.log("Robot status is 'accept' — move to Cooking step");
-          this.activeOrder.status.step = 3;
-          this.activeOrder.status.message = "Robot accepted the order.";
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = "Robot accepted the order.";
-        } else if (event.robot?.status === 'preparing' &&
-          eventUserId &&
-          currentUserId &&
-          String(eventUserId) === String(currentUserId)) {
-          console.log("Robot status is 'preparing' — move to Preparing step");
-          this.activeOrder.status.step = 4;
-          this.activeOrder.status.message = "Order is being prepared.";
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = "Order is being prepared.";
-        } else if (
-          event.robot?.status === 'completed' &&
-          eventUserId &&
-          currentUserId &&
-          String(eventUserId) === String(currentUserId)
-        ) {
-          console.log("Robot status is 'complete' — move to Ready step");
+        if (eventUserId && currentUserId && String(eventUserId) === String(currentUserId)) {
+          const targetOrder = this.orders.find(o => o.name === orderNumber);
 
-          // Update the active order first
-          this.activeOrder.status.step = 5;
-          this.activeOrder.status.message = "Order is ready.";
-          this.saveOrders();
-          this.showStatus = true;
-          this.resultMessage = "Order is ready.";
+          if (targetOrder) {
+            // Handle robot status steps
+            if (event.robot?.status === 'accepted') {
+              console.log("Robot status is 'accept' — move to Cooking step");
+              targetOrder.status.step = 3;
+              targetOrder.status.message = "Robot accepted the order.";
+              this.saveOrders();
+              // Show status modal for the updated order
+              if (targetOrder === this.activeOrder) {
+                this.showStatus = true;
+                this.resultMessage = "Robot accepted the order.";
+              }
+            } else if (event.robot?.status === 'preparing') {
+              console.log("Robot status is 'preparing' — move to Preparing step");
+              targetOrder.status.step = 4;
+              targetOrder.status.message = "Order is being prepared.";
+              this.saveOrders();
+              // Show status modal for the updated order
+              if (targetOrder === this.activeOrder) {
+                this.showStatus = true;
+                this.resultMessage = "Order is being prepared.";
+              }
+            } else if (event.robot?.status === 'completed') {
+              console.log("Robot status is 'complete' — move to Ready step");
 
-          const userId = localStorage.getItem('id');
-          const isPaid = true;
+              // Update target order
+              targetOrder.status.step = 5;
+              targetOrder.status.message = "Order is ready.";
+              this.saveOrders();
+              // Show status modal for the updated order
+              if (targetOrder === this.activeOrder) {
+                this.showStatus = true;
+                this.resultMessage = "Order is ready.";
+              }
 
-          // Save items to backend
-          api.post('/order/add-items', {
-            user_id: currentUserId,
-            order_number: this.activeOrder.name,
-            items: this.activeOrder.items.map(i => ({
-              id: i.id,
-              image: i.image,
-              name: i.name,
-              quantity: i.quantity,
-              selectedSize: i.selectedSize,
-              price: i.price
-            })),
-            status: true,
-            order_paid: isPaid
-          });
+              // Save items to backend
+              api.post('/order/add-items', {
+                user_id: currentUserId,
+                order_number: targetOrder.name,
+                items: targetOrder.items.map(i => ({
+                  id: i.id,
+                  image: i.image,
+                  name: i.name,
+                  quantity: i.quantity,
+                  selectedSize: i.selectedSize,
+                  price: i.price
+                })),
+                status: true,
+                order_paid: true
+              });
 
-          const allCompleted = this.orders.every(o => {
-            return o.status?.step === 5;
-          });
+              // Check if all completed
+              const allCompleted = this.orders.every(o => o.status?.step === 5);
 
-          if (allCompleted) {
-            console.log("🔥 ALL ORDERS COMPLETED — Clearing localStorage and reloading.");
+              if (allCompleted) {
+                console.log("🔥 ALL ORDERS COMPLETED — Clearing localStorage and resetting backend.");
 
-            // Remove order-related storage
-            localStorage.removeItem("order_status_step");
-            localStorage.removeItem("order_status_message");
-            localStorage.removeItem('selectedItems');
-            localStorage.removeItem('order_paid');
+                api.post("/order/reset-process-status", {
+                  user_id: currentUserId
+                });
 
-            localStorage.removeItem('dashboard_orders');
-            localStorage.removeItem('dashboard_activeOrderIndex');
-            localStorage.removeItem('dashboard_orderCounter');
-            localStorage.removeItem('dashboard_orderAdded');
 
-            setTimeout(() => {
-              window.location.reload();
-            }, 10000);
+                // 2. Clear localStorage
+                localStorage.removeItem("order_status_step");
+                localStorage.removeItem("order_status_message");
+                localStorage.removeItem('selectedItems');
+                localStorage.removeItem('order_paid');
+
+                localStorage.removeItem('dashboard_orders');
+                localStorage.removeItem('dashboard_activeOrderIndex');
+                localStorage.removeItem('dashboard_orderCounter');
+                localStorage.removeItem('dashboard_orderAdded');
+
+                // 3. Delay reload
+                setTimeout(() => {
+                  window.location.reload();
+                }, 10000);
+              }
+            }
           }
         }
       });
