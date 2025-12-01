@@ -68,18 +68,26 @@
         <!-- Progress Circle -->
         <div class="progress-card">
           <h3>Annual Target</h3>
+
           <div class="progress-circle">
             <svg viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="45" class="progress-bg"></circle>
-              <circle cx="50" cy="50" r="45" class="progress-bar" :stroke-dashoffset="283 * (1 - 0.65)"></circle>
+
+              <!-- Dynamic percentage -->
+              <circle cx="50" cy="50" r="45" class="progress-bar"
+                :stroke-dashoffset="283 * (1 - annualTarget.percentage / 100)">
+              </circle>
             </svg>
+
             <div class="progress-text">
-              <span class="percentage">65%</span>
-              <span class="amount">$326,450</span>
+              <span class="percentage">{{ annualTarget.percentage }}%</span>
+              <span class="amount">${{ annualTarget.amount.toLocaleString() }}</span>
             </div>
           </div>
+
           <p class="progress-trend">
-            <i class="fas fa-arrow-up"></i> 12.5% vs last year
+            <i class="fas fa-arrow-up"></i>
+            {{ annualTarget.growth }}% vs last year
           </p>
         </div>
 
@@ -115,6 +123,11 @@ export default {
 
   data() {
     return {
+      annualTarget: {
+        percentage: 0,
+        amount: 0,
+        growth: 0
+      },
       revenueChart: null,
       miniChart: null,
       selectedPeriod: '30days',
@@ -129,12 +142,27 @@ export default {
   },
 
   methods: {
-    async fetchRevenueOverview() {
-      const token = localStorage.getItem("auth_token");
+    async loadAnnualTarget() {
       try {
-        const response = await api.get(`/revenueoverview`, {
-          headers: { Authorization: `${token}` }
-        });
+        const response = await api.get("/annual-target");
+
+        if (!response.data.success) return;
+
+        const data = response.data.data;
+
+        this.annualTarget = {
+          percentage: data.percentage,
+          amount: data.current_revenue,
+          growth: data.growth
+        };
+
+      } catch (error) {
+        console.error("Error loading annual target:", error);
+      }
+    },
+    async fetchRevenueOverview() {
+      try {
+        const response = await api.get(`/revenueoverview`);
 
         if (response.data.success) {
           return response.data.data;
@@ -180,16 +208,22 @@ export default {
         }
       };
 
-      this.initChart(this.$refs.revenueChart, revenueData, revenueOptions, "line");
+      // Destroy previous chart if exists
+      if (this.revenueChart) {
+        this.revenueChart.destroy();
+      }
+
+      // Create new chart
+      this.revenueChart = new Chart(this.$refs.revenueChart, {
+        type: "line",
+        data: revenueData,
+        options: revenueOptions
+      });
     },
 
     async loadMiniChart() {
       try {
-        const token = localStorage.getItem("auth_token");
-
-        const response = await api.get("/last4months", {
-          headers: { Authorization: `${token}` }
-        });
+        const response = await api.get("/last4months");
 
         if (!response.data.success) return;
 
@@ -218,12 +252,12 @@ export default {
         };
 
         // Destroy previous chart if exists
-        if (this.chartInstances.mini) {
-          this.chartInstances.mini.destroy();
+        if (this.miniChart) {
+          this.miniChart.destroy();
         }
 
         // Create new chart
-        this.chartInstances.mini = new Chart(this.$refs.miniChart, {
+        this.miniChart = new Chart(this.$refs.miniChart, {
           type: "bar",
           data: miniData,
           options: miniOptions
@@ -235,13 +269,8 @@ export default {
     },
 
     async Transactions() {
-      const token = localStorage.getItem("auth_token");
       try {
-        const response = await api.get(`/currentpayment`, {
-          headers: {
-            Authorization: `${token}`,
-          },
-        });
+        const response = await api.get(`/currentpayment`);
 
         if (response.data.success) {
           this.transactions = response.data.data.map((item, index) => ({
@@ -260,11 +289,8 @@ export default {
       }
     },
     async totalRevenue() {
-      const token = localStorage.getItem("auth_token");
       try {
-        const response = await api.get(`/totalRevenue`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get(`/totalRevenue`);
 
         if (response.data.success && response.data.data) {
           const total = response.data.data;
@@ -280,13 +306,8 @@ export default {
     },
 
     async totalLastMonth() {
-      const token = localStorage.getItem("auth_token");
       try {
-        const response = await api.get(`/totalLastMonth`, {
-          headers: {
-            Authorization: `${token}`
-          }
-        });
+        const response = await api.get(`/totalLastMonth`);
         //console.log("total lastmonth", response.data);
         if (response.data.success && response.data.data) {
           const LastMonth = response.data.data;
@@ -299,13 +320,8 @@ export default {
     },
 
     async thisMonth() {
-      const token = localStorage.getItem("auth_token");
       try {
-        const response = await api.get(`/thisMonth`, {
-          headers: {
-            Authorization: `${token}`
-          }
-        });
+        const response = await api.get(`/thisMonth`);
         if (response.data.success && response.data.data) {
           const thisMonth = response.data.data;
           this.metrics[2].title = thisMonth.title || "Current Month";
@@ -319,13 +335,8 @@ export default {
     },
 
     async customers() {
-      const token = localStorage.getItem("auth_token");
       try {
-        const response = await api.get(`/customers`, {
-          headers: {
-            Authorization: `${token}`,
-          }
-        });
+        const response = await api.get(`/customers`);
         //console.log("customer", response.data);
         if (response.data.success && response.data.data) {
           const customers = response.data.data;
@@ -338,16 +349,7 @@ export default {
         console.log(error);
       }
     },
-    initChart(canvasRef, data, options, type = 'line') {
-      if (!canvasRef) return;
-      // Destroy existing chart if it exists
-      if (this.revenueChart && canvasRef === this.$refs.revenueChart) {
-        this.revenueChart.destroy();
-      }
-      if (this.miniChart && canvasRef === this.$refs.miniChart) {
-        this.miniChart.destroy();
-      }
-    },
+
 
     mounted() {
       this.totalRevenue();
@@ -355,8 +357,13 @@ export default {
       this.thisMonth();
       this.customers();
       this.Transactions();
-      this.loadRevenueChart();
-      this.loadMiniChart();
+
+      this.$nextTick(() => {
+        this.loadRevenueChart();
+        this.loadMiniChart();
+      });
+
+      this.loadAnnualTarget();
     }
   }
 }
