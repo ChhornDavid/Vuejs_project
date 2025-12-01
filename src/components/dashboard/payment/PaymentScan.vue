@@ -234,8 +234,9 @@ export default {
         },
         async handleScanOrder() {
             try {
-                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders'));
-                const orderName = storedOrders?.[0]?.name || 'UnknownOrder';
+                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders')) || [];
+                const activeIndex = parseInt(localStorage.getItem('dashboard_activeOrderIndex')) || 0;
+                const orderName = storedOrders?.[activeIndex]?.name || 'UnknownOrder';
                 const orderPayload = {
                     user_id: parseInt(localStorage.getItem("id"), 10),
                     amount: this.total,

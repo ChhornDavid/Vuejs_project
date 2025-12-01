@@ -225,10 +225,6 @@
               <span class="text-gray-500">{{ $t('subtotal') }}</span>
               <span class="font-medium">${{ subtotal.toFixed(2) }}</span>
             </div>
-            <div class="flex justify-between text-sm">
-              <span class="text-gray-500">{{ $t('discount') }}</span>
-              <span class="font-medium">${{ (subtotal * 0.1).toFixed(2) }}</span>
-            </div>
             <div class="flex justify-between text-lg font-bold pt-2">
               <span>{{ $t('total') }}</span>
               <span>${{ total.toFixed(2) }}</span>

@@ -9,7 +9,7 @@
           <option value="30days">Last 30 Days</option>
           <option value="90days">Last 90 Days</option>
         </select>
-        <button class="export-btn">
+        <button class="export-btn" @click="exportData">
           <i class="fas fa-file-export mr-2"></i> Export
         </button>
       </div>
@@ -140,6 +140,11 @@ export default {
       transactions: []
     };
   },
+  watch: {
+    selectedPeriod(newPeriod) {
+      this.loadRevenueByPeriod(newPeriod);
+    }
+  },
 
   mounted() {
     this.loadAnnualTarget();
@@ -149,9 +154,32 @@ export default {
     this.totalRevenue();
     this.totalLastMonth();
     this.thisMonth();
+    this.customers();
+    this.loadRevenueByPeriod();
+    this.exportData();
   },
 
   methods: {
+    async exportData() {
+      try {
+        const period = this.selectedPeriod;
+
+        const response = await api.get(`/export/revenue/${period}`, {
+          responseType: "blob"
+        });
+
+        const fileURL = window.URL.createObjectURL(new Blob([response.data]));
+        const fileLink = document.createElement("a");
+        fileLink.href = fileURL;
+        fileLink.setAttribute("download", `revenue_${period}.xlsx`);
+        document.body.appendChild(fileLink);
+        fileLink.click();
+        fileLink.remove();
+
+      } catch (error) {
+        console.error("Export error:", error);
+      }
+    },
     async loadAnnualTarget() {
       try {
         const response = await api.get("/annual-target");
@@ -346,16 +374,39 @@ export default {
     async customers() {
       try {
         const response = await api.get(`/customers`);
-        //console.log("customer", response.data);
+
+        console.log("FULL customers response:", response.data);
+        console.log("DATA:", response.data.data);
+
         if (response.data.success && response.data.data) {
           const customers = response.data.data;
+          console.log("Parsed customers:", customers);
+
           this.metrics[3].value = customers.value || "$0";
           this.metrics[3].title = customers.title || "Customer";
           this.metrics[3].change = customers.change || "+0";
           this.metrics[3].trend = customers.trend || "up";
         }
       } catch (error) {
-        console.log(error);
+        console.log("Customer ERROR:", error);
+      }
+    },
+    async loadRevenueByPeriod(period) {
+      try {
+        const response = await api.get(`/revenue/${period}`);
+        console.log("Revenue Period:", response.data);
+
+        if (response.data.success) {
+          const data = response.data.data;
+
+          this.filteredRevenue = {
+            label: data.label,
+            value: "$" + data.value
+          };
+        }
+
+      } catch (error) {
+        console.error("Period API error:", error);
       }
     },
   }

@@ -196,7 +196,6 @@ export default {
             this.total = this.selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
         },
         async handleSubmit() {
-            if (this.loading || this.ispaidAlready) return;
             this.loading = true;
             this.formError = null;
 
@@ -244,8 +243,9 @@ export default {
             try {
                 const userId = localStorage.getItem("id");
                 const token = localStorage.getItem("auth_token");
-                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders'));
-                const orderName = storedOrders?.[0]?.name || 'UnknownOrder';
+                const storedOrders = JSON.parse(localStorage.getItem('dashboard_orders')) || [];
+                const activeIndex = parseInt(localStorage.getItem('dashboard_activeOrderIndex')) || 0;
+                const orderName = storedOrders?.[activeIndex]?.name || 'UnknownOrder';
 
                 const orderPayload = {
                     user_id: parseInt(userId, 10),
